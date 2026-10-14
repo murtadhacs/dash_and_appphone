@@ -1,0 +1,48 @@
+name: alrhman_school
+description: "مدرسة الرحمن الابتدائية — تطبيق ولي الأمر"
+publish_to: 'none'
+version: 1.0.6+7
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  lucide_icons_flutter: ^3.1.19
+  flutter_localizations:
+    sdk: flutter
+  http: ^1.6.0
+  flutter_secure_storage: ^11.2.0
+  url_launcher: ^6.3.3
+  firebase_core: ^4.15.0
+  firebase_messaging: ^16.7.0
+  flutter_local_notifications: ^22.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/school_logo.png
+
+  fonts:
+    - family: Cairo
+      fonts:
+        - asset: assets/fonts/Cairo-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Cairo-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Cairo-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Cairo-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Cairo-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Cairo-Black.ttf
+          weight: 900

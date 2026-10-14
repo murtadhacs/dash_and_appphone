@@ -1,0 +1,23 @@
+# APK files and releases
+*.apk
+*.aab
+releases/
+
+# Firebase settings and secrets
+google-services.json
+GoogleService-Info.plist
+.env
+key.properties
+*.jks
+*.keystore
+
+# Build output and temporary files
+build/
+.dart_tool/
+.gradle/
+**/windows/flutter/ephemeral/
+**/android/.kotlin/
+.idea/
+*.iml
+.codex-remote-attachments/
+.flutter-plugins-dependencies

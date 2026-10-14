@@ -1,0 +1,211 @@
+{
+  "known_operations": 32,
+  "bound_operations": 30,
+  "unbound_operations": [
+    {
+      "method": "DELETE",
+      "path": "/api/admin/devices",
+      "contract": "flutter_api (1).yaml:1544"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/schedule",
+      "contract": "openapi-fragment.yaml:39"
+    }
+  ],
+  "unknown_operations": [],
+  "operations": [
+    {
+      "method": "DELETE",
+      "path": "/api/admin/banners",
+      "contract": "flutter_api (1).yaml:1296",
+      "bound": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/devices",
+      "contract": "flutter_api (1).yaml:1544",
+      "bound": false
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/leaves",
+      "contract": "flutter_api (1).yaml:978",
+      "bound": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/students",
+      "contract": "flutter_api (1).yaml:805",
+      "bound": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/activity-log",
+      "contract": "openapi-fragment (5).yaml:5",
+      "bound": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/attendance",
+      "contract": "openapi-fragment (4).yaml:169",
+      "bound": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/banners",
+      "contract": "flutter_api (1).yaml:1193",
+      "bound": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/banners/image",
+      "contract": "flutter_api (1).yaml:1329",
+      "bound": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/broadcasts",
+      "contract": "openapi-fragment (3).yaml:5",
+      "bound": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/dashboard",
+      "contract": "openapi-fragment (4).yaml:142",
+      "bound": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/devices",
+      "contract": "flutter_api (1).yaml:1399",
+      "bound": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/export/excel",
+      "contract": "openapi-fragment (4).yaml:203",
+      "bound": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/holidays",
+      "contract": "openapi-fragment (4).yaml:243",
+      "bound": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/schedule",
+      "contract": "openapi-fragment.yaml:39",
+      "bound": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/schedule/classes",
+      "contract": "openapi-fragment.yaml:114",
+      "bound": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/schedule/export",
+      "contract": "openapi-fragment.yaml:142",
+      "bound": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/settings",
+      "contract": "flutter_api (1).yaml:1055",
+      "bound": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/students",
+      "contract": "flutter_api (1).yaml:693",
+      "bound": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/banners",
+      "contract": "flutter_api (1).yaml:1216",
+      "bound": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/broadcasts",
+      "contract": "openapi-fragment (3).yaml:36",
+      "bound": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/devices",
+      "contract": "flutter_api (1).yaml:1422",
+      "bound": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/holidays",
+      "contract": "openapi-fragment (4).yaml:273",
+      "bound": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/holidays/cancel",
+      "contract": "openapi-fragment (4).yaml:326",
+      "bound": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/leaves",
+      "contract": "flutter_api (1).yaml:920",
+      "bound": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/login",
+      "contract": "flutter_api (1).yaml:612",
+      "bound": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/schedule/import",
+      "contract": "openapi-fragment.yaml:203",
+      "bound": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/students",
+      "contract": "openapi-fragment (2).yaml:70",
+      "bound": true
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/banners",
+      "contract": "flutter_api (1).yaml:1254",
+      "bound": true
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/devices",
+      "contract": "flutter_api (1).yaml:1482",
+      "bound": true
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/schedule",
+      "contract": "openapi-fragment.yaml:72",
+      "bound": true
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/settings",
+      "contract": "flutter_api (1).yaml:1077",
+      "bound": true
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/students",
+      "contract": "openapi-fragment (2).yaml:108",
+      "bound": true
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://futurekids-staging.up.railway.app/api/:path*" },
+    { "source": "/health", "destination": "https://futurekids-staging.up.railway.app/health" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

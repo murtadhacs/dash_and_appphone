@@ -1,0 +1,6 @@
+{
+  "name": "نظام أطفال المستقبل - الإدارة المدرسية",
+  "description": "منظومة الإدارة المدرسية الميدانية، تتبع حضور الطلاب بالبصمة وبطاقات RFID، وسجلات أولياء الأمور وإدارة البوابات الذكية",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

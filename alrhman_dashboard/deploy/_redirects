@@ -1,0 +1,5 @@
+# Netlify: الخادم لا يدعم CORS، فنمرّر /api من نفس نطاق الموقع.
+/api/*   https://futurekids-staging.up.railway.app/api/:splat   200
+/health  https://futurekids-staging.up.railway.app/health        200
+# تطبيق صفحة واحدة
+/*       /index.html                                           200
