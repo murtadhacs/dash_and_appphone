@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'api/app_services.dart';
+import 'core/app_colors.dart';
 import 'core/responsive.dart';
 import 'models/navigation_tab.dart';
 import 'screens/attendance_screen.dart';
@@ -134,51 +135,109 @@ class _AppShellState extends State<AppShell> {
 
     final desktop = Breakpoints.isDesktop(context);
     final width = MediaQuery.sizeOf(context).width;
-    final sidebar = Sidebar(currentTab: _tab, onSelectTab: _select);
+    final username = AppScope.of(context).api.username;
+    final sidebar = Sidebar(
+      currentTab: _tab,
+      onSelectTab: _select,
+      username: username,
+    );
 
-    return Scaffold(
-      key: _scaffoldKey,
-      // في RTL يفتح الـ drawer من اليمين، مطابقاً لموضع الشريط الجانبي.
-      drawer: desktop
-          ? null
-          : Drawer(width: Breakpoints.sidebarWidth, child: sidebar),
-      body: Row(
-        children: [
-          if (desktop) sidebar,
-          Expanded(
-            child: Column(
-              children: [
-                AppHeader(
-                  username: AppScope.of(context).api.username,
-                  onToggleSidebar: () =>
-                      _scaffoldKey.currentState?.openDrawer(),
-                  onLogout: _logout,
+    final content = Column(
+      children: [
+        AppHeader(
+          title: _titleFor(_tab),
+          onToggleSidebar: () => _scaffoldKey.currentState?.openDrawer(),
+          onLogout: _logout,
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              width >= Breakpoints.md ? 32 : 16,
+              20,
+              width >= Breakpoints.md ? 32 : 16,
+              40,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1280),
+                // مفتاح بحسب التبويب ليُعاد بناء الشاشة عند التبديل.
+                child: KeyedSubtree(
+                  key: ValueKey(_tab),
+                  child: _buildScreen(),
                 ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    // سطح المكتب: إطار كحلي بزوايا مدوّرة يضم الشريط الجانبي (يمين في RTL)
+    // ولوحة المحتوى العائمة. الشاشات الصغيرة: لوحة كاملة + Drawer.
+    if (desktop) {
+      return Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: AppColors.viewport,
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(AppRadius.shell),
+            ),
+            child: Row(
+              children: [
+                sidebar,
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(
-                      width >= Breakpoints.md ? 32 : 16,
-                      24,
-                      width >= Breakpoints.md ? 32 : 16,
-                      48,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1280),
-                        // مفتاح بحسب التبويب ليُعاد بناء الشاشة عند التبديل.
-                        child: KeyedSubtree(
-                          key: ValueKey(_tab),
-                          child: _buildScreen(),
-                        ),
-                      ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.canvas),
+                    child: ColoredBox(
+                      color: AppColors.background,
+                      child: content,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
+      );
+    }
+
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: AppColors.background,
+      // في RTL يفتح الـ drawer من اليمين، مطابقاً لموضع الشريط الجانبي.
+      drawer: Drawer(
+        width: Breakpoints.sidebarWidth,
+        backgroundColor: AppColors.primary,
+        child: sidebar,
       ),
+      body: SafeArea(child: content),
     );
+  }
+
+  String _titleFor(NavigationTab tab) {
+    switch (tab) {
+      case NavigationTab.dashboard:
+        return 'نظرة عامة';
+      case NavigationTab.students:
+        return 'الطلاب وأولياء الأمور';
+      case NavigationTab.attendance:
+        return 'الحضور والغياب';
+      case NavigationTab.devices:
+        return 'الأجهزة وبوابات الحضور';
+      case NavigationTab.banners:
+        return 'الإعلانات والإشعارات';
+      case NavigationTab.schedule:
+        return 'الجدول الدراسي';
+      case NavigationTab.settings:
+        return 'الإعدادات العامة';
+      case NavigationTab.activityLog:
+        return 'سجل النشاط';
+      case NavigationTab.login:
+        return '';
+    }
   }
 }

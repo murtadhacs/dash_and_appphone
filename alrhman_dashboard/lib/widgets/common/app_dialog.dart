@@ -31,7 +31,11 @@ class AppDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: Colors.white,
       insetPadding: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+      ),
+      shadowColor: const Color(0x290F172A),
+      elevation: 24,
       clipBehavior: Clip.antiAlias,
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -42,17 +46,16 @@ class AppDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              decoration: const BoxDecoration(
-                color: AppColors.surfaceMuted,
-                border: Border(bottom: BorderSide(color: AppColors.border)),
-              ),
+              padding: const EdgeInsets.fromLTRB(28, 24, 28, 4),
               child: Row(
                 children: [
                   IconTile(
                     icon: icon,
                     background: iconBackground,
                     foreground: iconForeground,
+                    size: 44,
+                    iconSize: 22,
+                    radius: AppRadius.control,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -62,9 +65,10 @@ class AppDialog extends StatelessWidget {
                         Text(
                           title,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 20,
+                            height: 1.4,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
+                            color: AppColors.text,
                           ),
                         ),
                         if (subtitle != null)
@@ -79,15 +83,19 @@ class AppDialog extends StatelessWidget {
                     ),
                   ),
                   InkWell(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                     onTap: onClose ?? () => Navigator.of(context).pop(),
-                    child: const SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: Icon(
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceMuted,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
                         Icons.close,
-                        size: 20,
-                        color: AppColors.textMuted,
+                        size: 18,
+                        color: AppColors.textSub,
                       ),
                     ),
                   ),
@@ -96,7 +104,7 @@ class AppDialog extends StatelessWidget {
             ),
             Flexible(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.fromLTRB(28, 16, 28, 28),
                 child: child,
               ),
             ),
@@ -115,16 +123,14 @@ class DialogActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(top: 16),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: AppColors.surfaceMuted)),
-      ),
+      padding: const EdgeInsets.only(top: 8),
+      // في RTL يقع الإجراء الأساسي (الأخير في القائمة) أقصى اليمين، ثم الإلغاء.
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          for (var i = 0; i < children.length; i++) ...[
-            if (i > 0) const SizedBox(width: 10),
+          for (var i = children.length - 1; i >= 0; i--) ...[
             children[i],
+            if (i > 0) const SizedBox(width: 12),
           ],
         ],
       ),

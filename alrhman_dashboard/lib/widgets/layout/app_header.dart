@@ -1,20 +1,25 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/app_colors.dart';
+import '../../core/baghdad_time.dart';
 import '../../core/responsive.dart';
 
-/// رقم دعم النظام الظاهر في قائمة المساعدة.
+/// رقم دعم النظام الظاهر في بطاقة الدعم الفني بالشريط الجانبي.
 const supportPhone = '07749078969';
 
-/// الشريط العلوي: المساعدة، اسم المستخدم، وتسجيل الخروج.
+/// الشريط العلوي داخل اللوحة العائمة: عنوان الصفحة، توقيت بغداد، وتسجيل الخروج.
+/// في RTL يبدأ العنوان من اليمين وتنتهي الأزرار عند اليسار.
 class AppHeader extends StatelessWidget {
-  final String? username;
+  final String title;
   final VoidCallback onToggleSidebar;
   final VoidCallback onLogout;
 
   const AppHeader({
     super.key,
-    required this.username,
+    required this.title,
     required this.onToggleSidebar,
     required this.onLogout,
   });
@@ -24,57 +29,45 @@ class AppHeader extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
     final desktop = Breakpoints.isDesktop(context);
 
-    return Container(
-      height: 64,
-      padding: EdgeInsets.symmetric(horizontal: desktop ? 24 : 16),
-      decoration: const BoxDecoration(
-        color: Color(0xF2FFFFFF),
-        border: Border(bottom: BorderSide(color: AppColors.border)),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        width >= Breakpoints.md ? 32 : 16,
+        24,
+        width >= Breakpoints.md ? 32 : 16,
+        0,
       ),
       child: Row(
         children: [
-          if (!desktop)
-            IconButton(
+          if (!desktop) ...[
+            _SquareButton(
               tooltip: 'القائمة',
-              onPressed: onToggleSidebar,
-              icon: const Icon(Icons.menu, size: 20, color: AppColors.textSub),
+              icon: Icons.menu,
+              onTap: onToggleSidebar,
             ),
-          const Spacer(),
-          const _HelpMenu(),
-          const SizedBox(width: 12),
-          Container(width: 1, height: 24, color: AppColors.border),
-          const SizedBox(width: 12),
-          if (width >= Breakpoints.sm)
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  (username == null || username!.isEmpty)
-                      ? 'المدير'
-                      : username!,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.text,
-                  ),
-                ),
-                const Text(
-                  'مدير النظام',
-                  style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-                ),
-              ],
+            const SizedBox(width: 12),
+          ],
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 26,
+                height: 1.4,
+                fontWeight: FontWeight.bold,
+                color: AppColors.text,
+              ),
             ),
-          const SizedBox(width: 10),
-          IconButton(
+          ),
+          if (width >= Breakpoints.sm) ...[
+            const _BaghdadClock(),
+            const SizedBox(width: 12),
+          ],
+          _SquareButton(
             tooltip: 'تسجيل الخروج',
-            onPressed: onLogout,
-            style: IconButton.styleFrom(
-              foregroundColor: AppColors.textMuted,
-              hoverColor: AppColors.redSoft,
-              minimumSize: const Size(32, 32),
-            ),
-            icon: const Icon(Icons.logout, size: 16),
+            icon: Icons.logout,
+            onTap: onLogout,
+            hoverColor: AppColors.redSoft,
           ),
         ],
       ),
@@ -82,79 +75,98 @@ class AppHeader extends StatelessWidget {
   }
 }
 
-class _HelpMenu extends StatelessWidget {
-  const _HelpMenu();
+class _SquareButton extends StatelessWidget {
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color? hoverColor;
+
+  const _SquareButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onTap,
+    this.hoverColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return MenuAnchor(
-      alignmentOffset: const Offset(0, 6),
-      style: MenuStyle(
-        backgroundColor: const WidgetStatePropertyAll(Colors.white),
-        surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
-        elevation: const WidgetStatePropertyAll(8),
-        padding: const WidgetStatePropertyAll(EdgeInsets.all(12)),
-        shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: AppColors.border),
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppRadius.control),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.control),
+          hoverColor: hoverColor,
+          onTap: onTap,
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.control),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Icon(icon, size: 20, color: AppColors.textSub),
           ),
         ),
       ),
-      menuChildren: const [
-        SizedBox(
-          width: 256,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'الدعم الفني',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                'لأي استفسار أو مشكلة تقنية تواصل على الرقم:',
-                style: TextStyle(fontSize: 11, color: AppColors.textSub),
-              ),
-              SizedBox(height: 6),
-              SelectableText(
-                supportPhone,
-                textDirection: TextDirection.ltr,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.text,
-                ),
-              ),
-            ],
+    );
+  }
+}
+
+/// ساعة بتوقيت بغداد تُحدَّث كل نصف دقيقة.
+class _BaghdadClock extends StatefulWidget {
+  const _BaghdadClock();
+
+  @override
+  State<_BaghdadClock> createState() => _BaghdadClockState();
+}
+
+class _BaghdadClockState extends State<_BaghdadClock> {
+  static final _fmt = DateFormat('hh:mm a', 'en');
+  late DateTime _now = BaghdadTime.now();
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) setState(() => _now = BaghdadTime.now());
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppRadius.control),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.schedule, size: 18, color: AppColors.textSub),
+          const SizedBox(width: 8),
+          const Text(
+            'توقيت بغداد',
+            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
-        ),
-      ],
-      builder: (context, controller, _) {
-        return Tooltip(
-          message: 'المساعدة والدعم',
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            hoverColor: AppColors.accentSoft,
-            onTap: () =>
-                controller.isOpen ? controller.close() : controller.open(),
-            child: const SizedBox(
-              width: 36,
-              height: 36,
-              child: Icon(
-                Icons.help_outline,
-                size: 20,
-                color: AppColors.textSub,
-              ),
-            ),
+          const SizedBox(width: 8),
+          Text(
+            '\u2066${_fmt.format(_now)}\u2069',
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

@@ -153,6 +153,7 @@ class _DeviceFormDialogState extends State<DeviceFormDialog> {
                       ? 'جارٍ الحفظ...'
                       : (_isEdit ? 'حفظ الموقع' : 'إضافة الجهاز'),
                   icon: Icons.save_outlined,
+                  style: AppButtonStyle.amber,
                   onPressed: _saving ? null : _submit,
                 ),
               ],

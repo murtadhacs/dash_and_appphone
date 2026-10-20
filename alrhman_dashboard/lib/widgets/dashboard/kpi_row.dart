@@ -42,7 +42,7 @@ class KpiRow extends StatelessWidget {
           icon: Icons.how_to_reg_outlined,
           iconBackground: AppColors.greenSoft,
           iconForeground: AppColors.greenDark,
-          footer: '${_pct(stats.presentToday)} من الإجمالي',
+          footer: _pct(stats.presentToday),
           footerColor: AppColors.greenDark,
         ),
         _KpiCard(
@@ -53,7 +53,7 @@ class KpiRow extends StatelessWidget {
           icon: Icons.person_off_outlined,
           iconBackground: AppColors.redSoft,
           iconForeground: AppColors.redDark,
-          footer: '${_pct(stats.absentToday)} من الإجمالي',
+          footer: _pct(stats.absentToday),
           footerColor: AppColors.redDark,
         ),
         _KpiCard(
@@ -64,7 +64,7 @@ class KpiRow extends StatelessWidget {
           icon: Icons.schedule,
           iconBackground: AppColors.warnSoft,
           iconForeground: AppColors.warnDeep,
-          footer: '${_pct(stats.excusedToday)} من الإجمالي',
+          footer: _pct(stats.excusedToday),
           footerColor: AppColors.warnDark,
         ),
       ],
@@ -98,77 +98,74 @@ class _KpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+      child: Row(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          IconTile(
+            icon: icon,
+            background: iconBackground,
+            foreground: iconForeground,
+            size: 48,
+            iconSize: 24,
+            radius: 16,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
-                      label,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSub,
+                      value,
+                      style: TextStyle(
+                        fontSize: 26,
+                        height: 1.3,
+                        fontWeight: FontWeight.bold,
+                        color: valueColor,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          value,
+                    if (footer != null) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          footer!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: valueColor,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          unit,
-                          style: const TextStyle(
                             fontSize: 12,
-                            color: AppColors.textMuted,
+                            fontWeight: FontWeight.w600,
+                            color: footerColor,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ] else ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        unit,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
-              ),
-              IconTile(
-                icon: icon,
-                background: iconBackground,
-                foreground: iconForeground,
-              ),
-            ],
-          ),
-          if (footer != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.only(top: 8),
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: AppColors.surfaceMuted)),
-              ),
-              child: Text(
-                footer!,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: footerColor,
-                ),
-              ),
+              ],
             ),
-          ],
+          ),
         ],
       ),
     );

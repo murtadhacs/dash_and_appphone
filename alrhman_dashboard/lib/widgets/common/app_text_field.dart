@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import '../../core/app_colors.dart';
 
 OutlineInputBorder _border(Color c, [double w = 1]) => OutlineInputBorder(
-  borderRadius: BorderRadius.circular(12),
+  borderRadius: BorderRadius.circular(AppRadius.control),
   borderSide: BorderSide(color: c, width: w),
 );
 
@@ -12,7 +12,7 @@ InputDecoration appInputDecoration({
   String? hint,
   Widget? prefix,
   Widget? suffix,
-  Color fill = AppColors.surfaceMuted,
+  Color fill = Colors.white,
   EdgeInsetsGeometry? padding,
 }) {
   return InputDecoration(
@@ -139,7 +139,7 @@ class AppTextField extends StatelessWidget {
     this.fontSize = 12,
     this.fontWeight,
     this.height = 40,
-    this.fill = AppColors.surfaceMuted,
+    this.fill = Colors.white,
     this.validator,
     this.formatters,
     this.contentPadding,

@@ -23,29 +23,9 @@ class DevicesHeader extends StatelessWidget {
     final titles = const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(Icons.fingerprint, size: 16, color: AppColors.brand),
-            SizedBox(width: 8),
-            Text(
-              'الأجهزة وبوابات الحضور',
-              style: TextStyle(fontSize: 12, color: AppColors.textSub),
-            ),
-          ],
-        ),
-        SizedBox(height: 4),
-        Text(
-          'إدارة أجهزة البصمة',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-        ),
-        SizedBox(height: 4),
         Text(
           'سجّل أجهزة البصمة وفعّلها أو عطّلها. الجهاز المعطّل لا تُحفظ بصماته.',
-          style: TextStyle(fontSize: 12, color: AppColors.textSub),
+          style: TextStyle(fontSize: 14, color: AppColors.textSub),
         ),
       ],
     );
@@ -60,16 +40,16 @@ class DevicesHeader extends StatelessWidget {
           message: 'تحديث القائمة',
           child: Material(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.control),
             child: InkWell(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.control),
               hoverColor: AppColors.surfaceMuted,
               onTap: refreshing ? null : onRefresh,
               child: Container(
-                width: 40,
-                height: 40,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.control),
                   border: Border.all(color: AppColors.border),
                 ),
                 child: Center(

@@ -5,7 +5,8 @@ import '../core/assets.dart';
 import '../widgets/login/login_brand_panel.dart';
 import '../widgets/login/login_form_panel.dart';
 
-/// صفحة دخول ممتدة، تدمج هوية المدرسة وحقول الدخول في مساحة واحدة.
+/// صفحة الدخول: إطار كحلي يضم لوحة الهوية (يمين في RTL) وبطاقة الدخول
+/// البيضاء على لوحة محتوى عائمة، بنفس لغة تصميم لوحة الإدارة.
 class LoginScreen extends StatelessWidget {
   final VoidCallback onLoginSuccess;
   const LoginScreen({super.key, required this.onLoginSuccess});
@@ -13,138 +14,138 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [AppColors.primary, AppColors.brand, AppColors.primary],
-          ),
-        ),
-        child: Stack(
-          children: [
-            PositionedDirectional(
-              top: -240,
-              end: -180,
-              child: _glow(AppColors.brand, 700),
-            ),
-            PositionedDirectional(
-              bottom: -280,
-              start: -200,
-              child: _glow(AppColors.amber.withValues(alpha: .12), 650),
-            ),
-            SafeArea(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final wide = constraints.maxWidth >= 1024;
-                  final padding = wide ? 64.0 : 24.0;
-                  return SingleChildScrollView(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight,
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: padding,
-                          vertical: 28,
-                        ),
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1280),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                _header(wide),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: wide ? 64 : 44,
-                                  ),
-                                  child: wide
-                                      ? Row(
-                                          children: [
-                                            Expanded(
-                                              flex: 5,
-                                              child: Align(
-                                                alignment: AlignmentDirectional
-                                                    .centerStart,
-                                                child: ConstrainedBox(
-                                                  constraints:
-                                                      const BoxConstraints(
-                                                        maxWidth: 400,
-                                                      ),
-                                                  child: LoginFormPanel(
-                                                    onLoginSuccess:
-                                                        onLoginSuccess,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 80),
-                                            const Expanded(
-                                              flex: 6,
-                                              child: LoginBrandPanel(),
-                                            ),
-                                          ],
-                                        )
-                                      : Column(
-                                          children: [
-                                            ConstrainedBox(
-                                              constraints: const BoxConstraints(
-                                                maxWidth: 440,
-                                              ),
-                                              child: LoginFormPanel(
-                                                onLoginSuccess: onLoginSuccess,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 56),
-                                            const LoginBrandPanel(
-                                              compact: true,
-                                            ),
-                                          ],
-                                        ),
-                                ),
-                                _footer(wide),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
+      backgroundColor: AppColors.viewport,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 1024;
+          return Padding(
+            padding: EdgeInsets.all(wide ? 16 : 0),
+            child: Container(
+              padding: EdgeInsets.all(wide ? 12 : 0),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(
+                  wide ? AppRadius.shell : 0,
+                ),
               ),
+              child: wide ? _wide() : _narrow(),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _glow(Color color, double size) => IgnorePointer(
-    child: Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(colors: [color, color.withValues(alpha: 0)]),
+  Widget _wide() => Row(
+    children: [
+      Expanded(flex: 5, child: _brandColumn(wide: true)),
+      Expanded(
+        flex: 6,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.canvas),
+          child: ColoredBox(
+            color: AppColors.background,
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(32),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 460),
+                  child: _formCard(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+
+  Widget _narrow() => SafeArea(
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: Column(
+            children: [
+              _header(),
+              const SizedBox(height: 28),
+              _formCard(),
+              const SizedBox(height: 28),
+              const LoginBrandPanel(compact: true),
+              const SizedBox(height: 24),
+              const Text(
+                '© 2026 الرحمن الابتدائية',
+                style: TextStyle(fontSize: 11, color: Colors.white60),
+              ),
+            ],
+          ),
+        ),
       ),
     ),
   );
 
-  Widget _header(bool wide) => Row(
+  Widget _formCard() => Container(
+    padding: const EdgeInsets.all(32),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(AppRadius.card),
+      boxShadow: AppShadows.card,
+    ),
+    child: LoginFormPanel(onLoginSuccess: onLoginSuccess),
+  );
+
+  Widget _brandColumn({required bool wide}) => Stack(
+    children: [
+      PositionedDirectional(
+        bottom: -110,
+        start: -110,
+        child: _circle(340, AppColors.amber.withValues(alpha: .16)),
+      ),
+      PositionedDirectional(
+        bottom: 70,
+        start: 220,
+        child: _circle(92, const Color(0x388FA7FE)),
+      ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(48, 40, 48, 36),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _header(),
+            const Spacer(),
+            const LoginBrandPanel(),
+            const Spacer(),
+            const Text(
+              '© 2026 الرحمن الابتدائية • إدارة أقرب. تعليم أفضل.',
+              style: TextStyle(fontSize: 11, color: Colors.white60),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+
+  Widget _circle(double size, Color color) => IgnorePointer(
+    child: Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+    ),
+  );
+
+  Widget _header() => Row(
     children: [
       Container(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppRadius.control),
         ),
         child: Image.asset(
           appLogoAsset,
-          width: 44,
-          height: 44,
+          width: 40,
+          height: 40,
           fit: BoxFit.contain,
         ),
       ),
@@ -168,39 +169,6 @@ class LoginScreen extends StatelessWidget {
           ],
         ),
       ),
-      if (wide) ...[
-        const Icon(Icons.grid_view_rounded, color: AppColors.amber, size: 18),
-        const SizedBox(width: 10),
-        const Text(
-          'بوابة الإدارة',
-          style: TextStyle(color: Colors.white70, fontSize: 12),
-        ),
-      ],
     ],
   );
-
-  Widget _footer(bool wide) {
-    const copyright = Text(
-      '© 2026 الرحمن الابتدائية',
-      style: TextStyle(fontSize: 11, color: Colors.white60),
-    );
-    const note = Text(
-      'إدارة أقرب. تعليم أفضل.',
-      style: TextStyle(fontSize: 11, color: Colors.white60),
-    );
-    return Container(
-      padding: const EdgeInsets.only(top: 20),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Colors.white.withValues(alpha: .12)),
-        ),
-      ),
-      child: wide
-          ? const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [copyright, note],
-            )
-          : const Column(children: [copyright, SizedBox(height: 8), note]),
-    );
-  }
 }

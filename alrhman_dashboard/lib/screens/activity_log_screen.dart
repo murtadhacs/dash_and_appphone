@@ -92,29 +92,9 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
     final titles = const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(Icons.history, size: 16, color: AppColors.brand),
-            SizedBox(width: 8),
-            Text(
-              'المراقبة والتدقيق',
-              style: TextStyle(fontSize: 12, color: AppColors.textSub),
-            ),
-          ],
-        ),
-        SizedBox(height: 4),
-        Text(
-          'سجل النشاط',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-        ),
-        SizedBox(height: 4),
         Text(
           'الأحدث أولاً • 50 عملية في الصفحة • الوقت بتوقيت بغداد',
-          style: TextStyle(fontSize: 12, color: AppColors.textSub),
+          style: TextStyle(fontSize: 14, color: AppColors.textSub),
         ),
       ],
     );

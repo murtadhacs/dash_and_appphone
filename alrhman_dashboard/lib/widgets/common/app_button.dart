@@ -21,7 +21,7 @@ class AppButton extends StatelessWidget {
     this.iconWidget,
     required this.onPressed,
     this.style = AppButtonStyle.primary,
-    this.height = 40,
+    this.height = 44,
     this.expand = false,
   });
 
@@ -31,7 +31,7 @@ class AppButton extends StatelessWidget {
     Color? border;
     switch (style) {
       case AppButtonStyle.primary:
-        bg = AppColors.brand;
+        bg = AppColors.primary;
         fg = Colors.white;
       case AppButtonStyle.amber:
         bg = AppColors.amber;
@@ -39,7 +39,6 @@ class AppButton extends StatelessWidget {
       case AppButtonStyle.soft:
         bg = AppColors.surfaceMuted;
         fg = AppColors.textSub;
-        border = AppColors.border;
       case AppButtonStyle.outline:
         bg = Colors.white;
         fg = AppColors.primary;
@@ -64,8 +63,8 @@ class AppButton extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: fg,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -74,20 +73,28 @@ class AppButton extends StatelessWidget {
 
     return Opacity(
       opacity: onPressed == null ? 0.5 : 1,
-      child: Material(
-        color: bg,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: onPressed,
-          child: Container(
-            height: height,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: border == null ? null : Border.all(color: border),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppRadius.control),
+          boxShadow: style == AppButtonStyle.amber && onPressed != null
+              ? AppShadows.amberGlow
+              : null,
+        ),
+        child: Material(
+          color: bg,
+          borderRadius: BorderRadius.circular(AppRadius.control),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(AppRadius.control),
+            onTap: onPressed,
+            child: Container(
+              height: height,
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppRadius.control),
+                border: border == null ? null : Border.all(color: border),
+              ),
+              child: content,
             ),
-            child: content,
           ),
         ),
       ),

@@ -18,12 +18,11 @@ import '../services/excel_export_service.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/common/async_states.dart';
 import '../widgets/dashboard/attendance_donut_card.dart';
-import '../widgets/dashboard/dashboard_banner.dart';
+import '../widgets/dashboard/dashboard_hero.dart';
 import '../widgets/dashboard/device_alert_banner.dart';
 import '../widgets/dashboard/devices_summary_card.dart';
 import '../widgets/dashboard/kpi_row.dart';
 import '../widgets/dashboard/live_feed_card.dart';
-import '../widgets/dashboard/quick_actions_card.dart';
 import 'attendance_screen.dart' show attendancePollInterval;
 
 /// لقطة كاملة لبيانات لوحة التحكم.
@@ -192,7 +191,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             onRefresh: _load,
             onOpenFullLog: () => widget.onNavigate(NavigationTab.attendance),
           );
-    final quick = QuickActionsCard(
+    final hero = DashboardHero(
+      dayLabel: info.isSchool ? 'يوم دراسي' : info.label,
       onAddStudent: widget.onOpenAddStudent,
       onGrantLeave: widget.onOpenQuickLeave,
       onExport: _exporting ? null : _exportToday,
@@ -212,10 +212,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(height: 20),
         ],
-        DashboardBanner(dayLabel: info.isSchool ? 'يوم دراسي' : info.label),
-        const SizedBox(height: 20),
-        quick,
-        const SizedBox(height: 20),
+        hero,
+        const SizedBox(height: 24),
         KpiRow(stats: data.stats),
         const SizedBox(height: 20),
         if (wide && info.isSchool)

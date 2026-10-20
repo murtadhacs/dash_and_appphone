@@ -5,17 +5,19 @@ class AppColors {
   AppColors._();
 
   // Surfaces
-  static const background = Color(0xFFF9F9FF);
+  static const background = Color(0xFFF0F1F3);
+  static const viewport = Color(0xFFE1E3E7);
+  static const navyDeep = Color(0xFF001142);
   static const surface = Colors.white;
-  static const surfaceMuted = Color(0xFFF0F3FF);
-  static const border = Color(0xFFE2E8F8);
+  static const surfaceMuted = Color(0xFFF0F1F3);
+  static const border = Color(0xFFE2E8F0);
   static const accentSoft = Color(0xFFE7EEFE);
 
   // Brand
   static const primary = Color(0xFF00236F);
   static const brand = Color(0xFF1E3A8A);
   static const amber = Color(0xFFFEA619);
-  static const onAmber = Color(0xFF684000);
+  static const onAmber = Color(0xFF151C27);
 
   // Text
   static const text = Color(0xFF151C27);
@@ -42,4 +44,33 @@ class AppColors {
   static const warnSoft = Color(0xFFFEF3C7);
 
   static const toastDark = Color(0xFF2A313D);
+}
+
+/// الظلال والأنصاف الموحّدة للتصميم الجديد (بطاقات عائمة بلا حدود قاسية).
+class AppShadows {
+  AppShadows._();
+
+  /// ظل البطاقات: 0 16 36 rgba(20,35,55,.08).
+  static const card = [
+    BoxShadow(color: Color(0x14142337), blurRadius: 36, offset: Offset(0, 16)),
+  ];
+
+  /// ظل النوافذ المنبثقة: 0 24 48 rgba(15,23,42,.16).
+  static const dialog = [
+    BoxShadow(color: Color(0x290F172A), blurRadius: 48, offset: Offset(0, 24)),
+  ];
+
+  /// توهج العنصر النشط وزر الإجراء الأساسي.
+  static const amberGlow = [
+    BoxShadow(color: Color(0x40FEA619), blurRadius: 12, offset: Offset(0, 4)),
+  ];
+}
+
+class AppRadius {
+  AppRadius._();
+
+  static const shell = 40.0;
+  static const canvas = 32.0;
+  static const card = 24.0;
+  static const control = 14.0;
 }

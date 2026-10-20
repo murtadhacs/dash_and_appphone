@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../core/app_colors.dart';
 import 'banners_screen.dart';
 import 'broadcasts_screen.dart';
 
@@ -20,12 +22,20 @@ class _CommunicationsScreenState extends State<CommunicationsScreen> {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(
-        'الإعلانات والإشعارات',
-        style: Theme.of(context).textTheme.headlineSmall,
-      ),
-      const SizedBox(height: 16),
       SegmentedButton<bool>(
+        style: SegmentedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: AppColors.textSub,
+          selectedBackgroundColor: AppColors.primary,
+          selectedForegroundColor: Colors.white,
+          side: const BorderSide(color: AppColors.border),
+          minimumSize: const Size(0, 44),
+          textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.control),
+          ),
+        ),
+        showSelectedIcon: false,
         segments: const [
           ButtonSegment(
             value: false,

@@ -57,10 +57,10 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
         const Text(
           'أهلاً بعودتك',
           style: TextStyle(
-            fontSize: 36,
+            fontSize: 30,
             height: 1.4,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.text,
           ),
         ),
         const SizedBox(height: 12),
@@ -69,15 +69,15 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppColors.textSub,
           ),
         ),
         const SizedBox(height: 8),
         const Text(
           'سجّل دخولك وابدأ إدارة يومك المدرسي.',
-          style: TextStyle(fontSize: 13, color: Colors.white60),
+          style: TextStyle(fontSize: 13, color: AppColors.textMuted),
         ),
-        const SizedBox(height: 36),
+        const SizedBox(height: 28),
         if (_error != null) _errorBanner(),
         AutofillGroup(
           child: Form(
@@ -113,12 +113,12 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.verified_user_outlined, size: 15, color: Colors.white60),
+            Icon(Icons.verified_user_outlined, size: 15, color: AppColors.textMuted),
             SizedBox(width: 8),
             Flexible(
               child: Text(
                 'وصول مخصص لإدارة المدرسة',
-                style: TextStyle(fontSize: 11, color: Colors.white60),
+                style: TextStyle(fontSize: 11, color: AppColors.textMuted),
               ),
             ),
           ],
@@ -130,9 +130,9 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
   Widget _label(String text) => Text(
     text,
     style: const TextStyle(
-      fontSize: 12,
+      fontSize: 13,
       fontWeight: FontWeight.w600,
-      color: Colors.white,
+      color: AppColors.textSub,
     ),
   );
 
@@ -145,7 +145,7 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
   }) {
     OutlineInputBorder border(Color color, [double width = 1]) =>
         OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppRadius.control),
           borderSide: BorderSide(color: color, width: width),
         );
     return TextFormField(
@@ -160,19 +160,19 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
       onFieldSubmitted: password ? (_) => _submit() : null,
       validator: (value) =>
           value == null || value.trim().isEmpty ? 'هذا الحقل مطلوب' : null,
-      style: const TextStyle(fontSize: 14, color: Colors.white),
-      cursorColor: AppColors.amber,
+      style: const TextStyle(fontSize: 14, color: AppColors.text),
+      cursorColor: AppColors.brand,
       decoration: InputDecoration(
         hintText: hint,
         hintTextDirection: TextDirection.rtl,
-        hintStyle: const TextStyle(fontSize: 12, color: Colors.white54),
+        hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: .06),
+        fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 18,
           vertical: 19,
         ),
-        prefixIcon: Icon(icon, size: 20, color: Colors.white60),
+        prefixIcon: Icon(icon, size: 20, color: AppColors.textMuted),
         suffixIcon: password
             ? IconButton(
                 tooltip: _showPassword
@@ -184,16 +184,16 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
                   size: 19,
-                  color: Colors.white60,
+                  color: AppColors.textMuted,
                 ),
               )
             : null,
-        enabledBorder: border(Colors.white.withValues(alpha: .2)),
-        disabledBorder: border(Colors.white.withValues(alpha: .1)),
-        focusedBorder: border(AppColors.amber, 1.5),
+        enabledBorder: border(AppColors.border),
+        disabledBorder: border(AppColors.border),
+        focusedBorder: border(AppColors.brand, 1.5),
         errorBorder: border(AppColors.red),
         focusedErrorBorder: border(AppColors.red, 1.5),
-        errorStyle: const TextStyle(color: Color(0xFFFFCACA)),
+        errorStyle: const TextStyle(color: AppColors.redDark),
       ),
     );
   }
@@ -237,9 +237,11 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
       onPressed: _loading ? null : _submit,
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.amber,
-        foregroundColor: AppColors.primary,
+        foregroundColor: AppColors.text,
         disabledBackgroundColor: AppColors.amber.withValues(alpha: .6),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.control),
+        ),
       ),
       child: _loading
           ? const SizedBox(
@@ -247,7 +249,7 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: AppColors.primary,
+                color: AppColors.text,
               ),
             )
           : const Row(

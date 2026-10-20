@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 
-/// البطاقة البيضاء ذات الحد الخفيف المستخدمة في كل الشاشات.
+/// البطاقة البيضاء العائمة (ظل ناعم بلا حد) المستخدمة في كل الشاشات.
 class AppCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -13,9 +13,9 @@ class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(20),
+    this.padding = const EdgeInsets.all(24),
     this.color = AppColors.surface,
-    this.radius = 16,
+    this.radius = AppRadius.card,
     this.clip = false,
   });
 
@@ -26,14 +26,7 @@ class AppCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: AppColors.border),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0A000000),
-            blurRadius: 8,
-            offset: Offset(0, 1),
-          ),
-        ],
+        boxShadow: AppShadows.card,
       ),
       padding: padding,
       child: child,

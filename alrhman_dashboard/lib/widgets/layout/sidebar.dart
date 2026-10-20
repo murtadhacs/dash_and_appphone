@@ -1,9 +1,12 @@
+import 'dart:ui' show PathMetric;
+
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
-import '../../core/responsive.dart';
 import '../../core/assets.dart';
+import '../../core/responsive.dart';
 import '../../models/navigation_tab.dart';
+import 'app_header.dart' show supportPhone;
 
 class _NavItem {
   final NavigationTab tab;
@@ -39,113 +42,143 @@ const _navItems = [
   _NavItem(NavigationTab.activityLog, 'سجل النشاط', Icons.history_outlined),
 ];
 
-/// الشريط الجانبي: يظهر ثابتاً على الشاشات الكبيرة وداخل Drawer على الصغيرة.
+/// الشريط الجانبي: كحلي عائم داخل الإطار العام، ثابت على الشاشات الكبيرة
+/// وداخل Drawer على الصغيرة. يقع على يمين الشاشة تلقائياً بحكم اتجاه RTL.
 class Sidebar extends StatelessWidget {
   final NavigationTab currentTab;
   final ValueChanged<NavigationTab> onSelectTab;
+  final String? username;
 
   const Sidebar({
     super.key,
     required this.currentTab,
     required this.onSelectTab,
+    this.username,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: Breakpoints.sidebarWidth,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(left: BorderSide(color: AppColors.border)),
-      ),
-      child: Column(
-        children: [
-          _brandHeader(),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-              children: [
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(8, 10, 8, 10),
-                  child: Text(
-                    'القائمة الرئيسية',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textMuted,
+      color: AppColors.primary,
+      child: LayoutBuilder(
+        // على الشاشات القصيرة يتمرّر الشريط كاملاً بدل قصّ القائمة.
+        builder: (context, constraints) => SingleChildScrollView(
+          padding: const EdgeInsetsDirectional.fromSTEB(14, 20, 18, 12),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
+            child: IntrinsicHeight(
+              child: Column(
+                children: [
+                  _brand(),
+                  const SizedBox(height: 22),
+                  _Profile(username: username),
+                  const SizedBox(height: 22),
+                  for (final item in _navItems)
+                    _NavTile(
+                      item: item,
+                      active: item.tab == currentTab,
+                      onTap: () => onSelectTab(item.tab),
                     ),
+                  const Spacer(),
+                  const SizedBox(height: 12),
+                  const _SupportCard(),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'الرحمن الابتدائية • الإصدار 1.0',
+                    style: TextStyle(fontSize: 11, color: Color(0xB3FFFFFF)),
                   ),
-                ),
-                for (final item in _navItems)
-                  _NavTile(
-                    item: item,
-                    active: item.tab == currentTab,
-                    onTap: () => onSelectTab(item.tab),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
-          _statusFooter(),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _brandHeader() {
-    return Container(
-      height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceMuted,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
-      child: Row(
-        children: [
-          Image.asset(appLogoAsset, height: 40, fit: BoxFit.contain),
-          const SizedBox(width: 10),
-          const Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'الرحمن الابتدائية',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                    height: 1.2,
-                  ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  'نظام الإدارة المدرسية',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textSub,
-                    height: 1,
-                  ),
-                ),
-              ],
-            ),
+  Widget _brand() {
+    return Row(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppRadius.control),
           ),
-        ],
-      ),
+          child: Image.asset(appLogoAsset, fit: BoxFit.contain),
+        ),
+        const SizedBox(width: 12),
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'الرحمن الابتدائية',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  height: 1.4,
+                ),
+              ),
+              Text(
+                'نظام الإدارة المدرسية',
+                style: TextStyle(fontSize: 11, color: Color(0xB3FFFFFF)),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
+}
 
-  Widget _statusFooter() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceMuted,
-        border: Border(top: BorderSide(color: AppColors.border)),
-      ),
-      child: const Text(
-        'الرحمن الابتدائية • الإصدار 1.0',
-        style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-      ),
+class _Profile extends StatelessWidget {
+  final String? username;
+  const _Profile({required this.username});
+
+  @override
+  Widget build(BuildContext context) {
+    final name = (username == null || username!.isEmpty) ? 'المدير' : username!;
+    return Column(
+      children: [
+        Container(
+          width: 76,
+          height: 76,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: AppColors.amber,
+            shape: BoxShape.circle,
+            border: Border.all(color: const Color(0x2EFFFFFF), width: 4),
+          ),
+          child: Text(
+            name.characters.first,
+            style: const TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: AppColors.navyDeep,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const Text(
+          'مدير النظام',
+          style: TextStyle(fontSize: 12, color: Color(0xB3FFFFFF)),
+        ),
+      ],
     );
   }
 }
@@ -163,50 +196,142 @@ class _NavTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fg = active ? AppColors.text : const Color(0xB8FFFFFF);
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
-      child: Material(
-        color: active ? AppColors.accentSoft : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          hoverColor: AppColors.border,
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-            decoration: BoxDecoration(
-              // الشريط البرتقالي على الحافة اليمنى للعنصر النشط.
-              border: Border(
-                right: BorderSide(
-                  color: active ? AppColors.amber : Colors.transparent,
-                  width: 4,
-                ),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  item.icon,
-                  size: 20,
-                  color: active ? AppColors.primary : AppColors.textMuted,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    item.label,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: active ? FontWeight.bold : FontWeight.w500,
-                      color: active ? AppColors.primary : AppColors.textSub,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppRadius.control),
+          boxShadow: active ? AppShadows.amberGlow : null,
+        ),
+        child: Material(
+          color: active ? AppColors.amber : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadius.control),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            hoverColor: const Color(0x14FFFFFF),
+            onTap: onTap,
+            child: Container(
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Row(
+                children: [
+                  Icon(item.icon, size: 20, color: fg),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      item.label,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: active ? FontWeight.bold : FontWeight.w500,
+                        color: fg,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
+}
+
+/// بطاقة الدعم الفني بحد متقطع (ثابتة في أسفل الشريط الجانبي).
+class _SupportCard extends StatelessWidget {
+  const _SupportCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _DashedRRectPainter(
+        color: const Color(0x59FFFFFF),
+        radius: AppRadius.card,
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0x0FFFFFFF),
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
+        child: Column(
+          children: [
+            const Text(
+              'الدعم الفني',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 2),
+            const Text(
+              'لأي استفسار تواصل على الرقم',
+              style: TextStyle(fontSize: 11, color: Color(0xB3FFFFFF)),
+            ),
+            const SizedBox(height: 6),
+            const SelectableText(
+              supportPhone,
+              textDirection: TextDirection.ltr,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.phone_outlined,
+                size: 18,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DashedRRectPainter extends CustomPainter {
+  final Color color;
+  final double radius;
+  _DashedRRectPainter({required this.color, required this.radius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          (Offset.zero & size).deflate(0.75),
+          Radius.circular(radius),
+        ),
+      );
+    for (final PathMetric metric in path.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        canvas.drawPath(metric.extractPath(distance, distance + 5), paint);
+        distance += 9;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedRRectPainter old) =>
+      old.color != color || old.radius != radius;
 }

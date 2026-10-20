@@ -218,28 +218,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(Icons.tune, size: 14, color: AppColors.textMuted),
-            SizedBox(width: 8),
-            Text(
-              'النظام الإداري',
-              style: TextStyle(fontSize: 12, color: AppColors.textSub),
-            ),
-            SizedBox(width: 8),
-            Text('/', style: TextStyle(color: AppColors.outline)),
-            SizedBox(width: 8),
-            Text(
-              'الإعدادات العامة',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 4),
         Text(
           'إعدادات المدرسة',
           style: TextStyle(

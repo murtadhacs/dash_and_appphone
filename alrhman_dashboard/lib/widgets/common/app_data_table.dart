@@ -38,15 +38,15 @@ class AppDataTable extends StatelessWidget {
               horizontalMargin: 20,
               dividerThickness: 1,
               border: const TableBorder(
-                horizontalInside: BorderSide(color: AppColors.surfaceMuted),
+                horizontalInside: BorderSide(color: AppColors.border),
               ),
               headingTextStyle: const TextStyle(
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textSub,
               ),
               dataTextStyle: const TextStyle(
-                fontSize: 12,
+                fontSize: 13,
                 color: AppColors.text,
               ),
               columns: columns,

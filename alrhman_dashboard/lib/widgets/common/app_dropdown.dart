@@ -21,7 +21,7 @@ class AppDropdown<T> extends StatelessWidget {
     required this.value,
     required this.items,
     required this.onChanged,
-    this.fill = AppColors.surfaceMuted,
+    this.fill = Colors.white,
     this.fontSize = 12,
   });
 
@@ -32,7 +32,7 @@ class AppDropdown<T> extends StatelessWidget {
       initialValue: value,
       isExpanded: true,
       isDense: true,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppRadius.control),
       icon: const Icon(
         Icons.keyboard_arrow_down_rounded,
         size: 18,

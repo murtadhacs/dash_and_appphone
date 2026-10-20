@@ -190,9 +190,9 @@ class _BannersScreenState extends State<BannersScreen> {
         const Text(
           'الإعلانات',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: AppColors.primary,
+            color: AppColors.text,
           ),
         ),
         const SizedBox(height: 6),

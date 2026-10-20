@@ -152,7 +152,7 @@ Future<void> pumpPage(
                         child: Column(
                           children: [
                             AppHeader(
-                              username: 'admin',
+                              title: 'الجدول الدراسي',
                               onToggleSidebar: () {},
                               onLogout: () {},
                             ),

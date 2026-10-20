@@ -546,6 +546,7 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                       ? 'جارٍ الحفظ...'
                       : (_isEdit ? 'تحديث التعديلات' : 'حفظ بيانات الطالب'),
                   icon: Icons.save_outlined,
+                  style: AppButtonStyle.amber,
                   onPressed: _saving ? null : _submit,
                 ),
               ],
