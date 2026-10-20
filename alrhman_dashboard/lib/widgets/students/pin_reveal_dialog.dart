@@ -3,10 +3,11 @@ import 'package:flutter/services.dart';
 
 import '../../core/app_colors.dart';
 import '../common/app_button.dart';
+import '../common/app_dialog.dart';
 import '../common/app_toast.dart';
-import '../common/icon_tile.dart';
 
-/// يعرض رمز ولي الأمر مرة واحدة بعد الحفظ (الخادم لا يستطيع عرضه لاحقاً).
+/// نافذة «رمز دخول ولي الأمر» (D2): تُعرض مرة واحدة بعد الحفظ
+/// لأن الخادم لا يستطيع عرض كلمة المرور لاحقاً.
 class PinRevealDialog extends StatefulWidget {
   final String parentName;
   final String pin;
@@ -36,121 +37,109 @@ class PinRevealDialog extends StatefulWidget {
 class _PinRevealDialogState extends State<PinRevealDialog> {
   bool _show = false;
   late final _password = TextEditingController(text: widget.pin);
+
   @override
   void dispose() {
     _password.dispose();
     super.dispose();
   }
 
+  Future<void> _copy() async {
+    await Clipboard.setData(ClipboardData(text: widget.pin));
+    if (mounted) showAppToast(context, 'تم نسخ كلمة المرور');
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.white,
-      insetPadding: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 440),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+    return AppDialog(
+      icon: Icons.key_rounded,
+      iconBackground: AppColors.okBg,
+      iconForeground: AppColors.green,
+      title: 'رمز دخول ولي الأمر',
+      subtitle: widget.parentName,
+      maxWidth: 480,
+      onClose: () => Navigator.of(context).pop(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'تم الحفظ — سلّم كلمة المرور لولي الأمر',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSub,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.canvas,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.line),
+            ),
+            child: TextField(
+              controller: _password,
+              readOnly: true,
+              obscureText: !_show,
+              autocorrect: false,
+              enableSuggestions: false,
+              textAlign: TextAlign.center,
+              textDirection: TextDirection.ltr,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                filled: false,
+              ),
+              style: const TextStyle(
+                fontSize: 20,
+                letterSpacing: 2,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'monospace',
+                color: AppColors.text,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const IconTile(
-                icon: Icons.vpn_key_outlined,
-                background: AppColors.warnSoft,
-                foreground: AppColors.warnDeep,
-                size: 56,
-                iconSize: 28,
-                circle: true,
+              AppButton(
+                label: 'نسخ الرمز',
+                icon: Icons.copy_rounded,
+                style: AppButtonStyle.outline,
+                small: true,
+                onPressed: _copy,
               ),
-              const SizedBox(height: 16),
-              const Text(
-                'تم الحفظ — سلّم كلمة المرور لولي الأمر',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.text,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'كلمة مرور ${widget.parentName} إلى التطبيق:',
-                style: const TextStyle(fontSize: 12, color: AppColors.textSub),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceMuted,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: TextField(
-                  controller: _password,
-                  readOnly: true,
-                  obscureText: !_show,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  textDirection: TextDirection.ltr,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    suffixIcon: IconButton(
-                      tooltip: _show ? 'إخفاء' : 'إظهار',
-                      onPressed: () => setState(() => _show = !_show),
-                      icon: Icon(
-                        _show
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                      ),
-                    ),
-                  ),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'monospace',
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'لن تتوفر كلمة المرور مرة أخرى بعد إغلاق النافذة. إن ضاعت فعيّن كلمة مرور جديدة من تعديل الطالب.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      label: 'نسخ كلمة المرور',
-                      icon: Icons.copy_outlined,
-                      style: AppButtonStyle.soft,
-                      onPressed: () async {
-                        await Clipboard.setData(
-                          ClipboardData(text: widget.pin),
-                        );
-                        if (context.mounted) {
-                          showAppToast(context, 'تم نسخ كلمة المرور');
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppButton(
-                      label: 'تم',
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ),
-                ],
+              const SizedBox(width: 10),
+              AppButton(
+                label: _show ? 'إخفاء' : 'إظهار',
+                tooltip: _show ? 'إخفاء' : 'إظهار',
+                icon: _show
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+                style: AppButtonStyle.outline,
+                small: true,
+                onPressed: () => setState(() => _show = !_show),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 16),
+          const DialogNote(
+            'يُعرض الرمز بعد نجاح الحفظ فقط، ولا يمكن استرجاعه لاحقاً. سلّمه لولي الأمر الآن، وإن ضاع فعيّن كلمة مرور جديدة من تعديل الطالب.',
+            tone: NoteTone.warn,
+          ),
+          const SizedBox(height: 20),
+          DialogActions(
+            children: [
+              AppButton(
+                label: 'إغلاق',
+                style: AppButtonStyle.primary,
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

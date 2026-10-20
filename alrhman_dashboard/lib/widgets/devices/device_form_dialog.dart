@@ -80,12 +80,12 @@ class _DeviceFormDialogState extends State<DeviceFormDialog> {
   @override
   Widget build(BuildContext context) {
     return AppDialog(
-      maxWidth: 480,
-      icon: Icons.settings_input_component_outlined,
-      title: _isEdit ? 'تعديل موقع الجهاز' : 'إضافة جهاز بصمة',
+      maxWidth: 540,
+      icon: Icons.memory_rounded,
+      title: _isEdit ? 'تعديل موقع الجهاز' : 'إضافة جهاز',
       subtitle: _isEdit
           ? widget.editing!.serialNumber
-          : 'يُسجَّل مفعّلاً مباشرة',
+          : 'ربط جهاز حضور جديد بالمدرسة',
       onClose: _saving ? () {} : null,
       child: Form(
         key: _formKey,
@@ -93,57 +93,48 @@ class _DeviceFormDialogState extends State<DeviceFormDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (_error != null)
-              Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.redSoft,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.redBorder),
-                ),
-                child: Text(
-                  _error!,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.redDark,
-                  ),
-                ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: DialogNote(_error!, tone: NoteTone.bad),
               ),
             if (!_isEdit) ...[
-              const FieldLabel('الرقم التسلسلي للجهاز', required: true),
+              const FieldLabel('الرقم التسلسلي', required: true),
               const SizedBox(height: 6),
               AppTextField(
                 controller: _serial,
-                height: 44,
                 ltr: true,
                 mono: true,
                 maxLength: 50,
-                fontWeight: FontWeight.bold,
+                hint: 'SN-2026-0460',
                 requiredField: true,
               ),
               const SizedBox(height: 6),
               const Text(
-                'يظهر الرقم التسلسلي في قائمة معلومات الجهاز نفسه. لا يمكن تغييره بعد الإضافة.',
-                style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                'يُحفظ كما هو ولا يمكن تعديله لاحقاً؛ يظهر في قائمة معلومات الجهاز نفسه.',
+                style: TextStyle(fontSize: 12, color: AppColors.textMuted),
               ),
               const SizedBox(height: 16),
             ],
-            const FieldLabel('الموقع (اسم البوابة)'),
+            const FieldLabel('موقع الجهاز'),
             const SizedBox(height: 6),
             AppTextField(
               controller: _location,
-              height: 44,
               maxLength: 50,
-              fontWeight: FontWeight.bold,
               hint: 'مثال: المدخل الرئيسي',
             ),
+            if (!_isEdit) ...[
+              const SizedBox(height: 16),
+              const DialogNote(
+                'يُسجَّل الجهاز مفعّلاً إدارياً، ويمكن تعطيله لاحقاً من بطاقة الجهاز.',
+                tone: NoteTone.ok,
+              ),
+            ],
             const SizedBox(height: 16),
             DialogActions(
               children: [
                 AppButton(
                   label: 'إلغاء',
-                  style: AppButtonStyle.soft,
+                  style: AppButtonStyle.outline,
                   onPressed: _saving
                       ? null
                       : () => Navigator.of(context).pop(false),
@@ -152,7 +143,7 @@ class _DeviceFormDialogState extends State<DeviceFormDialog> {
                   label: _saving
                       ? 'جارٍ الحفظ...'
                       : (_isEdit ? 'حفظ الموقع' : 'إضافة الجهاز'),
-                  icon: Icons.save_outlined,
+                  icon: _isEdit ? Icons.save_outlined : Icons.add_rounded,
                   style: AppButtonStyle.amber,
                   onPressed: _saving ? null : _submit,
                 ),

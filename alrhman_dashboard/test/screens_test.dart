@@ -127,15 +127,15 @@ void main() {
     'overview shortcuts open banner and leave forms; one report export',
     (tester) async {
       await _pumpApp(tester, size: const Size(1600, 1400));
-      expect(find.text('تصدير كشف اليوم'), findsOneWidget);
+      expect(find.text('تصدير الحضور'), findsOneWidget);
       expect(find.text('تصدير التقرير اليومي'), findsNothing);
-      expect(find.text('إضافة جدول سريع'), findsOneWidget);
+      expect(find.text('إضافة جدول'), findsOneWidget);
       await _capture(tester, 'overview_updated');
-      await _tapText(tester, 'إضافة بنر');
+      await _tapText(tester, 'إضافة بانر');
       expect(find.byType(BannerFormDialog), findsOneWidget);
       await _tapText(tester, 'إلغاء');
-      await _tapText(tester, 'لوحة التحكم');
-      await _tapText(tester, 'تسجيل إجازة');
+      await _tapText(tester, 'نظرة عامة');
+      await _tapText(tester, 'منح إجازة');
       expect(find.byType(LeaveDialog), findsOneWidget);
       expect(find.text('نوع العذر'), findsNothing);
       await _capture(tester, 'leave_updated');
@@ -145,7 +145,7 @@ void main() {
   );
   testWidgets('overview quick actions fit a narrow screen', (tester) async {
     await _pumpApp(tester, size: const Size(390, 900));
-    await tester.ensureVisible(find.text('إضافة بنر'));
+    await tester.ensureVisible(find.text('إضافة بانر'));
     await _settle(tester);
     expect(tester.takeException(), isNull);
     await _capture(tester, 'overview_mobile_updated');
@@ -156,19 +156,19 @@ void main() {
     tester,
   ) async {
     final server = await _pumpApp(tester, loggedIn: false);
-    expect(find.text('مرحباً بك مجدداً في بوابة الإدارة'), findsOneWidget);
+    expect(find.text('أدخل بيانات حساب الإدارة للمتابعة'), findsOneWidget);
     // لا بيانات تجريبية معبأة مسبقاً.
     expect(find.text('admin@futurekids.edu.sa'), findsNothing);
 
     final fields = find.byType(TextFormField);
     await tester.enterText(fields.at(0), 'admin');
     await tester.enterText(fields.at(1), 'wrong');
-    await _tapText(tester, 'تسجيل الدخول للنظام');
+    await _tapText(tester, 'دخول إلى اللوحة');
     expect(find.text('بيانات الدخول غير صحيحة'), findsOneWidget);
 
     await tester.enterText(fields.at(1), 'admin');
-    await _tapText(tester, 'تسجيل الدخول للنظام');
-    expect(find.text('نظرة عامة'), findsOneWidget);
+    await _tapText(tester, 'دخول إلى اللوحة');
+    expect(find.text('نظرة عامة'), findsWidgets);
     expect(
       server.requests.where((r) => r.url.path == '/api/admin/login').length,
       2,
@@ -196,7 +196,7 @@ void main() {
     await _pumpApp(tester);
     expect(find.textContaining('لا يوجد أي جهاز بصمة مفعّل'), findsNothing);
     expect(find.text('ZK-0001'), findsNothing); // الملخص يعرض الموقع لا الرقم
-    expect(find.text('المدخل الرئيسي'), findsOneWidget);
+    expect(find.textContaining('المدخل الرئيسي'), findsOneWidget);
     await _dispose(tester);
   });
 
@@ -204,12 +204,12 @@ void main() {
     tester,
   ) async {
     final server = await _pumpApp(tester);
-    await _tapText(tester, 'الطلاب وأولياء الأمور');
+    await _tapText(tester, 'الطلاب');
     expect(find.text('عمر فيصل المنصور'), findsOneWidget);
     // لا عمود لصلة القرابة ولا بيانات مزيّفة.
     expect(find.textContaining('الصلة'), findsNothing);
 
-    await _tapText(tester, 'إضافة طالب جديد');
+    await _tapText(tester, 'إضافة طالب');
     await tester.enterText(
       find.widgetWithText(TextFormField, 'مثال: ريان فهد الحارثي'),
       'طالب جديد',
@@ -249,7 +249,7 @@ void main() {
       find.widgetWithText(TextFormField, 'مثال: 1001'),
       '2001',
     );
-    await _tapText(tester, 'حفظ بيانات الطالب');
+    await _tapText(tester, 'حفظ الطالب');
     final post = server.requests.lastWhere(
       (r) => r.method == 'POST' && r.url.path == '/api/admin/students',
     );
@@ -265,7 +265,7 @@ void main() {
     await tester.tap(find.byTooltip('إظهار').last);
     await _settle(tester);
     expect(tester.widget<TextField>(revealed).obscureText, isFalse);
-    await _tapText(tester, 'تم');
+    await _tapText(tester, 'إغلاق');
     expect(find.text('طالب جديد'), findsOneWidget);
     await _dispose(tester);
   });
@@ -274,8 +274,8 @@ void main() {
     tester,
   ) async {
     final server = await _pumpApp(tester);
-    await _tapText(tester, 'الطلاب وأولياء الأمور');
-    await _tapText(tester, 'إضافة طالب جديد');
+    await _tapText(tester, 'الطلاب');
+    await _tapText(tester, 'إضافة طالب');
 
     await tester.enterText(
       find.widgetWithText(TextFormField, 'مثال: ريان فهد الحارثي'),
@@ -296,13 +296,13 @@ void main() {
 
     final pinField = find.widgetWithText(TextFormField, 'فارغ = بدون تغيير');
     expect(pinField, findsNothing);
-    expect(find.text('سيُربط الطالب بحساب ولي الأمر المسجّل'), findsOneWidget);
+    expect(find.textContaining('سيُربط الطالب بحساب ولي الأمر المسجّل'), findsOneWidget);
 
     await tester.enterText(
       find.widgetWithText(TextFormField, 'مثال: 1001'),
       '2001',
     );
-    await _tapText(tester, 'حفظ بيانات الطالب');
+    await _tapText(tester, 'حفظ الطالب');
     final post = server.requests.lastWhere(
       (r) => r.method == 'POST' && r.url.path == '/api/admin/students',
     );
@@ -316,7 +316,7 @@ void main() {
   testWidgets('الحضور: ترتيب الحاضرين، وإلغاء إجازة', (tester) async {
     final server = await _pumpApp(tester);
     server.leaves.add('3|${_todayStr()}'); // زيد في إجازة
-    await _tapText(tester, 'الحضور والاجازات');
+    await _tapText(tester, 'الحضور والإجازات');
 
     // الحاضر الأحدث دخولاً (ليان 08:41) فوق (عمر 07:12).
     final lian = tester.getTopLeft(find.text('ليان سعود المطيري').first).dy;
@@ -324,7 +324,7 @@ void main() {
     expect(lian, lessThan(omar));
     expect(find.text('08:41 AM'), findsOneWidget);
     expect(find.text('إلغاء الإجازة'), findsOneWidget);
-    expect(find.text('تسجيل عذر'), findsOneWidget); // كريم غائب
+    expect(find.text('منح إجازة'), findsNWidgets(2)); // كريم غائب + زر الرأس
 
     await _tapText(tester, 'إلغاء الإجازة');
     await _tapText(tester, 'نعم، ألغِ الإجازة');
@@ -340,7 +340,7 @@ void main() {
 
   testWidgets('الأجهزة: تحذير قبل التعطيل، وتعديل جزئي', (tester) async {
     final server = await _pumpApp(tester);
-    await _tapText(tester, 'الأجهزة وبوابات الحضور');
+    await _tapText(tester, 'الأجهزة');
 
     expect(find.text('ZK-0001'), findsOneWidget);
     expect(find.text('مفعّل'), findsOneWidget);
@@ -373,7 +373,7 @@ void main() {
     tester,
   ) async {
     final server = await _pumpApp(tester);
-    await _tapText(tester, 'الإعدادات العامة');
+    await _tapText(tester, 'إعدادات المدرسة');
 
     expect(find.byType(TextFormField), findsNWidgets(2));
     expect(find.textContaining('موعد'), findsNothing);
@@ -402,8 +402,8 @@ void main() {
     server.requests.clear();
     final services = AppScope.of(tester.element(find.byType(AppShell)));
     services.client.token = 'expired';
-    await _tapText(tester, 'الطلاب وأولياء الأمور');
-    expect(find.text('مرحباً بك مجدداً في بوابة الإدارة'), findsOneWidget);
+    await _tapText(tester, 'الطلاب');
+    expect(find.text('أدخل بيانات حساب الإدارة للمتابعة'), findsOneWidget);
     await _dispose(tester);
   });
 }

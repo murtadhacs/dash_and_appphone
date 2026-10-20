@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_colors.dart';
-import '../core/assets.dart';
 import '../widgets/login/login_brand_panel.dart';
 import '../widgets/login/login_form_panel.dart';
 
-/// صفحة الدخول: إطار كحلي يضم لوحة الهوية (يمين في RTL) وبطاقة الدخول
-/// البيضاء على لوحة محتوى عائمة، بنفس لغة تصميم لوحة الإدارة.
+/// صفحة الدخول بعرض الشاشة كاملة كما في Figma: لوحة الهوية الكحلية يميناً
+/// (في RTL) وبطاقة الدخول البيضاء على لوحة رمادية يساراً.
 class LoginScreen extends StatelessWidget {
   final VoidCallback onLoginSuccess;
   const LoginScreen({super.key, required this.onLoginSuccess});
@@ -14,42 +13,34 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.viewport,
+      backgroundColor: AppColors.primary,
       body: LayoutBuilder(
         builder: (context, constraints) {
           final wide = constraints.maxWidth >= 1024;
-          return Padding(
-            padding: EdgeInsets.all(wide ? 16 : 0),
-            child: Container(
-              padding: EdgeInsets.all(wide ? 12 : 0),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(
-                  wide ? AppRadius.shell : 0,
-                ),
-              ),
-              child: wide ? _wide() : _narrow(),
-            ),
-          );
+          return wide ? _wide(context) : _narrow();
         },
       ),
     );
   }
 
-  Widget _wide() => Row(
+  Widget _wide(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      Expanded(flex: 5, child: _brandColumn(wide: true)),
+      Expanded(flex: 5, child: _brandColumn()),
       Expanded(
         flex: 6,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.canvas),
+          borderRadius: const BorderRadiusDirectional.only(
+            topStart: Radius.circular(AppRadius.canvas),
+            bottomStart: Radius.circular(AppRadius.canvas),
+          ).resolve(Directionality.of(context)),
           child: ColoredBox(
             color: AppColors.background,
             child: Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(32),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 460),
+                  constraints: const BoxConstraints(maxWidth: 440),
                   child: _formCard(),
                 ),
               ),
@@ -67,16 +58,18 @@ class LoginScreen extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 460),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _header(),
+              const _Logo(),
               const SizedBox(height: 28),
               _formCard(),
-              const SizedBox(height: 28),
+              const SizedBox(height: 32),
               const LoginBrandPanel(compact: true),
               const SizedBox(height: 24),
               const Text(
-                '© 2026 الرحمن الابتدائية',
-                style: TextStyle(fontSize: 11, color: Colors.white60),
+                '© مدرسة الرحمن الابتدائية للبنين',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: Colors.white60),
               ),
             ],
           ),
@@ -85,40 +78,49 @@ class LoginScreen extends StatelessWidget {
     ),
   );
 
-  Widget _formCard() => Container(
-    padding: const EdgeInsets.all(32),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(AppRadius.card),
-      boxShadow: AppShadows.card,
+  Widget _formCard() => TweenAnimationBuilder<double>(
+    tween: Tween(begin: 0, end: 1),
+    duration: const Duration(milliseconds: 500),
+    curve: Curves.easeOutCubic,
+    builder: (context, t, child) => Opacity(
+      opacity: t,
+      child: Transform.translate(offset: Offset(0, 16 * (1 - t)), child: child),
     ),
-    child: LoginFormPanel(onLoginSuccess: onLoginSuccess),
+    child: Container(
+      padding: const EdgeInsets.all(36),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        boxShadow: AppShadows.card,
+      ),
+      child: LoginFormPanel(onLoginSuccess: onLoginSuccess),
+    ),
   );
 
-  Widget _brandColumn({required bool wide}) => Stack(
+  Widget _brandColumn() => Stack(
     children: [
       PositionedDirectional(
-        bottom: -110,
-        start: -110,
-        child: _circle(340, AppColors.amber.withValues(alpha: .16)),
+        bottom: -90,
+        end: -90,
+        child: _circle(320, AppColors.amber.withValues(alpha: .18)),
       ),
       PositionedDirectional(
-        bottom: 70,
-        start: 220,
-        child: _circle(92, const Color(0x388FA7FE)),
+        bottom: 40,
+        end: 300,
+        child: _circle(90, const Color(0x388FA7FE)),
       ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(48, 40, 48, 36),
+      const Padding(
+        padding: EdgeInsets.fromLTRB(48, 44, 48, 36),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _header(),
-            const Spacer(),
-            const LoginBrandPanel(),
-            const Spacer(),
-            const Text(
-              '© 2026 الرحمن الابتدائية • إدارة أقرب. تعليم أفضل.',
-              style: TextStyle(fontSize: 11, color: Colors.white60),
+            _Logo(),
+            Spacer(),
+            LoginBrandPanel(),
+            Spacer(),
+            Text(
+              '© مدرسة الرحمن الابتدائية للبنين',
+              style: TextStyle(fontSize: 12, color: Color(0xA6FFFFFF)),
             ),
           ],
         ),
@@ -133,38 +135,40 @@ class LoginScreen extends StatelessWidget {
       decoration: BoxDecoration(shape: BoxShape.circle, color: color),
     ),
   );
+}
 
-  Widget _header() => Row(
+class _Logo extends StatelessWidget {
+  const _Logo();
+
+  @override
+  Widget build(BuildContext context) => Row(
     children: [
       Container(
-        padding: const EdgeInsets.all(6),
+        width: 44,
+        height: 44,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withValues(alpha: .14),
           borderRadius: BorderRadius.circular(AppRadius.control),
         ),
-        child: Image.asset(
-          appLogoAsset,
-          width: 40,
-          height: 40,
-          fit: BoxFit.contain,
-        ),
+        child: const Icon(Icons.school_outlined, color: AppColors.amber),
       ),
-      const SizedBox(width: 14),
+      const SizedBox(width: 12),
       const Expanded(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'الرحمن الابتدائية',
+              'مدرسة الرحمن',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: 17,
+                height: 1.4,
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
-              'نظام الإدارة المدرسية الموحد',
-              style: TextStyle(color: Colors.white60, fontSize: 11),
+              'الابتدائية للبنين',
+              style: TextStyle(color: Color(0xB3FFFFFF), fontSize: 12),
             ),
           ],
         ),

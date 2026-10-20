@@ -42,7 +42,7 @@ Future<void> pumpForm(
 }
 
 Future<void> save(WidgetTester t, {bool edit = false}) async {
-  final button = find.text(edit ? 'تحديث التعديلات' : 'حفظ بيانات الطالب');
+  final button = find.text(edit ? 'تحديث التعديلات' : 'حفظ الطالب');
   await t.ensureVisible(button);
   await t.tap(button);
   await t.pumpAndSettle();

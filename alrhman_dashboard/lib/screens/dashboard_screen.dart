@@ -8,20 +8,22 @@ import '../api/api_exception.dart';
 import '../api/app_services.dart';
 import '../core/app_colors.dart';
 import '../core/baghdad_time.dart';
-import '../core/responsive.dart';
 import '../models/attendance_entry.dart';
 import '../models/dashboard_stats.dart';
 import '../models/device.dart';
 import '../models/navigation_tab.dart';
 import '../models/student.dart';
 import '../services/excel_export_service.dart';
+import '../widgets/common/app_card.dart';
 import '../widgets/common/app_toast.dart';
+import '../widgets/common/pill.dart';
+import '../widgets/layout/app_header.dart';
+import '../widgets/layout/shell_scope.dart';
+import '../widgets/ui/kpi_tile.dart';
 import '../widgets/common/async_states.dart';
 import '../widgets/dashboard/attendance_donut_card.dart';
 import '../widgets/dashboard/dashboard_hero.dart';
-import '../widgets/dashboard/device_alert_banner.dart';
 import '../widgets/dashboard/devices_summary_card.dart';
-import '../widgets/dashboard/kpi_row.dart';
 import '../widgets/dashboard/live_feed_card.dart';
 import 'attendance_screen.dart' show attendancePollInterval;
 
@@ -56,6 +58,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   static final _timeFmt = DateFormat('HH:mm:ss', 'en');
+  static final _dayFmt = DateFormat('EEEE', 'ar');
 
   _Snapshot? _data;
   String? _error;
@@ -109,6 +112,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _lastUpdated = DateTime.now();
         _refreshing = false;
       });
+      ShellScope.maybeOf(context)?.reportDay((results[0] as DashboardStats).dayInfo);
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -149,93 +153,148 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final data = _data;
-    if (data == null) {
-      return _error != null
-          ? ErrorView(message: _error!, onRetry: _load)
-          : const LoadingView();
-    }
-
-    final wide = MediaQuery.sizeOf(context).width >= Breakpoints.xl;
-
-    final noActiveDevice = !data.devices.any((d) => d.isActive);
-
-    final info = data.stats.dayInfo;
-    final closure = Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              info.label,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            if (info.notes != null) Text(info.notes!),
-            const Text('لا دوام اليوم ولا يُحتسب غياب.'),
-          ],
-        ),
+    final header = PageHeader(
+      title: 'نظرة عامة',
+      badge: Pill.tone(
+        'اليوم · ${_dayFmt.format(BaghdadTime.today())}',
+        BadgeTone.gray,
       ),
     );
+    if (data == null) {
+      return Column(
+        children: [
+          header,
+          const SizedBox(height: 24),
+          _error != null
+              ? ErrorView(message: _error!, onRetry: _load)
+              : const LoadingView(),
+        ],
+      );
+    }
+
+    final s = data.stats;
+    final info = s.dayInfo;
+    String pct(int v) => '${s.percentOf(v).toStringAsFixed(1)}%';
+
     final donut = info.isSchool
-        ? AttendanceDonutCard(stats: data.stats)
-        : closure;
-    final feed = !info.isSchool
-        ? const SizedBox.shrink()
-        : LiveFeedCard(
-            arrivals: data.today.arrivals,
-            students: data.students,
-            lastUpdated: _lastUpdated == null
-                ? '—'
-                : '\u2066${_timeFmt.format(_lastUpdated!)}\u2069',
-            refreshing: _refreshing,
-            onRefresh: _load,
-            onOpenFullLog: () => widget.onNavigate(NavigationTab.attendance),
+        ? AttendanceDonutCard(stats: s)
+        : AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CardTitle(info.label),
+                const SizedBox(height: 10),
+                if (info.notes != null)
+                  Text(
+                    info.notes!,
+                    style: const TextStyle(color: AppColors.textSub),
+                  ),
+                const SizedBox(height: 6),
+                const Text(
+                  'لا دوام اليوم ولا يُحتسب غياب.',
+                  style: TextStyle(color: AppColors.textMuted),
+                ),
+              ],
+            ),
           );
-    final hero = DashboardHero(
-      dayLabel: info.isSchool ? 'يوم دراسي' : info.label,
-      onAddStudent: widget.onOpenAddStudent,
-      onGrantLeave: widget.onOpenQuickLeave,
-      onExport: _exporting ? null : _exportToday,
-      onAddSchedule: widget.onOpenSchedule,
-      onAddBanner: widget.onOpenBanner,
-    );
-    final devices = DevicesSummaryCard(
-      devices: data.devices,
-      onManageDevices: () => widget.onNavigate(NavigationTab.devices),
+    final feed = LiveFeedCard(
+      arrivals: data.today.arrivals,
+      students: data.students,
+      lastUpdated: _lastUpdated == null
+          ? '—'
+          : '\u2066${_timeFmt.format(_lastUpdated!)}\u2069',
+      refreshing: _refreshing,
+      onRefresh: _load,
+      onOpenFullLog: () => widget.onNavigate(NavigationTab.attendance),
     );
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (noActiveDevice) ...[
-          DeviceAlertBanner(
-            onOpenDevices: () => widget.onNavigate(NavigationTab.devices),
-          ),
-          const SizedBox(height: 20),
-        ],
-        hero,
+        header,
+        const SizedBox(height: 28),
+        DashboardHero(
+          onAddStudent: widget.onOpenAddStudent,
+          onGrantLeave: widget.onOpenQuickLeave,
+          onExport: _exporting ? null : _exportToday,
+          onAddSchedule: widget.onOpenSchedule,
+          onAddBanner: widget.onOpenBanner,
+        ),
         const SizedBox(height: 24),
-        KpiRow(stats: data.stats),
-        const SizedBox(height: 20),
-        if (wide && info.isSchool)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 7,
-                child: Column(
-                  children: [feed, const SizedBox(height: 20), devices],
+        KpiGrid(
+          children: [
+            KpiTile(
+              label: 'إجمالي الطلاب',
+              value: '${s.totalStudents}',
+              icon: Icons.school_outlined,
+              iconBackground: AppColors.tint,
+              iconForeground: AppColors.brand,
+            ),
+            KpiTile(
+              label: 'أولياء الأمور',
+              value: '${s.totalParents}',
+              icon: Icons.groups_outlined,
+              iconBackground: AppColors.tint,
+              iconForeground: AppColors.brand,
+            ),
+            KpiTile(
+              label: 'الحاضرون اليوم',
+              value: '${s.presentToday}',
+              icon: Icons.check_rounded,
+              iconBackground: AppColors.okBg,
+              iconForeground: AppColors.green,
+              extra: pct(s.presentToday),
+              extraColor: AppColors.green,
+            ),
+            KpiTile(
+              label: 'الغائبون اليوم',
+              value: '${s.absentToday}',
+              icon: Icons.person_off_outlined,
+              iconBackground: AppColors.badBg,
+              iconForeground: AppColors.red,
+              extra: pct(s.absentToday),
+              extraColor: AppColors.red,
+            ),
+            KpiTile(
+              label: 'المجازون اليوم',
+              value: '${s.excusedToday}',
+              icon: Icons.event_busy_outlined,
+              iconBackground: AppColors.warnBg,
+              iconForeground: AppColors.warnText,
+              extra: pct(s.excusedToday),
+              extraColor: AppColors.warnText,
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        LayoutBuilder(
+          builder: (context, c) {
+            if (c.maxWidth >= 1000 && info.isSchool) {
+              return IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(width: 400, child: donut),
+                    const SizedBox(width: 20),
+                    Expanded(child: feed),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(flex: 5, child: donut),
-            ],
-          )
-        else ...[
-          donut,
-          const SizedBox(height: 20),
-          if (info.isSchool) ...[feed, const SizedBox(height: 20)],
-          devices,
-        ],
+              );
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                donut,
+                if (info.isSchool) ...[const SizedBox(height: 20), feed],
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 24),
+        DevicesSummaryCard(
+          devices: data.devices,
+          onManageDevices: () => widget.onNavigate(NavigationTab.devices),
+        ),
       ],
     );
   }

@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import '../../api/admin_api.dart';
 import '../../api/api_exception.dart';
 import '../../core/app_colors.dart';
+import '../common/app_button.dart';
+import '../common/app_dialog.dart';
+import '../common/app_text_field.dart';
 import '../../models/school_banner.dart';
 import 'banner_image.dart';
 
@@ -120,7 +123,7 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
     if (widget.editing == null && _bytes == null) {
-      setState(() => _error = 'ارفع صورة الإعلان أولاً');
+      setState(() => _error = 'ارفع صورة البانر أولاً');
       return;
     }
     setState(() {
@@ -146,100 +149,154 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
   @override
   Widget build(BuildContext context) => PopScope(
     canPop: !_busy,
-    child: AlertDialog(
-      title: Text(widget.editing == null ? 'إضافة إعلان جديد' : 'تعديل الإعلان'),
-      content: SizedBox(
-        width: 540,
-        child: SingleChildScrollView(
-          child: Form(
-            key: _form,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: AspectRatio(
-                    aspectRatio: 16 / 7,
-                    child: _bytes != null
-                        ? Image.memory(_bytes!, fit: BoxFit.cover)
-                        : widget.image != null
-                        ? BannerImage(image: widget.image!)
-                        : const ColoredBox(
-                            color: AppColors.surfaceMuted,
-                            child: Center(
-                              child: Icon(
-                                Icons.add_photo_alternate_outlined,
-                                size: 48,
-                                color: AppColors.primary,
-                              ),
-                            ),
+    child: AppDialog(
+      icon: Icons.image_outlined,
+      title: widget.editing == null ? 'إضافة بانر' : 'تعديل البانر',
+      subtitle: 'يظهر في تطبيق ولي الأمر بنسبة 16:7',
+      maxWidth: 580,
+      onClose: _busy ? () {} : () => Navigator.pop(context, false),
+      child: Form(
+        key: _form,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: AspectRatio(
+                aspectRatio: 16 / 7,
+                child: _bytes != null
+                    ? Image.memory(_bytes!, fit: BoxFit.cover)
+                    : widget.image != null
+                    ? BannerImage(image: widget.image!)
+                    : const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [AppColors.primary, AppColors.slate],
+                            begin: AlignmentDirectional.topStart,
+                            end: AlignmentDirectional.bottomEnd,
                           ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.add_photo_alternate_outlined,
+                            size: 44,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 10,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                AppButton(
+                  label: _picking
+                      ? 'جارٍ قراءة الصورة…'
+                      : (_bytes == null && widget.image == null
+                            ? 'رفع الصورة'
+                            : 'استبدال الصورة'),
+                  icon: Icons.upload_rounded,
+                  style: AppButtonStyle.outline,
+                  small: true,
                   onPressed: _busy ? null : _pick,
-                  icon: const Icon(Icons.upload_outlined),
-                  label: Text(
-                    _picking
-                        ? 'جارٍ قراءة الصورة…'
-                        : _name ?? 'رفع / استبدال الصورة',
+                ),
+                Text(
+                  '${_name == null ? '' : '$_name · '}JPG أو PNG أو WebP · حتى 2 MB',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textMuted,
                   ),
                 ),
-                const Text(
-                  'JPEG، PNG، WebP • حتى 2 ميجابايت • يُفضّل مقاس بنسبة 16:7',
-                  style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _title,
-                  enabled: !_busy,
-                  maxLength: 255,
-                  decoration: const InputDecoration(
-                    labelText: 'عنوان الإعلان (اختياري)',
-                  ),
-                  validator: (value) => (value?.trim().runes.length ?? 0) > 255
-                      ? 'الحد الأقصى 255 حرفاً'
-                      : null,
-                ),
-                SwitchListTile.adaptive(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('عرض في تطبيق ولي الأمر'),
-                  subtitle: const Text('يمكن إخفاء الإعلان مع الاحتفاظ بالصورة'),
-                  value: _active,
-                  onChanged: _busy ? null : (v) => setState(() => _active = v),
-                ),
-                if (_error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Text(
-                      _error!,
-                      style: const TextStyle(color: AppColors.red),
-                    ),
-                  ),
               ],
             ),
-          ),
+            const SizedBox(height: 18),
+            ValueListenableBuilder(
+              valueListenable: _title,
+              builder: (_, v, _) => FieldLabel(
+                'عنوان البانر',
+                hint: '(${v.text.runes.length}/255)',
+              ),
+            ),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: _title,
+              enabled: !_busy,
+              maxLength: 255,
+              style: const TextStyle(fontSize: 14),
+              decoration: appInputDecoration(
+                hint: 'مثال: بداية الفصل الدراسي الثاني',
+              ).copyWith(counterText: ''),
+              validator: (value) => (value?.trim().runes.length ?? 0) > 255
+                  ? 'الحد الأقصى 255 حرفاً'
+                  : null,
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.canvas,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'عرض في تطبيق ولي الأمر',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.text,
+                          ),
+                        ),
+                        Text(
+                          'يمكن إيقافه دون حذف البانر',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: _active,
+                    activeThumbColor: Colors.white,
+                    activeTrackColor: AppColors.primary,
+                    onChanged: _busy ? null : (v) => setState(() => _active = v),
+                  ),
+                ],
+              ),
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              DialogNote(_error!, tone: NoteTone.bad),
+            ],
+            const SizedBox(height: 20),
+            DialogActions(
+              children: [
+                AppButton(
+                  label: 'إلغاء',
+                  style: AppButtonStyle.outline,
+                  onPressed: _busy ? null : () => Navigator.pop(context, false),
+                ),
+                AppButton(
+                  label: _saving ? 'جارٍ الحفظ…' : 'حفظ البانر',
+                  icon: Icons.check_rounded,
+                  style: AppButtonStyle.amber,
+                  onPressed: _busy ? null : _save,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: _busy ? null : () => Navigator.pop(context, false),
-          child: const Text('إلغاء'),
-        ),
-        FilledButton.icon(
-          onPressed: _busy ? null : _save,
-          icon: _saving
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.check),
-          label: Text(_saving ? 'جارٍ الحفظ…' : 'حفظ الإعلان'),
-        ),
-      ],
     ),
   );
 }

@@ -8,6 +8,8 @@ import 'package:alrhman_dashboard/api/app_services.dart';
 import 'package:alrhman_dashboard/api/token_store.dart';
 import 'package:alrhman_dashboard/models/school_banner.dart';
 import 'package:alrhman_dashboard/screens/banners_screen.dart';
+import 'package:alrhman_dashboard/widgets/common/app_button.dart';
+import 'package:alrhman_dashboard/widgets/common/app_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -133,31 +135,31 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('إضافة إعلان'));
+      await tester.tap(find.text('إضافة بانر'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('حفظ الإعلان'));
+      await tester.tap(find.text('حفظ البانر'));
       await tester.pumpAndSettle();
-      expect(find.text('ارفع صورة الإعلان أولاً'), findsOneWidget);
+      expect(find.text('ارفع صورة البانر أولاً'), findsOneWidget);
       picker.selected = Uint8List(2097153);
-      await tester.tap(find.text('رفع / استبدال الصورة'));
+      await tester.tap(find.text('رفع الصورة'));
       await tester.pumpAndSettle();
       expect(find.text('حجم الصورة يجب ألا يتجاوز 2 ميجابايت'), findsOneWidget);
       expect(calls.any((req) => req.method == 'POST'), false);
       picker.selected = _png;
       await tester.runAsync(() async {
-        await tester.tap(find.text('رفع / استبدال الصورة'));
+        await tester.tap(find.text('رفع الصورة'));
         await Future<void>.delayed(const Duration(milliseconds: 100));
       });
       await tester.pumpAndSettle();
-      expect(find.text('school.png'), findsOneWidget);
-      await tester.tap(find.text('حفظ الإعلان'));
+      expect(find.textContaining('school.png'), findsOneWidget);
+      await tester.tap(find.text('حفظ البانر'));
       await tester.pumpAndSettle();
       expect(created, true);
       final post = calls.indexWhere((r) => r.method == 'POST');
       expect(calls[post + 1].method, 'GET');
       expect(calls[post + 1].url.path, '/api/admin/banners');
-      await tester.ensureVisible(find.text('تحميل'));
-      await tester.tap(find.text('تحميل'));
+      await tester.ensureVisible(find.byTooltip('تحميل'));
+      await tester.tap(find.byTooltip('تحميل'));
       await tester.pumpAndSettle();
       expect(picker.saved, _png);
       expect(tester.takeException(), isNull);
@@ -281,16 +283,16 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('مخفي'), findsOneWidget);
-      await tester.tap(find.text('معاينة'));
+      expect(find.text('غير مفعّل'), findsOneWidget);
+      await tester.tap(find.byTooltip('معاينة'));
       await tester.pumpAndSettle();
-      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.byType(AppDialog), findsOneWidget);
       await tester.tap(find.text('إغلاق'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('تعديل'));
+      await tester.tap(find.byTooltip('تعديل'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextFormField), 'العنوان الجديد');
-      await tester.tap(find.text('حفظ الإعلان'));
+      await tester.tap(find.text('حفظ البانر'));
       await tester.pumpAndSettle();
       expect(find.text('العنوان الجديد'), findsOneWidget);
       final put = calls.indexWhere((r) => r.method == 'PUT');
@@ -302,9 +304,9 @@ void main() {
             ),
         true,
       );
-      await tester.tap(find.text('حذف'));
+      await tester.tap(find.byTooltip('حذف'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'حذف'));
+      await tester.tap(find.widgetWithText(AppButton, 'حذف'));
       await tester.pumpAndSettle();
       expect(find.textContaining('لا توجد إعلانات بعد'), findsOneWidget);
       expect(calls.last.url.path, '/api/admin/banners');

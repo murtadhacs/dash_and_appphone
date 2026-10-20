@@ -17,17 +17,17 @@ InputDecoration appInputDecoration({
 }) {
   return InputDecoration(
     hintText: hint,
-    hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+    hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
     prefixIcon: prefix,
     suffixIcon: suffix,
     isDense: true,
     filled: true,
     fillColor: fill,
     contentPadding:
-        padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-    border: _border(AppColors.border),
-    enabledBorder: _border(AppColors.border),
-    focusedBorder: _border(AppColors.brand, 2),
+        padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    border: _border(AppColors.line),
+    enabledBorder: _border(AppColors.line),
+    focusedBorder: _border(AppColors.brand, 1.5),
     errorBorder: _border(AppColors.red),
     focusedErrorBorder: _border(AppColors.red, 2),
   );
@@ -70,22 +70,28 @@ class FieldLabel extends StatelessWidget {
               ],
             ),
             style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: AppColors.text,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSub,
             ),
           ),
         ),
-        const Spacer(),
-        ?trailing,
-        if (hint != null)
-          Text(
-            hint!,
-            style: TextStyle(
-              fontSize: 11,
-              color: hintColor ?? AppColors.textMuted,
+        if (hint != null) ...[
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              hint!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                color: hintColor ?? AppColors.textMuted,
+              ),
             ),
           ),
+        ],
+        const Spacer(),
+        ?trailing,
       ],
     );
   }
@@ -136,9 +142,9 @@ class AppTextField extends StatelessWidget {
     this.onTap,
     this.focusNode,
     this.textAlign = TextAlign.start,
-    this.fontSize = 12,
+    this.fontSize = 14,
     this.fontWeight,
-    this.height = 40,
+    this.height = 48,
     this.fill = Colors.white,
     this.validator,
     this.formatters,
@@ -185,7 +191,7 @@ class AppTextField extends StatelessWidget {
         padding: contentPadding,
         prefix: prefixIcon == null
             ? null
-            : Icon(prefixIcon, size: 16, color: AppColors.textMuted),
+            : Icon(prefixIcon, size: 18, color: AppColors.textMuted),
       ).copyWith(counterText: ''),
     );
 

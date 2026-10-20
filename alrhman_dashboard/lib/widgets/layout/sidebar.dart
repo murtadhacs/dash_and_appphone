@@ -1,11 +1,12 @@
 import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/app_colors.dart';
-import '../../core/assets.dart';
 import '../../core/responsive.dart';
 import '../../models/navigation_tab.dart';
+import '../common/app_toast.dart';
 import 'app_header.dart' show supportPhone;
 
 class _NavItem {
@@ -16,45 +17,46 @@ class _NavItem {
 }
 
 const _navItems = [
-  _NavItem(NavigationTab.dashboard, 'لوحة التحكم', Icons.dashboard_outlined),
-  _NavItem(
-    NavigationTab.students,
-    'الطلاب وأولياء الأمور',
-    Icons.school_outlined,
-  ),
+  _NavItem(NavigationTab.dashboard, 'نظرة عامة', Icons.grid_view_rounded),
+  _NavItem(NavigationTab.students, 'الطلاب', Icons.school_outlined),
   _NavItem(
     NavigationTab.attendance,
-    'الحضور والاجازات',
-    Icons.event_available_outlined,
+    'الحضور والإجازات',
+    Icons.assignment_turned_in_outlined,
   ),
-  _NavItem(NavigationTab.devices, 'الأجهزة وبوابات الحضور', Icons.fingerprint),
+  _NavItem(NavigationTab.devices, 'الأجهزة', Icons.memory_rounded),
+  _NavItem(NavigationTab.banners, 'التواصل والإعلانات', Icons.campaign_outlined),
   _NavItem(
     NavigationTab.schedule,
-    'الجدول الدراسي',
-    Icons.calendar_view_week_outlined,
+    'الجداول الأسبوعية',
+    Icons.calendar_today_outlined,
   ),
-  _NavItem(
-    NavigationTab.banners,
-    'الإعلانات والإشعارات',
-    Icons.photo_library_outlined,
-  ),
-  _NavItem(NavigationTab.settings, 'الإعدادات العامة', Icons.settings_outlined),
-  _NavItem(NavigationTab.activityLog, 'سجل النشاط', Icons.history_outlined),
+  _NavItem(NavigationTab.settings, 'إعدادات المدرسة', Icons.tune_rounded),
+  _NavItem(NavigationTab.activityLog, 'سجل النشاط', Icons.description_outlined),
 ];
 
-/// الشريط الجانبي: كحلي عائم داخل الإطار العام، ثابت على الشاشات الكبيرة
-/// وداخل Drawer على الصغيرة. يقع على يمين الشاشة تلقائياً بحكم اتجاه RTL.
+/// الشريط الجانبي الكحلي كما في Figma: الهوية، بطاقة المدير، القائمة مع
+/// عنصرين فرعيين للتواصل، بطاقة الدعم الفني وحالة الخادم.
+/// يقع يمين الشاشة تلقائياً بحكم اتجاه RTL.
 class Sidebar extends StatelessWidget {
   final NavigationTab currentTab;
   final ValueChanged<NavigationTab> onSelectTab;
   final String? username;
+
+  /// null = لم تُفحص بعد، true = الخادم يستجيب.
+  final bool? serverOnline;
 
   const Sidebar({
     super.key,
     required this.currentTab,
     required this.onSelectTab,
     this.username,
+    this.serverOnline,
   });
+
+  bool get _commsActive =>
+      currentTab == NavigationTab.banners ||
+      currentTab == NavigationTab.broadcasts;
 
   @override
   Widget build(BuildContext context) {
@@ -64,30 +66,59 @@ class Sidebar extends StatelessWidget {
       child: LayoutBuilder(
         // على الشاشات القصيرة يتمرّر الشريط كاملاً بدل قصّ القائمة.
         builder: (context, constraints) => SingleChildScrollView(
-          padding: const EdgeInsetsDirectional.fromSTEB(14, 20, 18, 12),
+          padding: const EdgeInsetsDirectional.fromSTEB(14, 22, 16, 14),
           child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
+            constraints: BoxConstraints(
+              minHeight: (constraints.maxHeight - 36).clamp(0, double.infinity),
+            ),
             child: IntrinsicHeight(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _brand(),
-                  const SizedBox(height: 22),
+                  const _Brand(),
+                  const SizedBox(height: 26),
                   _Profile(username: username),
-                  const SizedBox(height: 22),
-                  for (final item in _navItems)
+                  const SizedBox(height: 26),
+                  for (final item in _navItems) ...[
                     _NavTile(
-                      item: item,
-                      active: item.tab == currentTab,
+                      label: item.label,
+                      icon: item.icon,
+                      active: item.tab == NavigationTab.banners
+                          ? _commsActive
+                          : item.tab == currentTab,
                       onTap: () => onSelectTab(item.tab),
                     ),
+                    if (item.tab == NavigationTab.banners)
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: 24,
+                          top: 2,
+                          bottom: 6,
+                        ),
+                        child: Column(
+                          children: [
+                            _SubTile(
+                              label: 'البنرات',
+                              dot: const Color(0xFF8FA7FE),
+                              current: currentTab == NavigationTab.banners,
+                              onTap: () => onSelectTab(NavigationTab.banners),
+                            ),
+                            _SubTile(
+                              label: 'الإشعارات الجماعية',
+                              dot: AppColors.green,
+                              current: currentTab == NavigationTab.broadcasts,
+                              onTap: () =>
+                                  onSelectTab(NavigationTab.broadcasts),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                   const Spacer(),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   const _SupportCard(),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'الرحمن الابتدائية • الإصدار 1.0',
-                    style: TextStyle(fontSize: 11, color: Color(0xB3FFFFFF)),
-                  ),
+                  const SizedBox(height: 12),
+                  _ServerStatus(online: serverOnline),
                 ],
               ),
             ),
@@ -96,19 +127,27 @@ class Sidebar extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _brand() {
+class _Brand extends StatelessWidget {
+  const _Brand();
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
         Container(
           width: 44,
           height: 44,
-          padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.white.withValues(alpha: .14),
             borderRadius: BorderRadius.circular(AppRadius.control),
           ),
-          child: Image.asset(appLogoAsset, fit: BoxFit.contain),
+          child: const Icon(
+            Icons.school_outlined,
+            size: 24,
+            color: AppColors.amber,
+          ),
         ),
         const SizedBox(width: 12),
         const Expanded(
@@ -116,17 +155,17 @@ class Sidebar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'الرحمن الابتدائية',
+                'مدرسة الرحمن',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 17,
+                  height: 1.4,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  height: 1.4,
                 ),
               ),
               Text(
-                'نظام الإدارة المدرسية',
-                style: TextStyle(fontSize: 11, color: Color(0xB3FFFFFF)),
+                'الابتدائية للبنين',
+                style: TextStyle(fontSize: 12, color: Color(0xB3FFFFFF)),
               ),
             ],
           ),
@@ -146,8 +185,8 @@ class _Profile extends StatelessWidget {
     return Column(
       children: [
         Container(
-          width: 76,
-          height: 76,
+          width: 84,
+          height: 84,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: AppColors.amber,
@@ -157,7 +196,7 @@ class _Profile extends StatelessWidget {
           child: Text(
             name.characters.first,
             style: const TextStyle(
-              fontSize: 30,
+              fontSize: 34,
               fontWeight: FontWeight.bold,
               color: AppColors.navyDeep,
             ),
@@ -169,7 +208,7 @@ class _Profile extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
@@ -183,55 +222,136 @@ class _Profile extends StatelessWidget {
   }
 }
 
-class _NavTile extends StatelessWidget {
-  final _NavItem item;
+class _NavTile extends StatefulWidget {
+  final String label;
+  final IconData icon;
   final bool active;
   final VoidCallback onTap;
 
   const _NavTile({
-    required this.item,
+    required this.label,
+    required this.icon,
     required this.active,
     required this.onTap,
   });
 
   @override
+  State<_NavTile> createState() => _NavTileState();
+}
+
+class _NavTileState extends State<_NavTile> {
+  bool _hover = false;
+
+  @override
   Widget build(BuildContext context) {
-    final fg = active ? AppColors.text : const Color(0xB8FFFFFF);
+    final active = widget.active;
+    final fg = active
+        ? AppColors.text
+        : (_hover ? Colors.white : const Color(0xB8FFFFFF));
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadius.control),
-          boxShadow: active ? AppShadows.amberGlow : null,
-        ),
-        child: Material(
-          color: active ? AppColors.amber : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppRadius.control),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            hoverColor: const Color(0x14FFFFFF),
-            onTap: onTap,
-            child: Container(
-              height: 44,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: Row(
-                children: [
-                  Icon(item.icon, size: 20, color: fg),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      item.label,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: active ? FontWeight.bold : FontWeight.w500,
-                        color: fg,
-                      ),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: active
+                  ? AppColors.amber
+                  : (_hover ? const Color(0x17FFFFFF) : Colors.transparent),
+              borderRadius: BorderRadius.circular(AppRadius.control),
+              boxShadow: active ? AppShadows.amberGlow : null,
+            ),
+            child: Row(
+              children: [
+                AnimatedSlide(
+                  duration: const Duration(milliseconds: 200),
+                  offset: _hover && !active
+                      ? const Offset(-.12, 0)
+                      : Offset.zero,
+                  child: Icon(widget.icon, size: 20, color: fg),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    widget.label,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: active ? FontWeight.bold : FontWeight.w500,
+                      color: fg,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SubTile extends StatefulWidget {
+  final String label;
+  final Color dot;
+  final bool current;
+  final VoidCallback onTap;
+
+  const _SubTile({
+    required this.label,
+    required this.dot,
+    required this.current,
+    required this.onTap,
+  });
+
+  @override
+  State<_SubTile> createState() => _SubTileState();
+}
+
+class _SubTileState extends State<_SubTile> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final strong = widget.current || _hover;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: SizedBox(
+          height: 34,
+          child: Row(
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: strong ? 11 : 9,
+                height: strong ? 11 : 9,
+                decoration: BoxDecoration(
+                  color: widget.current ? AppColors.amber : widget.dot,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                widget.label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: widget.current
+                      ? FontWeight.bold
+                      : FontWeight.w500,
+                  color: strong ? Colors.white : const Color(0xB8FFFFFF),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -243,6 +363,11 @@ class _NavTile extends StatelessWidget {
 class _SupportCard extends StatelessWidget {
   const _SupportCard();
 
+  Future<void> _copy(BuildContext context) async {
+    await Clipboard.setData(const ClipboardData(text: supportPhone));
+    if (context.mounted) showAppToast(context, 'تم نسخ رقم الدعم الفني');
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
@@ -251,8 +376,7 @@ class _SupportCard extends StatelessWidget {
         radius: AppRadius.card,
       ),
       child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: const Color(0x0FFFFFFF),
           borderRadius: BorderRadius.circular(AppRadius.card),
@@ -269,12 +393,12 @@ class _SupportCard extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             const Text(
-              'لأي استفسار تواصل على الرقم',
+              'للمساعدة اتصل بنا',
               style: TextStyle(fontSize: 11, color: Color(0xB3FFFFFF)),
             ),
             const SizedBox(height: 6),
             const SelectableText(
-              supportPhone,
+              '0774 907 8969',
               textDirection: TextDirection.ltr,
               style: TextStyle(
                 fontSize: 15,
@@ -284,22 +408,88 @@ class _SupportCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.phone_outlined,
-                size: 18,
-                color: AppColors.primary,
-              ),
-            ),
+            _PhoneButton(onTap: () => _copy(context)),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PhoneButton extends StatefulWidget {
+  final VoidCallback onTap;
+  const _PhoneButton({required this.onTap});
+
+  @override
+  State<_PhoneButton> createState() => _PhoneButtonState();
+}
+
+class _PhoneButtonState extends State<_PhoneButton> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'نسخ رقم الدعم',
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedScale(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutBack,
+            scale: _hover ? 1.12 : 1,
+            child: AnimatedRotation(
+              duration: const Duration(milliseconds: 300),
+              turns: _hover ? -0.04 : 0,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: _hover ? AppColors.amber : Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.phone_outlined,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ServerStatus extends StatelessWidget {
+  final bool? online;
+  const _ServerStatus({required this.online});
+
+  @override
+  Widget build(BuildContext context) {
+    final (color, text) = switch (online) {
+      true => (AppColors.green, 'خادم المدرسة: متصل'),
+      false => (AppColors.red, 'خادم المدرسة: غير متصل'),
+      null => (const Color(0x99FFFFFF), 'خادم المدرسة: جارٍ الفحص'),
+    };
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 11, color: Color(0xBFFFFFFF)),
+        ),
+      ],
     );
   }
 }

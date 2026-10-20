@@ -167,7 +167,7 @@ void main() {
       expect(find.textContaining('قبل 12:00'), findsOneWidget);
       await t.enterText(find.byType(TextFormField).at(2), '2026-10-12');
       await t.enterText(find.byType(TextFormField).at(3), 'موعد طبي');
-      await tap(t, 'تأكيد وتسجيل الإجازة');
+      await tap(t, 'منح الإجازة');
       expect(calls, ['2026-10-08', '2026-10-11']);
       expect(find.textContaining('SECRET SERVER ERROR'), findsNothing);
       expect(find.textContaining('تم حفظ 1 من 3'), findsOneWidget);
@@ -197,9 +197,6 @@ void main() {
     Widget table(bool weekend, bool waiting) => AttendanceTable(
       entries: const [absent],
       students: const {},
-      live: false,
-      searchController: search,
-      onSearchChanged: (_) {},
       onRegisterExcuse: (_) {},
       onCancelLeave: (_) {},
       weekend: weekend,
@@ -208,7 +205,7 @@ void main() {
     await t.pumpWidget(host(table(true, false)));
     expect(find.text('غائب'), findsNothing);
     await t.pumpWidget(host(table(false, true)));
-    expect(find.text('لم يصل بعد'), findsOneWidget);
+    expect(find.text('بانتظار الوصول'), findsOneWidget);
     expect(find.text('غائب'), findsNothing);
     await t.pumpWidget(
       host(

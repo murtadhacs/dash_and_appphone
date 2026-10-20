@@ -5,12 +5,13 @@ import '../api/api_exception.dart';
 import '../api/app_services.dart';
 import '../core/app_colors.dart';
 import '../core/iraqi_phone.dart';
+import '../widgets/common/app_button.dart';
 import '../widgets/common/app_card.dart';
+import '../widgets/common/pill.dart';
+import '../widgets/layout/app_header.dart';
 import '../widgets/common/app_text_field.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/common/async_states.dart';
-import '../widgets/settings/settings_action_bar.dart';
-import '../widgets/settings/settings_group_header.dart';
 
 /// مفاتيح الإعدادات التي يقرؤها تطبيق ولي الأمر (`GET /api/mobile/settings`).
 const _kSchoolName = 'school_name';
@@ -127,104 +128,176 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final header = PageHeader(
+      title: 'إعدادات المدرسة',
+      badge: !_loaded
+          ? null
+          : _dirty
+          ? Pill.tone('تغييرات غير محفوظة', BadgeTone.warn)
+          : Pill.tone('جميع الإعدادات محدثة', BadgeTone.ok),
+    );
     if (!_loaded) {
-      return _error != null
-          ? ErrorView(message: _error!, onRetry: _load)
-          : const LoadingView();
+      return Column(
+        children: [
+          header,
+          const SizedBox(height: 24),
+          _error != null
+              ? ErrorView(message: _error!, onRetry: _load)
+              : const LoadingView(),
+        ],
+      );
     }
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 672),
+    const intro = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'بيانات\nالمدرسة',
+          style: TextStyle(
+            fontSize: 38,
+            height: 1.3,
+            fontWeight: FontWeight.bold,
+            color: AppColors.text,
+          ),
+        ),
+        SizedBox(height: 14),
+        Text(
+          'اسم المدرسة ورقم واتساب يظهران لأولياء الأمور في التطبيق، ويمكنك تعديلهما وحفظهما في أي وقت.',
+          style: TextStyle(fontSize: 14, height: 1.7, color: AppColors.textSub),
+        ),
+      ],
+    );
+
+    final card = AppCard(
+      padding: EdgeInsets.zero,
+      clip: true,
+      child: Form(
+        key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _header(),
-            const SizedBox(height: 24),
-            AppCard(
-              padding: EdgeInsets.zero,
-              clip: true,
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (_saving) const LinearProgressIndicator(minHeight: 4),
-                    Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const SettingsGroupHeader(
-                            icon: Icons.apartment_outlined,
-                            title: 'الهوية والاتصال',
-                            subtitle:
-                                'يظهران لأولياء الأمور في تطبيق ولي الأمر',
-                          ),
-                          const SizedBox(height: 16),
-                          const FieldLabel('اسم المدرسة'),
-                          const SizedBox(height: 6),
-                          AppTextField(
-                            controller: _name,
-                            height: 44,
-                            fontWeight: FontWeight.w600,
-                            prefixIcon: Icons.school_outlined,
-                            requiredField: true,
-                            onChanged: (_) => setState(() {}),
-                          ),
-                          const SizedBox(height: 16),
-                          const FieldLabel(
-                            'رقم واتساب إدارة المدرسة',
-                            hint: 'يستخدمه ولي الأمر للتواصل مع الإدارة',
-                          ),
-                          const SizedBox(height: 6),
-                          AppTextField(
-                            controller: _whatsapp,
-                            height: 44,
-                            ltr: true,
-                            mono: true,
-                            hint: '07XXXXXXXXX',
-                            keyboardType: TextInputType.phone,
-                            prefixIcon: Icons.chat_bubble_outline,
-                            validator: (v) {
-                              final t = v?.trim() ?? '';
-                              if (t.isEmpty) return null; // اختياري
-                              return IraqiPhone.normalize(t) == null
-                                  ? 'أدخل رقماً عراقياً صحيحاً مثل 07701234567'
-                                  : null;
-                            },
-                            onChanged: (_) => setState(() {}),
-                          ),
-                        ],
+            if (_saving) const LinearProgressIndicator(minHeight: 3),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: AppColors.tint,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.tune_rounded,
+                          size: 24,
+                          color: AppColors.brand,
+                        ),
                       ),
-                    ),
-                    SettingsActionBar(
-                      isDirty: _dirty,
-                      isSaving: _saving,
-                      onReset: _reset,
-                      onSave: _save,
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'الإعدادات العامة',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.text,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const FieldLabel('اسم المدرسة', required: true),
+                  const SizedBox(height: 6),
+                  AppTextField(
+                    controller: _name,
+                    prefixIcon: Icons.school_outlined,
+                    requiredField: true,
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: 18),
+                  const FieldLabel(
+                    'رقم واتساب المدرسة',
+                    hint: '(اختياري)',
+                  ),
+                  const SizedBox(height: 6),
+                  AppTextField(
+                    controller: _whatsapp,
+                    ltr: true,
+                    hint: '07XXXXXXXXX',
+                    keyboardType: TextInputType.phone,
+                    prefixIcon: Icons.chat_bubble_outline,
+                    validator: (v) {
+                      final t = v?.trim() ?? '';
+                      if (t.isEmpty) return null; // اختياري
+                      return IraqiPhone.normalize(t) == null
+                          ? 'أدخل رقماً عراقياً صحيحاً مثل 07701234567'
+                          : null;
+                    },
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'يُطبَّع الرقم تلقائياً بصيغة الهاتف العراقي، ويستخدمه ولي الأمر للتواصل مع الإدارة.',
+                    style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  ),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      AppButton(
+                        label: _saving ? 'جارٍ الحفظ...' : 'حفظ التغييرات',
+                        icon: Icons.save_outlined,
+                        style: AppButtonStyle.amber,
+                        onPressed: (!_dirty || _saving) ? null : _save,
+                      ),
+                      AppButton(
+                        label: 'استعادة القيم المحفوظة',
+                        icon: Icons.undo_rounded,
+                        style: AppButtonStyle.outline,
+                        onPressed: (!_dirty || _saving) ? null : _reset,
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
     );
-  }
 
-  Widget _header() {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'إعدادات المدرسة',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
+        header,
+        const SizedBox(height: 28),
+        LayoutBuilder(
+          builder: (context, c) => c.maxWidth >= 900
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(width: 340, child: intro),
+                    const SizedBox(width: 28),
+                    Expanded(
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 760),
+                          child: card,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [intro, const SizedBox(height: 20), card],
+                ),
         ),
       ],
     );

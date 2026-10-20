@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../core/baghdad_time.dart';
 import '../../models/device.dart';
+import '../common/app_button.dart';
 import '../common/app_card.dart';
 import '../common/pill.dart';
 
-/// ملخص أجهزة البصمة (من `GET /api/admin/devices`): الموقع والحالة وآخر مزامنة.
+/// شريط الجهاز أسفل لوحة التحكم كما في Figma: الجهاز الأساسي وآخر مزامنة
+/// وعدد الأجهزة المفعّلة وزر إدارة الأجهزة. بلا جهاز مفعّل يظهر تنبيه.
 class DevicesSummaryCard extends StatelessWidget {
   final List<Device> devices;
   final VoidCallback onManageDevices;
@@ -19,100 +21,93 @@ class DevicesSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final active = devices.where((d) => d.isActive).toList();
+    final main = active.firstOrNull ?? devices.firstOrNull;
+    final none = active.isEmpty;
+
+    final title = main == null
+        ? 'لا توجد أجهزة مسجّلة بعد'
+        : 'جهاز الحضور - ${main.locationName.isEmpty ? main.serialNumber : main.locationName}';
+    final subtitle = none
+        ? 'لا يوجد أي جهاز بصمة مفعّل، ولن تُسجَّل بصمات الطلاب. فعّل جهازاً أو أضف جهازاً جديداً.'
+        : 'مفعّل إدارياً · ${main!.lastSync == null ? 'لم يرسل بيانات بعد' : 'آخر مزامنة ${BaghdadTime.shortDateTime(main.lastSync!)}'}';
+
     return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'أجهزة البصمة',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: AppColors.text,
-            ),
-          ),
-          const SizedBox(height: 10),
-          if (devices.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                'لا توجد أجهزة مسجّلة بعد.',
-                style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-              ),
-            ),
-          for (final d in devices.take(4))
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          d.locationName.isEmpty
-                              ? d.serialNumber
-                              : d.locationName,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSub,
-                          ),
-                        ),
-                        Text(
-                          d.lastSync == null
-                              ? 'لم يرسل بيانات بعد'
-                              : 'آخر مزامنة: ${BaghdadTime.shortDateTime(d.lastSync!)}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Pill(
-                    label: d.isActive ? 'مفعّل' : 'معطّل',
-                    background: d.isActive
-                        ? AppColors.greenSoft
-                        : AppColors.redSoft,
-                    foreground: d.isActive
-                        ? AppColors.greenDark
-                        : AppColors.redDark,
-                    borderColor: d.isActive
-                        ? AppColors.greenBorder
-                        : AppColors.redBorder,
-                  ),
-                ],
-              ),
-            ),
-          const SizedBox(height: 6),
-          SizedBox(
-            width: double.infinity,
-            child: Material(
-              color: AppColors.surfaceMuted,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                hoverColor: AppColors.border,
-                onTap: onManageDevices,
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                  child: Text(
-                    'إدارة الأجهزة',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                  ),
+      hover: true,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      child: LayoutBuilder(
+        builder: (context, c) {
+          final info = Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: none ? AppColors.badBg : AppColors.tint,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  none ? Icons.warning_amber_rounded : Icons.memory_rounded,
+                  size: 24,
+                  color: none ? AppColors.red : AppColors.brand,
                 ),
               ),
-            ),
-          ),
-        ],
+              const SizedBox(width: 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        height: 1.5,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.text,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: none ? AppColors.redDark : AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+          final actions = Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Pill.tone(
+                none ? 'لا جهاز مفعّل' : '${active.length} جهاز مفعّل',
+                none ? BadgeTone.bad : BadgeTone.ok,
+              ),
+              const SizedBox(width: 18),
+              AppButton(
+                label: 'إدارة الأجهزة',
+                icon: Icons.memory_rounded,
+                style: none ? AppButtonStyle.amber : AppButtonStyle.primary,
+                onPressed: onManageDevices,
+              ),
+            ],
+          );
+          if (c.maxWidth < 720) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [info, const SizedBox(height: 14), actions],
+            );
+          }
+          return Row(
+            children: [
+              Expanded(child: info),
+              const SizedBox(width: 18),
+              actions,
+            ],
+          );
+        },
       ),
     );
   }

@@ -103,6 +103,18 @@ class ApiClient {
     throw _toException(response, auth: true);
   }
 
+  /// هل الخادم يستجيب؟ أي رد HTTP دون 500 يعني أنه متاح (لا يحتاج توكن).
+  Future<bool> ping() async {
+    try {
+      final r = await _http
+          .get(_uri('/health'), headers: {'Accept': 'application/json'})
+          .timeout(const Duration(seconds: 10));
+      return r.statusCode < 500;
+    } catch (_) {
+      return false;
+    }
+  }
+
   String resolve(String path) {
     final base = baseUrl.isEmpty ? Uri.base.origin : baseUrl;
     return Uri.parse('$base/').resolve(path).toString();

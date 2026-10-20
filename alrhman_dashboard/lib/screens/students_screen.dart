@@ -6,14 +6,18 @@ import '../api/app_services.dart';
 import '../core/app_colors.dart';
 import '../models/student.dart';
 import '../services/excel_export_service.dart';
+import '../widgets/common/app_button.dart';
+import '../widgets/common/app_card.dart';
+import '../widgets/common/app_dropdown.dart';
 import '../widgets/common/app_toast.dart';
+import '../widgets/common/pill.dart';
+import '../widgets/layout/app_header.dart';
+import '../widgets/ui/kpi_tile.dart';
 import '../widgets/common/async_states.dart';
 import '../widgets/students/delete_student_dialog.dart';
 import '../widgets/students/pin_reveal_dialog.dart';
 import '../widgets/students/student_form_dialog.dart';
-import '../widgets/students/students_stats_row.dart';
 import '../widgets/students/students_table_card.dart';
-import '../widgets/students/students_toolbar.dart';
 
 /// شاشة الطلاب وأولياء الأمور (بيانات حيّة من `/api/admin/students`).
 class StudentsScreen extends StatefulWidget {
@@ -206,35 +210,133 @@ class _StudentsScreenState extends State<StudentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final header = PageHeader(
+      title: 'الطلاب وأولياء الأمور',
+      search: HeaderSearch(
+        controller: _search,
+        hint: 'ابحث بالاسم أو الهاتف أو RFID',
+        onChanged: (_) => setState(() {}),
+      ),
+      cta: AppButton(
+        label: 'إضافة طالب',
+        icon: Icons.person_add_alt_1_outlined,
+        style: AppButtonStyle.amber,
+        onPressed: _students == null ? null : _openAdd,
+      ),
+    );
     if (_students == null) {
-      return _error != null
-          ? ErrorView(message: _error!, onRetry: _load)
-          : const LoadingView();
+      return Column(
+        children: [
+          header,
+          const SizedBox(height: 24),
+          _error != null
+              ? ErrorView(message: _error!, onRetry: _load)
+              : const LoadingView(),
+        ],
+      );
     }
 
+    final all = _students!;
+    final parents = all
+        .map((s) => s.parentPhone)
+        .where((p) => p.isNotEmpty)
+        .toSet()
+        .length;
+    final withoutRfid = all.where((s) => !s.hasRealRfid).length;
+    final grades = _distinct((s) => s.grade);
+    final sections = _distinct((s) => s.section);
+    final filtered = _filtered;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        StudentsStatsRow(students: _students!),
-        const SizedBox(height: 20),
-        StudentsToolbar(
-          searchController: _search,
-          grades: _distinct((s) => s.grade),
-          sections: _distinct((s) => s.section),
-          gradeFilter: _grade,
-          sectionFilter: _section,
-          onSearchChanged: (_) => setState(() {}),
-          onGradeChanged: (v) => setState(() => _grade = v),
-          onSectionChanged: (v) => setState(() => _section = v),
-          onReset: _reset,
-          onAdd: _openAdd,
+        header,
+        const SizedBox(height: 24),
+        KpiGrid(
+          children: [
+            KpiTile(
+              label: 'الطلاب',
+              value: '${all.length}',
+              icon: Icons.school_outlined,
+              iconBackground: AppColors.tint,
+              iconForeground: AppColors.brand,
+            ),
+            KpiTile(
+              label: 'أولياء الأمور',
+              value: '$parents',
+              icon: Icons.groups_outlined,
+              iconBackground: AppColors.okBg,
+              iconForeground: AppColors.green,
+            ),
+            KpiTile(
+              label: 'بدون RFID حقيقي',
+              value: '$withoutRfid',
+              icon: Icons.memory_rounded,
+              iconBackground: AppColors.warnBg,
+              iconForeground: AppColors.warnText,
+              note: withoutRfid == 0
+                  ? null
+                  : 'لن تُسجَّل بصماتهم حتى يُحدَّد المعرّف',
+            ),
+            AppCard(
+              hover: true,
+              padding: const EdgeInsets.all(18),
+              child: Center(
+                child: AppButton(
+                  label: 'تصدير Excel',
+                  icon: Icons.download_rounded,
+                  style: AppButtonStyle.outline,
+                  onPressed: _exportExcel,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            SizedBox(
+              width: 220,
+              child: AppDropdown<String>(
+                value: grades.contains(_grade) ? _grade : 'all',
+                items: [
+                  const DropdownItem('all', 'جميع الصفوف والمراحل'),
+                  for (final g in grades) DropdownItem(g, g),
+                ],
+                onChanged: (v) => setState(() => _grade = v),
+              ),
+            ),
+            SizedBox(
+              width: 180,
+              child: AppDropdown<String>(
+                value: sections.contains(_section) ? _section : 'all',
+                items: [
+                  const DropdownItem('all', 'جميع الشعب'),
+                  for (final s in sections) DropdownItem(s, s),
+                ],
+                onChanged: (v) => setState(() => _section = v),
+              ),
+            ),
+            AppButton(
+              label: 'إعادة ضبط',
+              icon: Icons.undo_rounded,
+              style: AppButtonStyle.outline,
+              onPressed: _reset,
+            ),
+            Pill.tone(
+              'عرض ${filtered.length} من أصل ${all.length} طالباً',
+              BadgeTone.tint,
+            ),
+          ],
         ),
         const SizedBox(height: 20),
         StudentsTableCard(
-          students: _filtered,
-          total: _students!.length,
+          students: filtered,
           onEdit: _openEdit,
           onDelete: _confirmDelete,
-          onExport: _exportExcel,
         ),
       ],
     );

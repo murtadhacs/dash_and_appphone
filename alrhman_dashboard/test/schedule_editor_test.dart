@@ -11,7 +11,6 @@ import 'package:alrhman_dashboard/models/schedule_class.dart';
 import 'package:alrhman_dashboard/models/schedule_period.dart';
 import 'package:alrhman_dashboard/screens/schedule_screen.dart';
 import 'package:alrhman_dashboard/widgets/layout/sidebar.dart';
-import 'package:alrhman_dashboard/widgets/layout/app_header.dart';
 import 'package:alrhman_dashboard/widgets/schedule/schedule_editor_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -148,18 +147,7 @@ Future<void> pumpPage(
                           currentTab: NavigationTab.schedule,
                           onSelectTab: (_) {},
                         ),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            AppHeader(
-                              title: 'الجدول الدراسي',
-                              onToggleSidebar: () {},
-                              onLogout: () {},
-                            ),
-                            Expanded(child: page),
-                          ],
-                        ),
-                      ),
+                      Expanded(child: page),
                     ],
                   )
                 : page,
@@ -264,17 +252,19 @@ void main() {
       expect(find.text('9 صفوف مسجّلة'), findsOneWidget);
       expect(find.text('استيراد'), findsNothing);
       expect(find.text('تصدير'), findsNothing);
-      expect(find.textContaining('معاينة جدول الصف 1'), findsOneWidget);
-      await tap(t, 'التالي');
+      expect(find.textContaining('معاينة: الصف 1'), findsOneWidget);
+      await t.tap(find.byTooltip('التالي'));
+      await t.pumpAndSettle();
       expect(find.text('الصف 7 — أ'), findsOneWidget);
       await t.enterText(find.byType(TextField).first, 'الصف 9');
       await t.pumpAndSettle();
       expect(find.text('الصف 9 — أ'), findsOneWidget);
-      await tap(t, 'عرض شبكي');
+      await t.tap(find.byTooltip('عرض شبكي'));
+      await t.pumpAndSettle();
       expect(find.text('تعديل الجدول'), findsOneWidget);
       await t.tap(find.text('الصف 9 — أ'));
       await t.pumpAndSettle();
-      expect(find.textContaining('معاينة جدول الصف 9'), findsOneWidget);
+      expect(find.textContaining('معاينة: الصف 9'), findsOneWidget);
       expect(server.requests.last.url.queryParameters, {
         'grade': 'الصف 9',
         'section': 'أ',
@@ -287,9 +277,7 @@ void main() {
     (t) async {
       final server = Server();
       await pumpPage(t, server, const Size(1300, 1000));
-      await t.ensureVisible(find.text('تعديل').first);
-      await t.tap(find.text('تعديل').first);
-      await t.pumpAndSettle();
+      await tap(t, 'تعديل الجدول');
       final field = find.byKey(const ValueKey('subject/الأحد/1'));
       await t.enterText(field, 'الرياضيات المتقدمة');
       await tap(t, 'حفظ الجدول');
@@ -314,6 +302,8 @@ void main() {
     (t) async {
       final server = Server();
       await pumpPage(t, server, const Size(1300, 1000));
+      await t.tap(find.byTooltip('عرض شبكي'));
+      await t.pumpAndSettle();
       await tap(t, 'إعداد');
       await tap(t, 'حفظ الجدول');
       expect(find.text('أدخل مادة الحصة 1 ليوم الأحد'), findsOneWidget);
@@ -355,7 +345,7 @@ void main() {
       final server = Server();
       await pumpPage(t, server, size, shell: true);
       expect(t.takeException(), isNull);
-      await t.ensureVisible(find.textContaining('معاينة جدول الصف 1'));
+      await t.ensureVisible(find.textContaining('معاينة: الصف 1'));
       await t.pumpAndSettle();
       await screenshot(
         t,

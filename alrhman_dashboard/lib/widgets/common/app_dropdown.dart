@@ -22,7 +22,7 @@ class AppDropdown<T> extends StatelessWidget {
     required this.items,
     required this.onChanged,
     this.fill = Colors.white,
-    this.fontSize = 12,
+    this.fontSize = 13,
   });
 
   @override
@@ -38,11 +38,14 @@ class AppDropdown<T> extends StatelessWidget {
         size: 18,
         color: AppColors.textMuted,
       ),
-      decoration: appInputDecoration(fill: fill),
+      decoration: appInputDecoration(
+        fill: fill,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+      ),
       style: TextStyle(
         fontSize: fontSize,
-        fontWeight: FontWeight.w600,
-        color: AppColors.text,
+        fontWeight: FontWeight.w500,
+        color: AppColors.textSub,
         fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
       ),
       items: [

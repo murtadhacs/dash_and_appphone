@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'api/app_services.dart';
 import 'core/app_colors.dart';
 import 'core/responsive.dart';
+import 'core/school_day_info.dart';
 import 'models/navigation_tab.dart';
 import 'screens/attendance_screen.dart';
 import 'screens/activity_log_screen.dart';
@@ -13,10 +16,11 @@ import 'screens/devices_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/students_screen.dart';
-import 'widgets/layout/app_header.dart';
+import 'widgets/layout/shell_scope.dart';
 import 'widgets/layout/sidebar.dart';
 
-/// الهيكل العام: شريط جانبي + هيدر + الشاشة الحالية، وإدارة الجلسة.
+/// الهيكل العام بعرض الشاشة كاملة: شريط جانبي كحلي ملاصق لحافة الشاشة
+/// (يمين في RTL)، ولوحة محتوى رمادية تملأ الباقي بزاويتين مدوّرتين عند الشريط.
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
@@ -26,10 +30,13 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _dayInfo = ValueNotifier<SchoolDayInfo?>(null);
 
   NavigationTab _tab = NavigationTab.login;
   bool _booting = true;
   bool _started = false;
+  bool? _serverOnline;
+  Timer? _pingTimer;
 
   // اختصارات تفتح نوافذ داخل شاشات أخرى
   bool _openAddStudent = false;
@@ -54,7 +61,32 @@ class _AppShellState extends State<AppShell> {
         _tab = has ? NavigationTab.dashboard : NavigationTab.login;
         _booting = false;
       });
+      if (has) _loadDayInfo();
     });
+    _ping();
+    _pingTimer = Timer.periodic(const Duration(minutes: 1), (_) => _ping());
+  }
+
+  @override
+  void dispose() {
+    _pingTimer?.cancel();
+    _dayInfo.dispose();
+    super.dispose();
+  }
+
+  Future<void> _ping() async {
+    final ok = await AppScope.of(context).client.ping();
+    if (mounted && ok != _serverOnline) setState(() => _serverOnline = ok);
+  }
+
+  /// حالة اليوم لشارة «الدوام الرسمي قائم» في رأس كل صفحة.
+  Future<void> _loadDayInfo() async {
+    try {
+      final stats = await AppScope.of(context).api.dashboard();
+      if (mounted) _dayInfo.value = stats.dayInfo;
+    } catch (_) {
+      // الشارة اختيارية؛ تبقى مخفية إن تعذرت القراءة.
+    }
   }
 
   void _select(NavigationTab tab) {
@@ -108,7 +140,14 @@ class _AppShellState extends State<AppShell> {
       case NavigationTab.activityLog:
         return const ActivityLogScreen();
       case NavigationTab.banners:
+      case NavigationTab.broadcasts:
         return CommunicationsScreen(
+          showBroadcasts: _tab == NavigationTab.broadcasts,
+          onSwitch: (broadcasts) => setState(
+            () => _tab = broadcasts
+                ? NavigationTab.broadcasts
+                : NavigationTab.banners,
+          ),
           openAddOnStart: _openBanner,
           onStartHandled: () => _openBanner = false,
         );
@@ -125,82 +164,84 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     if (_booting) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
     if (_tab == NavigationTab.login) {
       return LoginScreen(
-        onLoginSuccess: () => setState(() => _tab = NavigationTab.dashboard),
+        onLoginSuccess: () {
+          setState(() => _tab = NavigationTab.dashboard);
+          _loadDayInfo();
+        },
       );
     }
 
     final desktop = Breakpoints.isDesktop(context);
     final width = MediaQuery.sizeOf(context).width;
-    final username = AppScope.of(context).api.username;
     final sidebar = Sidebar(
       currentTab: _tab,
       onSelectTab: _select,
-      username: username,
+      username: AppScope.of(context).api.username,
+      serverOnline: _serverOnline,
     );
+    final pad = width >= Breakpoints.md ? 32.0 : 16.0;
+    // كل قسم في التواصل (البنرات/الإشعارات) يبقى نفس الشاشة دون إعادة بناء.
+    final screenKey = _tab == NavigationTab.broadcasts
+        ? NavigationTab.banners
+        : _tab;
 
-    final content = Column(
-      children: [
-        AppHeader(
-          title: _titleFor(_tab),
-          onToggleSidebar: () => _scaffoldKey.currentState?.openDrawer(),
-          onLogout: _logout,
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              width >= Breakpoints.md ? 32 : 16,
-              20,
-              width >= Breakpoints.md ? 32 : 16,
-              40,
-            ),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1280),
-                // مفتاح بحسب التبويب ليُعاد بناء الشاشة عند التبديل.
-                child: KeyedSubtree(
-                  key: ValueKey(_tab),
-                  child: _buildScreen(),
-                ),
-              ),
+    final content = ShellScope(
+      onLogout: _logout,
+      onOpenMenu: () => _scaffoldKey.currentState?.openDrawer(),
+      showMenuButton: !desktop,
+      dayInfo: _dayInfo,
+      reportDay: (info) => _dayInfo.value = info,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(pad, 28, pad, 40),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 320),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          layoutBuilder: (current, previous) =>
+              current ?? const SizedBox.shrink(),
+          transitionBuilder: (child, animation) => FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, .015),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
             ),
           ),
+          child: KeyedSubtree(
+            key: ValueKey(screenKey),
+            child: _buildScreen(),
+          ),
         ),
-      ],
+      ),
     );
 
-    // سطح المكتب: إطار كحلي بزوايا مدوّرة يضم الشريط الجانبي (يمين في RTL)
-    // ولوحة المحتوى العائمة. الشاشات الصغيرة: لوحة كاملة + Drawer.
     if (desktop) {
       return Scaffold(
         key: _scaffoldKey,
-        backgroundColor: AppColors.viewport,
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(AppRadius.shell),
+        backgroundColor: AppColors.primary,
+        body: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            sidebar,
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadiusDirectional.only(
+                  topStart: Radius.circular(AppRadius.canvas),
+                  bottomStart: Radius.circular(AppRadius.canvas),
+                ).resolve(Directionality.of(context)),
+                child: ColoredBox(color: AppColors.background, child: content),
+              ),
             ),
-            child: Row(
-              children: [
-                sidebar,
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.canvas),
-                    child: ColoredBox(
-                      color: AppColors.background,
-                      child: content,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          ],
         ),
       );
     }
@@ -216,28 +257,5 @@ class _AppShellState extends State<AppShell> {
       ),
       body: SafeArea(child: content),
     );
-  }
-
-  String _titleFor(NavigationTab tab) {
-    switch (tab) {
-      case NavigationTab.dashboard:
-        return 'نظرة عامة';
-      case NavigationTab.students:
-        return 'الطلاب وأولياء الأمور';
-      case NavigationTab.attendance:
-        return 'الحضور والغياب';
-      case NavigationTab.devices:
-        return 'الأجهزة وبوابات الحضور';
-      case NavigationTab.banners:
-        return 'الإعلانات والإشعارات';
-      case NavigationTab.schedule:
-        return 'الجدول الدراسي';
-      case NavigationTab.settings:
-        return 'الإعدادات العامة';
-      case NavigationTab.activityLog:
-        return 'سجل النشاط';
-      case NavigationTab.login:
-        return '';
-    }
   }
 }

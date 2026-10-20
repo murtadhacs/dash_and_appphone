@@ -9,7 +9,7 @@ class Breakpoints {
   static const double xl = 1280;
 
   /// عرض الشريط الجانبي الثابت.
-  static const double sidebarWidth = 256;
+  static const double sidebarWidth = 248;
 
   static bool isDesktop(BuildContext context) =>
       MediaQuery.sizeOf(context).width >= lg;

@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import '../api/app_services.dart';
 import '../api/api_exception.dart';
+import '../core/app_colors.dart';
 import '../models/broadcast.dart';
 import '../models/student.dart';
+import '../widgets/common/app_button.dart';
+import '../widgets/common/app_card.dart';
+import '../widgets/common/app_dialog.dart';
+import '../widgets/common/app_text_field.dart';
+import '../widgets/common/pill.dart';
+import '../widgets/layout/app_header.dart';
+import '../widgets/ui/hover.dart';
+import '../widgets/ui/seg_tabs.dart';
 
+/// قسم «الإشعارات الجماعية»: نموذج إرسال بمعاينة عدد المستلمين، وسجل الإشعارات.
 class BroadcastsScreen extends StatefulWidget {
-  const BroadcastsScreen({super.key});
+  /// مفتاح «البنرات / الإشعارات الجماعية» من الشاشة الأم (اختياري).
+  final Widget? tabs;
+  const BroadcastsScreen({super.key, this.tabs});
   @override
   State<BroadcastsScreen> createState() => _BroadcastsScreenState();
 }
@@ -24,6 +36,7 @@ class _BroadcastsScreenState extends State<BroadcastsScreen> {
       _studentsLoading = true,
       _hasMore = false;
   int? _before;
+  int? _previewCount;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -114,37 +127,71 @@ class _BroadcastsScreenState extends State<BroadcastsScreen> {
         setState(() => _error = 'لا يوجد أولياء أمور ضمن الجمهور المحدد.');
         return;
       }
+      setState(() => _previewCount = count);
       final confirmed = await showDialog<bool>(
         context: context,
         barrierDismissible: false,
-        builder: (ctx) => AlertDialog(
-          title: const Text('تأكيد إرسال الإشعار'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('سيصل الإشعار إلى $count من أولياء الأمور ولا يمكن سحبه'),
-                const SizedBox(height: 16),
-                Text(
-                  draft.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+        builder: (ctx) => AppDialog(
+          icon: Icons.send_rounded,
+          title: 'تأكيد إرسال الإشعار',
+          subtitle: 'راجع النص قبل الإرسال؛ لا يمكن تعديله بعد ذلك',
+          maxWidth: 560,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DialogNote(
+                'سيصل الإشعار إلى $count من أولياء الأمور ولا يمكن سحبه',
+                tone: NoteTone.warn,
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.canvas,
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                const SizedBox(height: 8),
-                Text(draft.body),
-              ],
-            ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      draft.title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.text,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      draft.body,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        height: 1.7,
+                        color: AppColors.textSub,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              DialogActions(
+                children: [
+                  AppButton(
+                    label: 'إلغاء',
+                    style: AppButtonStyle.outline,
+                    onPressed: () => Navigator.pop(ctx, false),
+                  ),
+                  AppButton(
+                    label: 'إرسال الإشعار',
+                    icon: Icons.send_rounded,
+                    style: AppButtonStyle.amber,
+                    onPressed: () => Navigator.pop(ctx, true),
+                  ),
+                ],
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('إلغاء'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('إرسال الإشعار'),
-            ),
-          ],
         ),
       );
       if (confirmed != true || !mounted) return;
@@ -181,23 +228,28 @@ class _BroadcastsScreenState extends State<BroadcastsScreen> {
     String? value,
     Iterable<String> choices,
     ValueChanged<String?> change,
-  ) => DropdownButtonFormField<String>(
-    key: ValueKey('$_audience-$label'),
-    initialValue: value,
-    isExpanded: true,
-    decoration: InputDecoration(
-      labelText: label,
-      border: const OutlineInputBorder(),
-    ),
-    items: [
-      for (final v in choices.toSet().toList()..sort())
-        DropdownMenuItem(
-          value: v,
-          child: Text(v, overflow: TextOverflow.ellipsis),
-        ),
+  ) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      FieldLabel(label),
+      const SizedBox(height: 6),
+      DropdownButtonFormField<String>(
+        key: ValueKey('$_audience-$label'),
+        initialValue: value,
+        isExpanded: true,
+        borderRadius: BorderRadius.circular(AppRadius.control),
+        decoration: appInputDecoration(hint: 'اختر $label'),
+        items: [
+          for (final v in choices.toSet().toList()..sort())
+            DropdownMenuItem(
+              value: v,
+              child: Text(v, overflow: TextOverflow.ellipsis),
+            ),
+        ],
+        onChanged: _sending ? null : change,
+        validator: (v) => v == null ? 'اختر $label' : null,
+      ),
     ],
-    onChanged: _sending ? null : change,
-    validator: (v) => v == null ? 'اختر $label' : null,
   );
 
   @override
@@ -215,249 +267,370 @@ class _BroadcastsScreenState extends State<BroadcastsScreen> {
         .map((s) => s.section)
         .whereType<String>()
         .where((v) => v.trim().isNotEmpty);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          'إرسال إشعار لأولياء الأمور',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'تظهر الرسالة في إشعارات ولي الأمر. الإشعار المرسل لا يمكن تعديله أو سحبه.',
-        ),
-        const SizedBox(height: 16),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Form(
-              key: _form,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextFormField(
-                    controller: _title,
-                    enabled: !_sending,
-                    maxLength: 100,
-                    decoration: const InputDecoration(
-                      labelText: 'عنوان الإشعار',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (v) => _validateText(v, 100),
+
+    final form = AppCard(
+      child: Form(
+        key: _form,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const CardTitle('إشعار جماعي جديد'),
+            const SizedBox(height: 18),
+            ValueListenableBuilder(
+              valueListenable: _title,
+              builder: (_, v, _) => FieldLabel(
+                'العنوان',
+                hint: '(${v.text.runes.length}/100)',
+              ),
+            ),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: _title,
+              enabled: !_sending,
+              maxLength: 100,
+              style: const TextStyle(fontSize: 14),
+              decoration: appInputDecoration(
+                hint: 'مثال: تذكير بموعد الاجتماع',
+              ).copyWith(counterText: ''),
+              validator: (v) => _validateText(v, 100),
+            ),
+            const SizedBox(height: 16),
+            ValueListenableBuilder(
+              valueListenable: _body,
+              builder: (_, v, _) => FieldLabel(
+                'نص الإشعار',
+                hint: '(${v.text.runes.length}/500)',
+              ),
+            ),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: _body,
+              enabled: !_sending,
+              maxLength: 500,
+              minLines: 4,
+              maxLines: 8,
+              style: const TextStyle(fontSize: 14, height: 1.7),
+              decoration: appInputDecoration(
+                hint: 'اكتب نص الرسالة هنا…',
+              ).copyWith(counterText: ''),
+              validator: (v) => _validateText(v, 500),
+            ),
+            const SizedBox(height: 16),
+            const FieldLabel('الجمهور'),
+            const SizedBox(height: 8),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: SegTabs<String>(
+                items: const [
+                  ('all', 'الجميع'),
+                  ('parent', 'ولي أمر'),
+                  ('grade', 'صف'),
+                  ('section', 'شعبة'),
+                  ('class', 'صف وشعبة'),
+                ],
+                value: _audience,
+                onChanged: (v) {
+                  if (_sending) return;
+                  setState(() {
+                    _audience = v;
+                    _phone = _grade = _section = null;
+                    _previewCount = null;
+                  });
+                },
+              ),
+            ),
+            if (_audience != 'all') ...[
+              const SizedBox(height: 16),
+              if (_studentsLoading) const LinearProgressIndicator(),
+              if (_studentsError != null) ...[
+                DialogNote(_studentsError!, tone: NoteTone.bad),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton(
+                    onPressed: _sending ? null : _loadStudents,
+                    child: const Text('تحديث قائمة الطلاب'),
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _body,
-                    enabled: !_sending,
-                    maxLength: 500,
-                    minLines: 3,
-                    maxLines: 8,
-                    decoration: const InputDecoration(
-                      labelText: 'نص الإشعار',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (v) => _validateText(v, 500),
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: _audience,
-                    decoration: const InputDecoration(
-                      labelText: 'الجمهور',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: const [
+                ),
+              ],
+              if (_audience == 'parent') ...[
+                const FieldLabel('ولي الأمر من قائمة الطلاب'),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  key: const ValueKey('broadcast-parent'),
+                  initialValue: _phone,
+                  isExpanded: true,
+                  borderRadius: BorderRadius.circular(AppRadius.control),
+                  decoration: appInputDecoration(hint: 'اختر ولي الأمر'),
+                  items: [
+                    for (final entry in parents.entries)
                       DropdownMenuItem(
-                        value: 'all',
-                        child: Text('جميع أولياء الأمور'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'parent',
-                        child: Text('ولي أمر واحد'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'grade',
-                        child: Text('مرحلة كاملة'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'section',
-                        child: Text('شعبة في جميع المراحل'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'class',
-                        child: Text('مرحلة وشعبة'),
-                      ),
-                    ],
-                    onChanged: _sending
-                        ? null
-                        : (v) => setState(() {
-                            _audience = v!;
-                            _phone = _grade = _section = null;
-                          }),
-                  ),
-                  if (_audience != 'all') ...[
-                    const SizedBox(height: 16),
-                    if (_studentsLoading) const LinearProgressIndicator(),
-                    if (_studentsError != null) ...[
-                      Text(_studentsError!),
-                      TextButton(
-                        onPressed: _sending ? null : _loadStudents,
-                        child: const Text('تحديث قائمة الطلاب'),
-                      ),
-                    ],
-                    if (_audience == 'parent')
-                      DropdownButtonFormField<String>(
-                        key: const ValueKey('broadcast-parent'),
-                        initialValue: _phone,
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'ولي الأمر من قائمة الطلاب',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: [
-                          for (final entry in parents.entries)
-                            DropdownMenuItem(
-                              value: entry.key,
-                              child: Text(
-                                '${entry.value.parentName} • ${entry.key} • ${entry.value.name}',
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                        ],
-                        onChanged: _sending
-                            ? null
-                            : (v) => setState(() => _phone = v),
-                        validator: (v) => v == null ? 'اختر ولي الأمر' : null,
-                      ),
-                    if (_audience == 'grade' || _audience == 'class')
-                      _select(
-                        'المرحلة',
-                        _grade,
-                        grades,
-                        (v) => setState(() {
-                          _grade = v;
-                          _section = null;
-                        }),
-                      ),
-                    if (_audience == 'class') const SizedBox(height: 16),
-                    if (_audience == 'section' || _audience == 'class')
-                      KeyedSubtree(
-                        key: ValueKey('$_audience-$_grade'),
-                        child: _select(
-                          'الشعبة',
-                          _section,
-                          sections,
-                          (v) => setState(() => _section = v),
+                        value: entry.key,
+                        child: Text(
+                          '${entry.value.parentName} • ${entry.key} • ${entry.value.name}',
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                   ],
-                  const SizedBox(height: 16),
-                  if (_error != null)
-                    Text(
-                      _error!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
+                  onChanged: _sending ? null : (v) => setState(() => _phone = v),
+                  validator: (v) => v == null ? 'اختر ولي الأمر' : null,
+                ),
+              ],
+              if (_audience == 'grade' || _audience == 'class')
+                _select(
+                  'المرحلة',
+                  _grade,
+                  grades,
+                  (v) => setState(() {
+                    _grade = v;
+                    _section = null;
+                  }),
+                ),
+              if (_audience == 'class') const SizedBox(height: 16),
+              if (_audience == 'section' || _audience == 'class')
+                KeyedSubtree(
+                  key: ValueKey('$_audience-$_grade'),
+                  child: _select(
+                    'الشعبة',
+                    _section,
+                    sections,
+                    (v) => setState(() => _section = v),
+                  ),
+                ),
+            ],
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: AppColors.tint,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'عدد المستلمين المتوقع',
+                      style: TextStyle(fontSize: 13, color: AppColors.brand),
                     ),
-                  if (_success != null)
-                    Text(
-                      _success!,
-                      style: const TextStyle(color: Colors.green),
-                    ),
-                  const SizedBox(height: 12),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: FilledButton.icon(
-                      onPressed:
-                          _sending ||
-                              (_audience != 'all' &&
-                                  (_studentsLoading || _studentsError != null))
-                          ? null
-                          : _send,
-                      icon: const Icon(Icons.send_outlined),
-                      label: Text(
-                        _sending
-                            ? 'جارٍ التحقق والإرسال…'
-                            : 'معاينة عدد المستلمين',
-                      ),
+                  ),
+                  Text(
+                    _previewCount == null
+                        ? 'يظهر عند المعاينة'
+                        : '$_previewCount ولي أمر',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.brand,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ),
-        const SizedBox(height: 24),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                'سجل الإشعارات المرسلة',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            TextButton.icon(
-              onPressed: _loading ? null : _loadLog,
-              icon: const Icon(Icons.refresh),
-              label: const Text('تحديث السجل'),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              DialogNote(_error!, tone: NoteTone.bad),
+            ],
+            if (_success != null) ...[
+              const SizedBox(height: 12),
+              DialogNote(_success!, tone: NoteTone.ok),
+            ],
+            const SizedBox(height: 16),
+            AppButton(
+              label: _sending ? 'جارٍ التحقق والإرسال…' : 'معاينة وإرسال',
+              icon: Icons.send_rounded,
+              style: AppButtonStyle.amber,
+              height: 50,
+              expand: true,
+              onPressed:
+                  _sending ||
+                      (_audience != 'all' &&
+                          (_studentsLoading || _studentsError != null))
+                  ? null
+                  : _send,
             ),
           ],
         ),
-        if (_loading) const LinearProgressIndicator(),
-        if (_logError != null)
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Text(
-              _logError!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
+      ),
+    );
+
+    final history = AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CardTitle(
+            'سجل الإشعارات',
+            trailing: [
+              AppButton(
+                label: 'تحديث',
+                icon: Icons.refresh_rounded,
+                style: AppButtonStyle.outline,
+                small: true,
+                onPressed: _loading ? null : _loadLog,
+              ),
+            ],
           ),
-        if (!_loading && _logError == null && _items.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(24),
-            child: Text('لم يُرسل أي إشعار بعد'),
-          ),
-        for (final item in _items)
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  SelectableText(item.body),
-                  const SizedBox(height: 12),
-                  Text(item.audienceLabel),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 16,
-                    runSpacing: 8,
-                    children: [
-                      Text(
-                        'قرأه ${item.readers} من ${item.recipients} من أولياء الأمور',
-                      ),
-                      Text(
-                        DateFormat('yyyy-MM-dd HH:mm', 'en').format(
-                          item.createdAt.toUtc().add(const Duration(hours: 3)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+          const SizedBox(height: 8),
+          if (_loading) const LinearProgressIndicator(minHeight: 3),
+          if (_logError != null) ...[
+            const SizedBox(height: 8),
+            DialogNote(_logError!, tone: NoteTone.bad),
+          ],
+          if (!_loading && _logError == null && _items.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(28),
+              child: Center(
+                child: Text(
+                  'لم يُرسل أي إشعار بعد',
+                  style: TextStyle(color: AppColors.textMuted),
+                ),
               ),
             ),
-          ),
-        if (_hasMore)
-          Align(
-            child: OutlinedButton(
-              onPressed: _loading ? null : () => _loadLog(more: true),
-              child: const Text('تحميل إشعارات أقدم'),
+          for (var i = 0; i < _items.length; i++)
+            _HistoryItem(item: _items[i], last: i == _items.length - 1),
+          if (_hasMore) ...[
+            const SizedBox(height: 12),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: AppButton(
+                label: 'تحميل إشعارات أقدم',
+                icon: Icons.schedule_rounded,
+                style: AppButtonStyle.outline,
+                small: true,
+                onPressed: _loading ? null : () => _loadLog(more: true),
+              ),
             ),
+          ],
+        ],
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        PageHeader(
+          title: 'التواصل والإعلانات',
+          cta: AppButton(
+            label: 'تحديث السجل',
+            icon: Icons.refresh_rounded,
+            style: AppButtonStyle.outline,
+            onPressed: _loading ? null : _loadLog,
           ),
+        ),
+        if (widget.tabs != null) ...[
+          const SizedBox(height: 24),
+          Align(alignment: AlignmentDirectional.centerStart, child: widget.tabs),
+        ],
+        const SizedBox(height: 24),
+        LayoutBuilder(
+          builder: (context, c) => c.maxWidth >= 1000
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(width: 480, child: form),
+                    const SizedBox(width: 20),
+                    Expanded(child: history),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [form, const SizedBox(height: 20), history],
+                ),
+        ),
       ],
+    );
+  }
+}
+
+class _HistoryItem extends StatelessWidget {
+  final BroadcastItem item;
+  final bool last;
+  const _HistoryItem({required this.item, required this.last});
+
+  @override
+  Widget build(BuildContext context) {
+    final ratio = item.recipients == 0 ? 0.0 : item.readers / item.recipients;
+    return HoverLift(
+      lift: 2,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          border: last
+              ? null
+              : const Border(bottom: BorderSide(color: AppColors.line)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    item.title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      height: 1.5,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.text,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Flexible(child: Pill.tone(item.audienceLabel, BadgeTone.tint)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            SelectableText(
+              item.body,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.7,
+                color: AppColors.textSub,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 12,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                SizedBox(
+                  width: 220,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: ratio),
+                      duration: const Duration(milliseconds: 700),
+                      curve: Curves.easeOutCubic,
+                      builder: (_, v, _) => LinearProgressIndicator(
+                        value: v,
+                        minHeight: 8,
+                        color: AppColors.green,
+                        backgroundColor: AppColors.canvas,
+                      ),
+                    ),
+                  ),
+                ),
+                Text(
+                  'قرأه ${item.readers} من ${item.recipients} من أولياء الأمور',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+                Text(
+                  DateFormat('yyyy-MM-dd HH:mm', 'en').format(
+                    item.createdAt.toUtc().add(const Duration(hours: 3)),
+                  ),
+                  textDirection: TextDirection.ltr,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

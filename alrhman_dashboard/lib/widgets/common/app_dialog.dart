@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import 'app_button.dart';
 import 'icon_tile.dart';
 
 /// نافذة منبثقة بترويسة ملونة (أيقونة + عنوان + وصف + زر إغلاق) ومحتوى قابل للتمرير.
@@ -20,8 +21,8 @@ class AppDialog extends StatelessWidget {
     required this.title,
     required this.child,
     this.subtitle,
-    this.iconBackground = AppColors.brand,
-    this.iconForeground = Colors.white,
+    this.iconBackground = AppColors.tint,
+    this.iconForeground = AppColors.brand,
     this.maxWidth = 672,
     this.onClose,
   });
@@ -125,15 +126,113 @@ class DialogActions extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.only(top: 8),
       // في RTL يقع الإجراء الأساسي (الأخير في القائمة) أقصى اليمين، ثم الإلغاء.
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 10,
+        children: [for (var i = children.length - 1; i >= 0; i--) children[i]],
+      ),
+    );
+  }
+}
+
+/// صندوق ملاحظة داخل النوافذ (معلومة، تحذير، نجاح) كما في Figma.
+enum NoteTone { info, warn, ok, bad }
+
+class DialogNote extends StatelessWidget {
+  final String text;
+  final NoteTone tone;
+  final IconData? icon;
+
+  const DialogNote(this.text, {super.key, this.tone = NoteTone.info, this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    final (bg, fg, defaultIcon) = switch (tone) {
+      NoteTone.info => (AppColors.tint, AppColors.brand, Icons.info_outline),
+      NoteTone.warn => (
+        AppColors.warnBg,
+        const Color(0xFFB26B00),
+        Icons.warning_amber_rounded,
+      ),
+      NoteTone.ok => (AppColors.okBg, const Color(0xFF0B8F63), Icons.check),
+      NoteTone.bad => (AppColors.badBg, AppColors.redDark, Icons.error_outline),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(AppRadius.control),
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (var i = children.length - 1; i >= 0; i--) ...[
-            children[i],
-            if (i > 0) const SizedBox(width: 12),
-          ],
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(icon ?? defaultIcon, size: 18, color: fg),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(fontSize: 13, height: 1.7, color: fg),
+            ),
+          ),
         ],
       ),
     );
   }
+}
+
+/// نافذة تأكيد بأسلوب Figma. ترجع true عند التأكيد.
+Future<bool> showConfirmDialog(
+  BuildContext context, {
+  required String title,
+  required String message,
+  required String confirmLabel,
+  String cancelLabel = 'تراجع',
+  bool danger = false,
+  IconData icon = Icons.help_outline_rounded,
+  Widget? extra,
+}) async {
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AppDialog(
+      icon: icon,
+      title: title,
+      maxWidth: 520,
+      iconBackground: danger ? AppColors.badBg : AppColors.tint,
+      iconForeground: danger ? AppColors.red : AppColors.brand,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            message,
+            style: const TextStyle(
+              fontSize: 14,
+              height: 1.8,
+              color: AppColors.textSub,
+            ),
+          ),
+          if (extra != null) ...[const SizedBox(height: 14), extra],
+          const SizedBox(height: 20),
+          DialogActions(
+            children: [
+              AppButton(
+                label: cancelLabel,
+                style: AppButtonStyle.outline,
+                onPressed: () => Navigator.pop(ctx, false),
+              ),
+              AppButton(
+                label: confirmLabel,
+                style: danger ? AppButtonStyle.danger : AppButtonStyle.amber,
+                onPressed: () => Navigator.pop(ctx, true),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+  return ok ?? false;
 }

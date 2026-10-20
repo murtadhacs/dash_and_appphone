@@ -5,12 +5,16 @@ import '../api/api_exception.dart';
 import '../api/app_services.dart';
 import '../core/app_colors.dart';
 import '../models/device.dart';
+import '../widgets/common/app_button.dart';
+import '../widgets/common/app_dialog.dart';
 import '../widgets/common/app_toast.dart';
+import '../widgets/common/pill.dart';
+import '../widgets/layout/app_header.dart';
+import '../widgets/ui/kpi_tile.dart';
 import '../widgets/common/async_states.dart';
 import '../widgets/common/responsive_grid.dart';
 import '../widgets/devices/device_card.dart';
 import '../widgets/devices/device_form_dialog.dart';
-import '../widgets/devices/devices_header.dart';
 
 /// شاشة الأجهزة وبوابات الحضور (`/api/admin/devices`).
 class DevicesScreen extends StatefulWidget {
@@ -90,28 +94,17 @@ class _DevicesScreenState extends State<DevicesScreen> {
     final next = !d.isActive;
     if (!next) {
       // تحذير قبل التعطيل.
-      final ok = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('تعطيل الجهاز'),
-          content: Text(
+      final ok = await showConfirmDialog(
+        context,
+        title: 'تعطيل الجهاز',
+        message:
             'لن تُحفظ بصمات هذا الجهاز أثناء تعطيله.\n\n'
             '${d.locationName.isEmpty ? d.serialNumber : d.locationName}',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('تراجع'),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: AppColors.red),
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('نعم، عطّل الجهاز'),
-            ),
-          ],
-        ),
+        confirmLabel: 'نعم، عطّل الجهاز',
+        danger: true,
+        icon: Icons.pause_rounded,
       );
-      if (ok != true || !mounted) return;
+      if (!ok || !mounted) return;
     }
 
     setState(() => _busy.add(d.serialNumber));
@@ -137,34 +130,90 @@ class _DevicesScreenState extends State<DevicesScreen> {
   @override
   Widget build(BuildContext context) {
     final devices = _devices;
+    final active = devices?.where((d) => d.isActive).length ?? 0;
+    final disabled = (devices?.length ?? 0) - active;
+    final unsynced = devices?.where((d) => d.lastSync == null).length ?? 0;
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        DevicesHeader(refreshing: _refreshing, onAdd: _add, onRefresh: _load),
-        const SizedBox(height: 20),
+        PageHeader(
+          title: 'الأجهزة',
+          badge: devices == null
+              ? null
+              : Pill.tone('${devices.length} أجهزة', BadgeTone.tint),
+          actions: [
+            AppButton(
+              label: _refreshing ? 'جارٍ التحديث…' : 'تحديث',
+              icon: Icons.refresh_rounded,
+              style: AppButtonStyle.outline,
+              onPressed: _refreshing ? null : _load,
+            ),
+          ],
+          cta: AppButton(
+            label: 'إضافة جهاز',
+            icon: Icons.add_rounded,
+            style: AppButtonStyle.amber,
+            onPressed: _add,
+          ),
+        ),
+        const SizedBox(height: 24),
         if (devices == null)
           _error != null
               ? ErrorView(message: _error!, onRetry: _load)
               : const LoadingView()
-        else if (devices.isEmpty)
-          const EmptyView(
-            message:
-                'لا توجد أجهزة مسجّلة. اضغط "إضافة جهاز" لتسجيل أول جهاز بصمة.',
-            icon: Icons.fingerprint,
-          )
-        else
-          ResponsiveGrid(
-            columns: const {0: 1, 768: 2, 1280: 3},
-            gap: 16,
+        else ...[
+          KpiGrid(
             children: [
-              for (final d in devices)
-                DeviceCard(
-                  device: d,
-                  busy: _busy.contains(d.serialNumber),
-                  onEditLocation: () => _editLocation(d),
-                  onToggle: () => _toggle(d),
-                ),
+              KpiTile(
+                label: 'أجهزة مفعّلة إدارياً',
+                value: '$active',
+                icon: Icons.wifi_rounded,
+                iconBackground: AppColors.okBg,
+                iconForeground: AppColors.green,
+              ),
+              KpiTile(
+                label: 'أجهزة معطلة',
+                value: '$disabled',
+                icon: Icons.pause_rounded,
+                iconBackground: AppColors.badBg,
+                iconForeground: AppColors.red,
+              ),
+              KpiTile(
+                label: 'بدون مزامنة',
+                value: '$unsynced',
+                icon: Icons.schedule_rounded,
+                iconBackground: AppColors.warnBg,
+                iconForeground: AppColors.warnText,
+              ),
             ],
           ),
+          const SizedBox(height: 24),
+          if (devices.isEmpty)
+            const EmptyView(
+              message:
+                  'لا توجد أجهزة مسجّلة. اضغط "إضافة جهاز" لتسجيل أول جهاز بصمة.',
+              icon: Icons.memory_rounded,
+            )
+          else
+            ResponsiveGrid(
+              columns: const {0: 1, 700: 2, 1200: 3},
+              gap: 20,
+              children: [
+                for (final d in devices)
+                  DeviceCard(
+                    device: d,
+                    busy: _busy.contains(d.serialNumber),
+                    onEditLocation: () => _editLocation(d),
+                    onToggle: () => _toggle(d),
+                  ),
+              ],
+            ),
+          const SizedBox(height: 16),
+          const Text(
+            'التفعيل حالة إدارية وليس اختبار اتصال لحظياً؛ «آخر مزامنة» هي القيمة المُرجعة من السيرفر.',
+            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+          ),
+        ],
       ],
     );
   }

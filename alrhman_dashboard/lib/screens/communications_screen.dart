@@ -1,64 +1,42 @@
 import 'package:flutter/material.dart';
 
-import '../core/app_colors.dart';
+import '../widgets/ui/seg_tabs.dart';
 import 'banners_screen.dart';
 import 'broadcasts_screen.dart';
 
-class CommunicationsScreen extends StatefulWidget {
+/// شاشة «التواصل والإعلانات» بقسمين: البنرات والإشعارات الجماعية.
+/// القسم يتحدد من الشريط الجانبي أو من مفتاح التبويبات أعلى الصفحة.
+class CommunicationsScreen extends StatelessWidget {
+  final bool showBroadcasts;
+  final ValueChanged<bool>? onSwitch;
   final bool openAddOnStart;
   final VoidCallback? onStartHandled;
+
   const CommunicationsScreen({
     super.key,
+    this.showBroadcasts = false,
+    this.onSwitch,
     this.openAddOnStart = false,
     this.onStartHandled,
   });
-  @override
-  State<CommunicationsScreen> createState() => _CommunicationsScreenState();
-}
 
-class _CommunicationsScreenState extends State<CommunicationsScreen> {
-  bool _notifications = false;
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      SegmentedButton<bool>(
-        style: SegmentedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: AppColors.textSub,
-          selectedBackgroundColor: AppColors.primary,
-          selectedForegroundColor: Colors.white,
-          side: const BorderSide(color: AppColors.border),
-          minimumSize: const Size(0, 44),
-          textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.control),
-          ),
-        ),
-        showSelectedIcon: false,
-        segments: const [
-          ButtonSegment(
-            value: false,
-            label: Text('الإعلانات'),
-            icon: Icon(Icons.photo_library_outlined),
-          ),
-          ButtonSegment(
-            value: true,
-            label: Text('الإشعارات'),
-            icon: Icon(Icons.notifications_outlined),
-          ),
-        ],
-        selected: {_notifications},
-        onSelectionChanged: (v) => setState(() => _notifications = v.first),
-      ),
-      const SizedBox(height: 24),
-      if (_notifications)
-        const BroadcastsScreen()
-      else
-        BannersScreen(
-          openAddOnStart: widget.openAddOnStart,
-          onStartHandled: widget.onStartHandled,
-        ),
-    ],
-  );
+  Widget build(BuildContext context) {
+    final tabs = SegTabs<bool>(
+      items: const [(false, 'البنرات'), (true, 'الإشعارات الجماعية')],
+      value: showBroadcasts,
+      onChanged: (v) => onSwitch?.call(v),
+    );
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 260),
+      child: showBroadcasts
+          ? BroadcastsScreen(key: const ValueKey('broadcasts'), tabs: tabs)
+          : BannersScreen(
+              key: const ValueKey('banners'),
+              tabs: tabs,
+              openAddOnStart: openAddOnStart,
+              onStartHandled: onStartHandled,
+            ),
+    );
+  }
 }

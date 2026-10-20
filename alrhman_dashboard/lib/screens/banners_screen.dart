@@ -11,6 +11,9 @@ import '../widgets/banners/banner_form_dialog.dart';
 import '../widgets/banners/banner_image.dart';
 import '../widgets/common/app_button.dart';
 import '../widgets/common/app_card.dart';
+import '../widgets/common/app_dialog.dart';
+import '../widgets/common/pill.dart';
+import '../widgets/layout/app_header.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/common/async_states.dart';
 import '../widgets/common/responsive_grid.dart';
@@ -18,10 +21,14 @@ import '../widgets/common/responsive_grid.dart';
 class BannersScreen extends StatefulWidget {
   final bool openAddOnStart;
   final VoidCallback? onStartHandled;
+
+  /// مفتاح «البنرات / الإشعارات الجماعية» من الشاشة الأم (اختياري).
+  final Widget? tabs;
   const BannersScreen({
     super.key,
     this.openAddOnStart = false,
     this.onStartHandled,
+    this.tabs,
   });
   @override
   State<BannersScreen> createState() => _BannersScreenState();
@@ -84,35 +91,24 @@ class _BannersScreenState extends State<BannersScreen> {
       image: banner == null ? null : _image(banner),
     );
     if (!saved || !mounted) return;
-    showAppToast(context, 'تم حفظ الإعلان بنجاح');
+    showAppToast(context, 'تم حفظ البانر بنجاح');
     await _load(); // GET بعد رفع الصورة أو تعديلها، لتحديث القائمة والمعاينة.
   }
 
   Future<void> _delete(SchoolBanner banner) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('حذف الإعلان'),
-        content: const Text(
-          'سيتم حذف الإعلان وصورته نهائياً. هل تريد المتابعة؟',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('إلغاء'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.red),
-            child: const Text('حذف'),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'حذف البانر',
+      message:
+          'سيتم حذف البانر وصورته نهائياً من تطبيق ولي الأمر. هل تريد المتابعة؟',
+      confirmLabel: 'حذف',
+      danger: true,
+      icon: Icons.delete_outline_rounded,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
     await _action(banner, () async {
       await _api.deleteBanner(banner.id);
-      if (mounted) showAppToast(context, 'تم حذف الإعلان');
+      if (mounted) showAppToast(context, 'تم حذف البانر');
       await _load();
     });
   }
@@ -163,81 +159,84 @@ class _BannersScreenState extends State<BannersScreen> {
 
   Future<void> _preview(SchoolBanner banner) => showDialog<void>(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(banner.title.isEmpty ? 'معاينة الإعلان' : banner.title),
-      content: SizedBox(
-        width: 800,
-        child: AspectRatio(
-          aspectRatio: 16 / 7,
-          child: BannerImage(image: _image(banner), fit: BoxFit.contain),
-        ),
+    builder: (ctx) => AppDialog(
+      icon: Icons.image_outlined,
+      title: banner.title.isEmpty ? 'معاينة البانر' : banner.title,
+      subtitle: 'كما يظهر في تطبيق ولي الأمر بنسبة 16:7',
+      maxWidth: 860,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: AspectRatio(
+              aspectRatio: 16 / 7,
+              child: BannerImage(image: _image(banner), fit: BoxFit.contain),
+            ),
+          ),
+          const SizedBox(height: 18),
+          DialogActions(
+            children: [
+              AppButton(
+                label: 'إغلاق',
+                style: AppButtonStyle.outline,
+                onPressed: () => Navigator.pop(ctx),
+              ),
+            ],
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('إغلاق'),
-        ),
-      ],
     ),
   );
 
   @override
   Widget build(BuildContext context) {
     final banners = _banners;
+    final active = banners?.where((b) => b.isActive).length ?? 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'الإعلانات',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.text,
+        PageHeader(
+          title: 'التواصل والإعلانات',
+          cta: AppButton(
+            label: 'إضافة بانر',
+            icon: Icons.add_rounded,
+            style: AppButtonStyle.amber,
+            onPressed: _loading ? null : () => _edit(),
           ),
         ),
-        const SizedBox(height: 6),
-        const Text(
-          'أضف صور إعلانات المدرسة لتظهر في الصفحة الرئيسية لتطبيق ولي الأمر.',
-          style: TextStyle(color: AppColors.textSub),
-        ),
-        const SizedBox(height: 20),
+        if (widget.tabs != null) ...[
+          const SizedBox(height: 24),
+          Align(alignment: AlignmentDirectional.centerStart, child: widget.tabs),
+        ],
+        const SizedBox(height: 24),
         Wrap(
-          spacing: 12,
-          runSpacing: 12,
+          spacing: 10,
+          runSpacing: 10,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            AppButton(
-              label: 'إضافة إعلان',
-              icon: Icons.add_photo_alternate_outlined,
-              onPressed: _loading ? null : () => _edit(),
-            ),
+            Pill.tone('${banners?.length ?? 0} بنرات', BadgeTone.tint),
+            Pill.tone('$active مفعّلة في تطبيق ولي الأمر', BadgeTone.ok),
             AppButton(
               label: _loading ? 'جارٍ التحديث…' : 'تحديث',
-              icon: Icons.refresh,
+              icon: Icons.refresh_rounded,
               style: AppButtonStyle.outline,
               onPressed: _loading ? null : _load,
             ),
           ],
         ),
-        const SizedBox(height: 20),
-        AppCard(
-          color: AppColors.surfaceMuted,
-          child: Text(
-            'الإعلانات للعرض فقط • ${banners?.length ?? 0} إعلان • '
-            '${banners?.where((b) => b.isActive).length ?? 0} ظاهر لولي الأمر',
-            style: const TextStyle(color: AppColors.primary),
-          ),
-        ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
         if (_error != null) ErrorView(message: _error!, onRetry: _load),
         if (banners == null && _error == null) const LoadingView(),
         if (banners != null && banners.isEmpty)
           const EmptyView(
-            message: 'لا توجد إعلانات بعد. أضف أول صورة لإعلانات المدرسة.',
-            icon: Icons.photo_library_outlined,
+            message: 'لا توجد إعلانات بعد. أضف أول بانر لتطبيق ولي الأمر.',
+            icon: Icons.image_outlined,
           ),
         if (banners != null && banners.isNotEmpty)
           ResponsiveGrid(
-            columns: const {0: 1, 768: 2, 1280: 3},
+            columns: const {0: 1, 700: 2, 1200: 3},
             gap: 20,
             children: [for (final banner in banners) _card(banner)],
           ),
@@ -247,7 +246,13 @@ class _BannersScreenState extends State<BannersScreen> {
 
   Widget _card(SchoolBanner banner) {
     final busy = _busy.contains(banner.id) || _loading;
+    final size = banner.sizeBytes == null
+        ? null
+        : banner.sizeBytes! >= 1024 * 1024
+        ? '${(banner.sizeBytes! / 1024 / 1024).toStringAsFixed(1)} MB'
+        : '${(banner.sizeBytes! / 1024).ceil()} KB';
     return AppCard(
+      hover: true,
       padding: EdgeInsets.zero,
       clip: true,
       child: Column(
@@ -258,67 +263,72 @@ class _BannersScreenState extends State<BannersScreen> {
             child: BannerImage(image: _image(banner)),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  banner.title.isEmpty ? 'إعلان بدون عنوان' : banner.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  banner.isActive ? 'ظاهر لولي الأمر' : 'مخفي',
-                  style: TextStyle(
-                    color: banner.isActive
-                        ? AppColors.greenDark
-                        : AppColors.textMuted,
-                  ),
-                ),
-                if (banner.sizeBytes != null)
-                  Text(
-                    '${(banner.sizeBytes! / 1024).ceil()} كيلوبايت',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
+                Row(
                   children: [
-                    TextButton.icon(
-                      onPressed: busy ? null : () => _preview(banner),
-                      icon: const Icon(Icons.visibility_outlined, size: 18),
-                      label: const Text('معاينة'),
-                    ),
-                    TextButton.icon(
-                      onPressed: busy ? null : () => _edit(banner),
-                      icon: const Icon(Icons.edit_outlined, size: 18),
-                      label: const Text('تعديل'),
-                    ),
-                    TextButton.icon(
-                      onPressed: busy ? null : () => _download(banner),
-                      icon: const Icon(Icons.download_outlined, size: 18),
-                      label: const Text('تحميل'),
-                    ),
-                    TextButton.icon(
-                      onPressed: busy ? null : () => _delete(banner),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.red,
+                    Expanded(
+                      child: Text(
+                        banner.title.isEmpty ? 'بانر بدون عنوان' : banner.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          height: 1.5,
+                          color: AppColors.text,
+                        ),
                       ),
-                      icon: const Icon(Icons.delete_outline, size: 18),
-                      label: const Text('حذف'),
+                    ),
+                    const SizedBox(width: 10),
+                    Pill.tone(
+                      banner.isActive ? 'مفعّل' : 'غير مفعّل',
+                      banner.isActive ? BadgeTone.ok : BadgeTone.gray,
                     ),
                   ],
                 ),
-                if (_busy.contains(banner.id)) const LinearProgressIndicator(),
+                const SizedBox(height: 6),
+                Text(
+                  size == null ? 'نسبة 16:7' : 'نسبة 16:7 · $size',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    IconActionButton(
+                      icon: Icons.visibility_outlined,
+                      tooltip: 'معاينة',
+                      onPressed: busy ? null : () => _preview(banner),
+                    ),
+                    const SizedBox(width: 8),
+                    IconActionButton(
+                      icon: Icons.edit_outlined,
+                      tooltip: 'تعديل',
+                      onPressed: busy ? null : () => _edit(banner),
+                    ),
+                    const SizedBox(width: 8),
+                    IconActionButton(
+                      icon: Icons.download_rounded,
+                      tooltip: 'تحميل',
+                      onPressed: busy ? null : () => _download(banner),
+                    ),
+                    const SizedBox(width: 8),
+                    IconActionButton.danger(
+                      icon: Icons.delete_outline_rounded,
+                      tooltip: 'حذف',
+                      onPressed: busy ? null : () => _delete(banner),
+                    ),
+                  ],
+                ),
+                if (_busy.contains(banner.id)) ...[
+                  const SizedBox(height: 10),
+                  const LinearProgressIndicator(minHeight: 3),
+                ],
               ],
             ),
           ),

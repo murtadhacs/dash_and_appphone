@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 
-/// زر صفحة صغير (28×28) في شريط الترقيم.
-class PageButton extends StatelessWidget {
+/// زر صفحة (36×36) في شريط الترقيم بأسلوب Figma، مع حركة عند المرور.
+class PageButton extends StatefulWidget {
   final String? label;
   final IconData? icon;
   final bool active;
@@ -20,36 +20,55 @@ class PageButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final bg = active
-        ? AppColors.brand
-        : (bordered ? Colors.white : Colors.transparent);
-    final fg = active
-        ? Colors.white
-        : (icon != null ? AppColors.textMuted : AppColors.text);
+  State<PageButton> createState() => _PageButtonState();
+}
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onTap: onTap,
-      child: Container(
-        width: 28,
-        height: 28,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(8),
-          border: bordered ? Border.all(color: AppColors.border) : null,
-        ),
-        child: icon != null
-            ? Icon(icon, size: 16, color: fg)
-            : Text(
-                label ?? '',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: active ? FontWeight.bold : FontWeight.w500,
-                  color: fg,
-                ),
+class _PageButtonState extends State<PageButton> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = widget.onTap != null;
+    final on = _hover && enabled && !widget.active;
+    final fg = widget.active
+        ? Colors.white
+        : (enabled ? AppColors.text : AppColors.outline);
+    return MouseRegion(
+      cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 150),
+          scale: on ? 1.08 : 1,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            constraints: const BoxConstraints(minWidth: 36),
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: widget.active
+                  ? AppColors.primary
+                  : (on ? AppColors.canvas : Colors.white),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: widget.active ? AppColors.primary : AppColors.line,
               ),
+            ),
+            child: widget.icon != null
+                ? Icon(widget.icon, size: 16, color: fg)
+                : Text(
+                    widget.label ?? '',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: fg,
+                    ),
+                  ),
+          ),
+        ),
       ),
     );
   }

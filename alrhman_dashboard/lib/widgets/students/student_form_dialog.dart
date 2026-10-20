@@ -311,10 +311,12 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final knownParent = !_isEdit && !_isNewParent && _normalizedPhone != null;
     return AppDialog(
-      icon: Icons.person_add_alt,
+      icon: _isEdit ? Icons.edit_outlined : Icons.person_add_alt_1_outlined,
       title: _isEdit ? 'تعديل بيانات الطالب' : 'إضافة طالب جديد',
-      subtitle: 'تسجيل بيانات الطالب وربطه بولي أمره ومعرّف البصمة',
+      subtitle: 'أدخل بيانات الطالب وولي أمره',
+      maxWidth: 600,
       onClose: _saving ? () {} : null,
       child: Form(
         key: _formKey,
@@ -322,8 +324,6 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (_error != null) _errorBanner(),
-            _sectionHeader(AppColors.brand, 'بيانات الطالب'),
-            const SizedBox(height: 16),
             _labeled(
               const FieldLabel('اسم الطالب', required: true),
               AppTextField(
@@ -333,45 +333,12 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                 requiredField: true,
               ),
             ),
-            const SizedBox(height: 14),
-            _twoCols(
-              _labeled(
-                const FieldLabel('الصف'),
-                AppDropdown<String>(
-                  value: _grade,
-                  items: _items(
-                    widget.knownGrades.isEmpty
-                        ? _presetGrades
-                        : widget.knownGrades,
-                    _grade,
-                  ),
-                  onChanged: (v) => setState(() => _grade = v),
-                ),
-              ),
-              _labeled(
-                const FieldLabel('الشعبة'),
-                AppDropdown<String>(
-                  value: _section,
-                  items: _items(
-                    widget.knownSections.isEmpty
-                        ? _presetSections
-                        : widget.knownSections,
-                    _section,
-                  ),
-                  onChanged: (v) => setState(() => _section = v),
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
             _labeled(
-              FieldLabel(
-                'رقم المستخدم في جهاز البصمة',
+              const FieldLabel(
+                'معرّف RFID',
                 required: true,
-                leading: const Icon(
-                  Icons.sensors,
-                  size: 14,
-                  color: AppColors.greenDark,
-                ),
+                hint: 'رقم المستخدم في جهاز البصمة',
               ),
               AppTextField(
                 controller: _rfid,
@@ -405,7 +372,6 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                   _rfidError = null;
                   _suggestedRfid = null;
                 }),
-                fontWeight: FontWeight.bold,
                 hint: _isEdit
                     ? 'رقم المستخدم المسجّل على الجهاز'
                     : 'مثال: 1001',
@@ -427,48 +393,87 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
             if (_suggestedRfid != null) ...[
               Align(
                 alignment: AlignmentDirectional.centerStart,
-                child: TextButton(
-                  onPressed: _saving
-                      ? null
-                      : () => setState(() {
-                          _rfid.text = _suggestedRfid!;
-                          _rfidError = null;
-                          _suggestedRfid = null;
-                        }),
-                  child: Text('استخدام الرقم $_suggestedRfid'),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: AppButton(
+                    label: 'استخدام الرقم $_suggestedRfid',
+                    icon: Icons.auto_fix_high_rounded,
+                    style: AppButtonStyle.outline,
+                    small: true,
+                    onPressed: _saving
+                        ? null
+                        : () => setState(() {
+                            _rfid.text = _suggestedRfid!;
+                            _rfidError = null;
+                            _suggestedRfid = null;
+                          }),
+                  ),
                 ),
               ),
+              const SizedBox(height: 4),
               const Text(
                 'الاقتراح غير محجوز؛ تأكد من مطابقة الرقم على جهاز البصمة.',
                 style: TextStyle(fontSize: 11, color: AppColors.textMuted),
               ),
             ],
-            const SizedBox(height: 24),
-            const Divider(height: 1, color: AppColors.surfaceMuted),
             const SizedBox(height: 16),
-            _sectionHeader(AppColors.amber, 'بيانات ولي الأمر'),
-            if (!_isEdit) ...[
-              const SizedBox(height: 12),
-              AppButton(
-                label: 'اختيار ولي أمر مسجّل',
-                icon: Icons.family_restroom_outlined,
-                style: AppButtonStyle.outline,
-                onPressed: _saving ? null : _chooseParent,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'لإضافة أخ أو أخت لطالب مسجّل، اختر ولي أمره لربط الأبناء بالحساب نفسه.',
-                style: TextStyle(fontSize: 12, color: AppColors.textSub),
-              ),
-            ],
-            if (_isEdit && widget.editing!.parentPhone.isEmpty)
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Text(
-                  'لا يوجد ولي أمر مرتبط بهذا الطالب. أدخل بيانات ولي الأمر كاملة؛ حفظ التعديلات يعيد ربط الطالب بالرقم.',
+            _twoCols(
+              _labeled(
+                const FieldLabel('الصف'),
+                AppDropdown<String>(
+                  value: _grade,
+                  items: _items(
+                    widget.knownGrades.isEmpty
+                        ? _presetGrades
+                        : widget.knownGrades,
+                    _grade,
+                  ),
+                  onChanged: (v) => setState(() => _grade = v),
                 ),
               ),
+              _labeled(
+                const FieldLabel('الشعبة'),
+                AppDropdown<String>(
+                  value: _section,
+                  items: _items(
+                    widget.knownSections.isEmpty
+                        ? _presetSections
+                        : widget.knownSections,
+                    _section,
+                  ),
+                  onChanged: (v) => setState(() => _section = v),
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
+            if (!_isEdit) ...[
+              Row(
+                children: [
+                  AppButton(
+                    label: 'اختيار ولي أمر مسجّل',
+                    icon: Icons.family_restroom_outlined,
+                    style: AppButtonStyle.outline,
+                    small: true,
+                    onPressed: _saving ? null : _chooseParent,
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'لإضافة أخ أو أخت لطالب مسجّل، اختر ولي أمره لربط الأبناء بالحساب نفسه.',
+                      style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+            if (_isEdit && widget.editing!.parentPhone.isEmpty) ...[
+              const DialogNote(
+                'لا يوجد ولي أمر مرتبط بهذا الطالب. أدخل بيانات ولي الأمر كاملة؛ حفظ التعديلات يعيد ربط الطالب بالرقم.',
+                tone: NoteTone.warn,
+              ),
+              const SizedBox(height: 12),
+            ],
             _twoCols(
               _labeled(
                 const FieldLabel('اسم ولي الأمر', required: true),
@@ -480,12 +485,11 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                 ),
               ),
               _labeled(
-                const FieldLabel('رقم الهاتف', required: true),
+                const FieldLabel('رقم هاتف ولي الأمر', required: true),
                 AppTextField(
                   controller: _phone,
                   hint: '07XXXXXXXXX',
                   ltr: true,
-                  mono: true,
                   keyboardType: TextInputType.phone,
                   onChanged: (_) => setState(_syncPin),
                   validator: (v) {
@@ -499,53 +503,35 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                 ),
               ),
             ),
-            const SizedBox(height: 14),
-            if (!_isEdit && !_isNewParent && _normalizedPhone != null)
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.accentSoft,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'سيُربط الطالب بحساب ولي الأمر المسجّل',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'يستخدم ولي الأمر كلمة مروره الحالية للوصول إلى جميع أبنائه.',
-                    ),
-                    if (widget.knownStudents.any(
-                      (s) =>
-                          IraqiPhone.normalize(s.parentPhone) ==
-                          _normalizedPhone,
-                    )) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        'الأبناء المسجّلون: ${widget.knownStudents.where((s) => IraqiPhone.normalize(s.parentPhone) == _normalizedPhone).map((s) => s.name).join('، ')}',
-                      ),
-                    ],
-                  ],
-                ),
+            const SizedBox(height: 16),
+            if (knownParent)
+              DialogNote(
+                'سيُربط الطالب بحساب ولي الأمر المسجّل\n'
+                'يستخدم ولي الأمر كلمة مروره الحالية للوصول إلى جميع أبنائه.'
+                '${widget.knownStudents.any((s) => IraqiPhone.normalize(s.parentPhone) == _normalizedPhone) ? '\nالأبناء المسجّلون: ${widget.knownStudents.where((s) => IraqiPhone.normalize(s.parentPhone) == _normalizedPhone).map((s) => s.name).join('، ')}' : ''}',
               )
-            else
+            else ...[
               _pinSection(),
-            const SizedBox(height: 24),
+              if (!_isEdit && _isNewParent) ...[
+                const SizedBox(height: 12),
+                const DialogNote(
+                  'ولي أمر جديد: سيُنشأ حسابه مع الطالب، وتظهر كلمة المرور مرة واحدة بعد الحفظ.',
+                ),
+              ],
+            ],
+            const SizedBox(height: 22),
             DialogActions(
               children: [
                 AppButton(
                   label: 'إلغاء',
-                  style: AppButtonStyle.soft,
+                  style: AppButtonStyle.outline,
                   onPressed: _saving ? null : () => Navigator.of(context).pop(),
                 ),
                 AppButton(
                   label: _saving
                       ? 'جارٍ الحفظ...'
-                      : (_isEdit ? 'تحديث التعديلات' : 'حفظ بيانات الطالب'),
-                  icon: Icons.save_outlined,
+                      : (_isEdit ? 'تحديث التعديلات' : 'حفظ الطالب'),
+                  icon: Icons.check_rounded,
                   style: AppButtonStyle.amber,
                   onPressed: _saving ? null : _submit,
                 ),
@@ -565,17 +551,9 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
         : 'اترك الحقل فارغاً للإبقاء على كلمة المرور الحالية. تغييرها يُخرج ولي الأمر من كل أجهزته.';
 
     return _labeled(
-      FieldLabel(
-        'كلمة مرور ولي الأمر',
-        required: isNew,
-        leading: const Icon(
-          Icons.vpn_key_outlined,
-          size: 14,
-          color: AppColors.amber,
-        ),
-      ),
+      FieldLabel('كلمة مرور ولي الأمر', required: isNew),
       ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420),
+        constraints: const BoxConstraints(maxWidth: 600),
         child: AppTextField(
           controller: _pin,
           password: true,
@@ -642,9 +620,8 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
     margin: const EdgeInsets.only(bottom: 16),
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: AppColors.redSoft,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: AppColors.redBorder),
+      color: AppColors.badBg,
+      borderRadius: BorderRadius.circular(AppRadius.control),
     ),
     child: Row(
       children: [
@@ -663,33 +640,6 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
       ],
     ),
   );
-
-  Widget _sectionHeader(Color dot, String title) {
-    return Container(
-      padding: const EdgeInsets.only(bottom: 4),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.surfaceMuted)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.text,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _twoCols(Widget a, Widget b) {
     return LayoutBuilder(
@@ -719,7 +669,7 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
         const SizedBox(height: 4),
         Text(
           help,
-          style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
         ),
       ],
     ],

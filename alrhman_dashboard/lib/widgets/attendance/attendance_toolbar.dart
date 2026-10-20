@@ -1,270 +1,244 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
-import '../../core/responsive.dart';
 import '../common/app_button.dart';
+import '../common/app_card.dart';
+import '../common/pill.dart';
+import '../layout/app_header.dart';
+import '../ui/seg_tabs.dart';
 
 enum AttendanceFilter { all, present, absent, excused }
 
-/// شريط الأدوات: تنقل التاريخ + فلاتر الحالة + منح إجازة + تصدير Excel.
-class AttendanceToolbar extends StatelessWidget {
+/// بطاقة التاريخ كما في Figma: السابق/التاريخ/التالي وزر «اليوم» يميناً،
+/// وتنبيه ما قبل 09:31 وأزرار العطل يساراً.
+class AttendanceDateBar extends StatelessWidget {
   final String dateLabel;
-  final bool isToday;
   final bool canGoNext;
   final VoidCallback onPrev;
   final VoidCallback onNext;
   final VoidCallback onToday;
   final VoidCallback onPickDate;
-  final AttendanceFilter filter;
-  final ValueChanged<AttendanceFilter> onFilterChanged;
-  final Map<AttendanceFilter, int> counts;
-  final VoidCallback onGrantLeave;
-  final VoidCallback onExport;
-  final bool exporting;
-  final bool hideAbsence;
+  final bool awaitingArrival;
+  final Widget holidayActions;
 
-  const AttendanceToolbar({
+  const AttendanceDateBar({
     super.key,
     required this.dateLabel,
-    required this.isToday,
     required this.canGoNext,
     required this.onPrev,
     required this.onNext,
     required this.onToday,
     required this.onPickDate,
-    required this.filter,
-    required this.onFilterChanged,
-    required this.counts,
-    required this.onGrantLeave,
-    required this.onExport,
-    required this.exporting,
-    this.hideAbsence = false,
+    required this.awaitingArrival,
+    required this.holidayActions,
   });
 
   @override
   Widget build(BuildContext context) {
-    final left = Wrap(
-      spacing: 10,
-      runSpacing: 10,
+    final nav = Wrap(
+      spacing: 6,
+      runSpacing: 8,
       crossAxisAlignment: WrapCrossAlignment.center,
-      children: [_dateNav(context), _todayButton(), _pills()],
-    );
-
-    final right = Wrap(
-      spacing: 10,
-      runSpacing: 10,
       children: [
-        AppButton(
-          label: 'منح إجازة',
-          icon: Icons.add_circle_outline,
-          style: AppButtonStyle.amber,
-          onPressed: onGrantLeave,
+        HeaderSquareButton(
+          tooltip: 'اليوم السابق',
+          icon: Icons.chevron_right_rounded,
+          onTap: onPrev,
         ),
+        _DateChip(label: dateLabel, onTap: onPickDate),
+        Opacity(
+          opacity: canGoNext ? 1 : .4,
+          child: HeaderSquareButton(
+            tooltip: 'اليوم التالي',
+            icon: Icons.chevron_left_rounded,
+            onTap: canGoNext ? onNext : null,
+          ),
+        ),
+        const SizedBox(width: 4),
         AppButton(
-          label: exporting ? 'جارٍ التنزيل...' : 'تصدير إلى Excel',
+          label: 'اليوم',
+          icon: Icons.schedule_rounded,
           style: AppButtonStyle.outline,
-          iconWidget: const _ExcelIcon(),
-          onPressed: exporting ? null : onExport,
+          small: true,
+          onPressed: onToday,
         ),
       ],
     );
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
+    final side = Wrap(
+      spacing: 10,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        if (awaitingArrival)
+          Pill.tone('قبل 09:31: عداد الغياب بانتظار الوصول', BadgeTone.warn),
+        holidayActions,
+      ],
+    );
+    return AppCard(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: LayoutBuilder(
-        builder: (context, c) {
-          return c.maxWidth >= 1000
-              ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(child: left),
-                    const SizedBox(width: 16),
-                    right,
-                  ],
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [left, const SizedBox(height: 16), right],
-                );
-        },
-      ),
-    );
-  }
-
-  Widget _dateNav(BuildContext context) {
-    final showToday = MediaQuery.sizeOf(context).width >= Breakpoints.sm;
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _arrow(Icons.chevron_right, 'اليوم السابق', onPrev),
-          InkWell(
-            borderRadius: BorderRadius.circular(8),
-            onTap: onPickDate,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              child: Row(
+        builder: (context, c) => c.maxWidth >= 900
+            ? Row(
                 children: [
-                  const Icon(
-                    Icons.calendar_today_outlined,
-                    size: 16,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    dateLabel,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.text,
-                    ),
-                  ),
-                  if (isToday && showToday) ...[
-                    const SizedBox(width: 8),
-                    const Text(
-                      '(اليوم)',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                  ],
+                  nav,
+                  const Spacer(),
+                  Flexible(child: side),
                 ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [nav, const SizedBox(height: 12), side],
               ),
-            ),
-          ),
-          _arrow(Icons.chevron_left, 'اليوم التالي', canGoNext ? onNext : null),
-        ],
-      ),
-    );
-  }
-
-  Widget _arrow(IconData icon, String tip, VoidCallback? onTap) {
-    return Opacity(
-      opacity: onTap == null ? 0.4 : 1,
-      child: IconActionButton(
-        icon: icon,
-        tooltip: tip,
-        color: AppColors.textSub,
-        hoverBackground: Colors.white,
-        onPressed: onTap,
-      ),
-    );
-  }
-
-  Widget _todayButton() => Material(
-    color: AppColors.surfaceMuted,
-    borderRadius: BorderRadius.circular(12),
-    child: InkWell(
-      borderRadius: BorderRadius.circular(12),
-      hoverColor: AppColors.border,
-      onTap: onToday,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: const Text(
-          'اليوم',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-        ),
-      ),
-    ),
-  );
-
-  Widget _pills() {
-    final items = <(AttendanceFilter, String)>[
-      (AttendanceFilter.all, 'الكل (${counts[AttendanceFilter.all] ?? 0})'),
-      (
-        AttendanceFilter.present,
-        'الحاضرون (${counts[AttendanceFilter.present] ?? 0})',
-      ),
-      if (!hideAbsence)
-        (
-          AttendanceFilter.absent,
-          'الغياب (${counts[AttendanceFilter.absent] ?? 0})',
-        ),
-      (
-        AttendanceFilter.excused,
-        'الإجازات (${counts[AttendanceFilter.excused] ?? 0})',
-      ),
-    ];
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Wrap(
-        spacing: 4,
-        children: [
-          for (final (value, label) in items)
-            InkWell(
-              borderRadius: BorderRadius.circular(8),
-              onTap: () => onFilterChanged(value),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: filter == value ? AppColors.brand : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: filter == value ? Colors.white : AppColors.textSub,
-                  ),
-                ),
-              ),
-            ),
-        ],
       ),
     );
   }
 }
 
-/// أيقونة Excel (مرسومة بالكود بدل SVG).
-class _ExcelIcon extends StatelessWidget {
-  const _ExcelIcon();
+class _DateChip extends StatefulWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _DateChip({required this.label, required this.onTap});
+
+  @override
+  State<_DateChip> createState() => _DateChipState();
+}
+
+class _DateChipState extends State<_DateChip> {
+  bool _hover = false;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 16,
-      height: 18,
-      decoration: BoxDecoration(
-        color: const Color(0xFF107C41),
-        borderRadius: BorderRadius.circular(2),
-      ),
-      alignment: Alignment.center,
-      child: const Text(
-        'X',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 10,
-          fontWeight: FontWeight.w900,
-          height: 1,
+    return Tooltip(
+      message: 'اختيار تاريخ',
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            height: 44,
+            constraints: const BoxConstraints(minWidth: 240),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: _hover ? AppColors.canvas : Colors.white,
+              borderRadius: BorderRadius.circular(AppRadius.control),
+              border: Border.all(
+                color: _hover ? AppColors.brand : AppColors.line,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.calendar_today_outlined,
+                  size: 16,
+                  color: AppColors.textSub,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  widget.label,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.text,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// شريط الأدوات فوق الجدول: البحث، فلتر الحالة، التصدير، والتسجيل اليدوي.
+class AttendanceTools extends StatelessWidget {
+  final TextEditingController searchController;
+  final ValueChanged<String> onSearchChanged;
+  final AttendanceFilter filter;
+  final ValueChanged<AttendanceFilter> onFilterChanged;
+  final Map<AttendanceFilter, int> counts;
+  final bool hideAbsence;
+  final VoidCallback onExport;
+  final bool exporting;
+  final VoidCallback? onManualAttendance;
+
+  const AttendanceTools({
+    super.key,
+    required this.searchController,
+    required this.onSearchChanged,
+    required this.filter,
+    required this.onFilterChanged,
+    required this.counts,
+    required this.hideAbsence,
+    required this.onExport,
+    required this.exporting,
+    this.onManualAttendance,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    String n(AttendanceFilter f) => '${counts[f] ?? 0}';
+    final tabs = SegTabs<AttendanceFilter>(
+      items: [
+        (AttendanceFilter.all, 'الكل (${n(AttendanceFilter.all)})'),
+        (AttendanceFilter.present, 'حاضر (${n(AttendanceFilter.present)})'),
+        if (!hideAbsence)
+          (AttendanceFilter.absent, 'غائب (${n(AttendanceFilter.absent)})'),
+        (AttendanceFilter.excused, 'مجاز (${n(AttendanceFilter.excused)})'),
+      ],
+      value: filter,
+      onChanged: onFilterChanged,
+    );
+    final buttons = Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        AppButton(
+          label: exporting ? 'جارٍ التنزيل...' : 'تصدير Excel',
+          icon: Icons.download_rounded,
+          style: AppButtonStyle.outline,
+          onPressed: exporting ? null : onExport,
+        ),
+        AppButton(
+          label: 'تسجيل حضور يدوي',
+          icon: Icons.lock_outline_rounded,
+          style: AppButtonStyle.outline,
+          tooltip: 'التسجيل اليدوي غير مربوط بالخادم حالياً',
+          onPressed: onManualAttendance,
+        ),
+      ],
+    );
+    return LayoutBuilder(
+      builder: (context, c) {
+        final search = HeaderSearch(
+          controller: searchController,
+          hint: 'ابحث باسم الطالب أو الصف أو الشعبة',
+          onChanged: onSearchChanged,
+          width: c.maxWidth >= 700 ? 300 : c.maxWidth,
+        );
+        if (c.maxWidth >= 1100) {
+          return Row(
+            children: [
+              search,
+              const SizedBox(width: 12),
+              tabs,
+              const Spacer(),
+              buttons,
+            ],
+          );
+        }
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [search, tabs, buttons],
+        );
+      },
     );
   }
 }

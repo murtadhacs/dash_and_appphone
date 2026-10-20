@@ -4,6 +4,7 @@ enum NavigationTab {
   attendance,
   devices,
   banners,
+  broadcasts,
   schedule,
   settings,
   activityLog,

@@ -7,6 +7,7 @@ import '../common/app_dialog.dart';
 import '../common/app_button.dart';
 import '../common/app_text_field.dart';
 import '../../core/app_colors.dart';
+import '../ui/letter_avatar.dart';
 
 class LeaveDialog extends StatefulWidget {
   final List<Student> students;
@@ -159,15 +160,27 @@ class _LeaveDialogState extends State<LeaveDialog> {
     String label,
     TextEditingController controller, {
     bool end = false,
-  }) => TextFormField(
+  }) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      FieldLabel(label),
+      const SizedBox(height: 6),
+      _dateInput(controller, end: end),
+    ],
+  );
+
+  Widget _dateInput(TextEditingController controller, {bool end = false}) =>
+      TextFormField(
     controller: controller,
     readOnly: _locked,
     textDirection: TextDirection.ltr,
+    style: const TextStyle(fontSize: 14),
     decoration: appInputDecoration(hint: 'yyyy-MM-dd').copyWith(
-      labelText: label,
       suffixIcon: IconButton(
+        tooltip: 'اختيار تاريخ',
         onPressed: _locked ? null : () => _pick(controller),
-        icon: const Icon(Icons.calendar_month),
+        icon: const Icon(Icons.calendar_today_outlined, size: 18),
+        color: AppColors.textMuted,
       ),
     ),
     onChanged: (_) => setState(() {}),
@@ -186,32 +199,6 @@ class _LeaveDialogState extends State<LeaveDialog> {
       return null;
     },
   );
-  Widget _notice(
-    String text,
-    IconData icon,
-    Color background,
-    Color foreground,
-  ) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: background,
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Row(
-      children: [
-        Icon(icon, color: foreground, size: 20),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(color: foreground, fontSize: 12, height: 1.7),
-          ),
-        ),
-      ],
-    ),
-  );
-
   void _close() {
     if (!_saving) Navigator.pop(context, _savedAny);
   }
@@ -231,37 +218,35 @@ class _LeaveDialogState extends State<LeaveDialog> {
     return PopScope(
       canPop: !_saving,
       child: AppDialog(
-        maxWidth: 640,
-        icon: Icons.event_available,
-        title: 'تسجيل إجازة',
-        subtitle: 'اختر الطالب وحدّد الفترة وأضف ملاحظات الإجازة',
+        maxWidth: 600,
+        icon: Icons.event_busy_outlined,
+        iconBackground: AppColors.warnBg,
+        iconForeground: AppColors.warnText,
+        title: 'منح إجازة',
+        subtitle: 'تُحتسب أيام الدوام فقط',
         onClose: _close,
         child: Form(
           key: _form,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _notice(
+              const DialogNote(
                 'سجّل الإجازات قبل 12:00 بتوقيت بغداد',
-                Icons.schedule,
-                AppColors.warnSoft,
-                AppColors.warnDeep,
+                tone: NoteTone.warn,
+                icon: Icons.schedule_rounded,
               ),
               const SizedBox(height: 16),
               if (_error != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    _error!,
-                    style: const TextStyle(color: AppColors.redDark),
-                  ),
+                  child: DialogNote(_error!, tone: NoteTone.bad),
                 ),
               if (_complete)
-                Text(
-                  'تم تسجيل الإجازة بنجاح لـ ${_savedDates.length} أيام دراسية.',
-                  style: const TextStyle(
-                    color: AppColors.greenDark,
-                    fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: DialogNote(
+                    'تم تسجيل الإجازة بنجاح لـ ${_savedDates.length} أيام دراسية.',
+                    tone: NoteTone.ok,
                   ),
                 ),
               AbsorbPointer(
@@ -269,13 +254,20 @@ class _LeaveDialogState extends State<LeaveDialog> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    const FieldLabel('الطالب'),
+                    const SizedBox(height: 6),
                     TextFormField(
                       controller: _search,
                       readOnly: _locked,
+                      style: const TextStyle(fontSize: 14),
                       decoration: appInputDecoration(
                         hint: 'ابحث بالاسم أو الصف أو رقم البصمة',
-                        prefix: const Icon(Icons.search),
-                      ).copyWith(labelText: 'الطالب'),
+                        prefix: const Icon(
+                          Icons.search_rounded,
+                          size: 18,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
                       onChanged: (_) => setState(() {
                         _student = null;
                         _error = null;
@@ -290,7 +282,17 @@ class _LeaveDialogState extends State<LeaveDialog> {
                             for (final s in choices)
                               ListTile(
                                 dense: true,
-                                title: Text(s.name),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                hoverColor: AppColors.rowHover,
+                                leading: LetterAvatar(name: s.name, size: 34),
+                                title: Text(
+                                  s.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 subtitle: Text(
                                   '${s.gradeSection} • معرّف البصمة: ${s.rfidTag}',
                                 ),
@@ -310,22 +312,56 @@ class _LeaveDialogState extends State<LeaveDialog> {
                       ),
                     if (_student != null) ...[
                       const SizedBox(height: 12),
-                      _notice(
-                        '${_student!.gradeSection} • معرّف البصمة: ${_student!.rfidTag}',
-                        Icons.person_outline,
-                        AppColors.accentSoft,
-                        AppColors.primary,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppColors.line),
+                        ),
+                        child: Row(
+                          children: [
+                            LetterAvatar(name: _student!.name),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _student!.name,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.text,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${_student!.gradeSection} • معرّف البصمة: ${_student!.rfidTag}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(
+                              Icons.check_circle_rounded,
+                              color: AppColors.green,
+                              size: 20,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                     const SizedBox(height: 16),
                     LayoutBuilder(
                       builder: (_, constraints) {
-                        final start = _dateField('بداية الإجازة', _start);
-                        final end = _dateField(
-                          'نهاية الإجازة',
-                          _end,
-                          end: true,
-                        );
+                        final start = _dateField('من تاريخ', _start);
+                        final end = _dateField('إلى تاريخ', _end, end: true);
                         return constraints.maxWidth < 440
                             ? Column(
                                 children: [
@@ -345,24 +381,23 @@ class _LeaveDialogState extends State<LeaveDialog> {
                       },
                     ),
                     const SizedBox(height: 12),
-                    _notice(
-                      'عدد أيام الإجازة الدراسية: ${_days.length} • الجمعة والسبت مستثنيان',
-                      Icons.date_range_outlined,
-                      AppColors.surfaceMuted,
-                      AppColors.textSub,
+                    DialogNote(
+                      '${_days.length} أيام دوام (الجمعة والسبت مستثناتان). ستُرسل كل يوم على حدة.',
+                      tone: NoteTone.ok,
+                      icon: Icons.check_rounded,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
+                    const FieldLabel('السبب / ملاحظات'),
+                    const SizedBox(height: 6),
                     TextFormField(
                       controller: _reason,
                       readOnly: _locked,
-                      maxLines: 3,
-                      decoration:
-                          appInputDecoration(
-                            hint: 'اكتب سبب الإجازة أو الملاحظات اللازمة',
-                          ).copyWith(
-                            labelText: 'تفاصيل وملاحظات الإجازة',
-                            alignLabelWithHint: true,
-                          ),
+                      minLines: 3,
+                      maxLines: 4,
+                      style: const TextStyle(fontSize: 14, height: 1.6),
+                      decoration: appInputDecoration(
+                        hint: 'مثال: مراجعة طبية',
+                      ),
                       validator: (v) => v == null || v.trim().isEmpty
                           ? 'اكتب تفاصيل العذر'
                           : null,
@@ -372,19 +407,17 @@ class _LeaveDialogState extends State<LeaveDialog> {
               ),
               const SizedBox(height: 16),
               if (_saving)
-                Text(
-                  'جارٍ الحفظ: ${_savedDates.length} من ${_days.length} أيام',
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    'جارٍ الحفظ: ${_savedDates.length} من ${_days.length} أيام',
+                    style: const TextStyle(color: AppColors.textSub),
+                  ),
                 ),
               Wrap(
-                spacing: 10,
+                spacing: 12,
                 runSpacing: 10,
-                alignment: WrapAlignment.end,
                 children: [
-                  AppButton(
-                    onPressed: _saving ? null : _close,
-                    style: AppButtonStyle.soft,
-                    label: _savedAny ? 'إغلاق' : 'إلغاء',
-                  ),
                   if (_complete)
                     AppButton(
                       style: AppButtonStyle.outline,
@@ -402,14 +435,20 @@ class _LeaveDialogState extends State<LeaveDialog> {
                     ),
                   if (!_complete)
                     AppButton(
-                      icon: Icons.check_circle_outline,
+                      icon: Icons.check_rounded,
+                      style: AppButtonStyle.amber,
                       onPressed: _saving ? null : _submit,
                       label: _saving
                           ? 'جارٍ الحفظ...'
                           : _savedDates.isEmpty
-                          ? 'تأكيد وتسجيل الإجازة'
+                          ? 'منح الإجازة'
                           : 'إكمال الأيام المتبقية',
                     ),
+                  AppButton(
+                    onPressed: _saving ? null : _close,
+                    style: AppButtonStyle.outline,
+                    label: _savedAny ? 'إغلاق' : 'إلغاء',
+                  ),
                 ],
               ),
             ],

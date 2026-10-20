@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../models/attendance_entry.dart';
 import '../../models/student.dart';
-import '../common/app_avatar.dart';
+import '../common/app_button.dart';
 import '../common/app_card.dart';
-import '../common/app_data_table.dart';
 import '../common/async_states.dart';
-import '../common/clipped_text.dart';
+import '../common/pill.dart';
 import '../common/pulse_dot.dart';
-import '../common/section_title.dart';
+import '../ui/letter_avatar.dart';
 
-/// بطاقة آخر الحركات: الطلاب الذين لديهم وقت دخول اليوم، الأحدث أولاً.
+/// بطاقة «آخر الوصولات» كما في Figma: أحدث ستة طلاب سجّلوا دخولاً اليوم.
 class LiveFeedCard extends StatelessWidget {
   final List<AttendanceEntry> arrivals;
   final Map<int, Student> students;
@@ -35,128 +34,133 @@ class LiveFeedCard extends StatelessWidget {
     final shown = arrivals.take(6).toList();
     return AppCard(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              const Expanded(
-                child: SectionTitle(
-                  icon: Icons.fingerprint,
-                  title: 'آخر حركات الدخول',
-                  subtitle: 'الطلاب الذين سجّلوا بصمة دخول اليوم، الأحدث أولاً',
-                ),
-              ),
-              TextButton.icon(
-                onPressed: onOpenFullLog,
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  textStyle: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+          CardTitle(
+            'آخر الوصولات',
+            afterTitle: [
+              Tooltip(
+                message: 'آخر تحديث $lastUpdated',
+                child: Pill.tone(
+                  'تحديث كل 20 ثانية',
+                  BadgeTone.ok,
+                  leading: const PulseDot(
+                    color: AppColors.green,
+                    size: 6,
+                    ping: true,
                   ),
                 ),
-                icon: const Icon(Icons.arrow_back, size: 14),
-                iconAlignment: IconAlignment.end,
-                label: const Text('سجل الحضور الكامل'),
+              ),
+            ],
+            trailing: [
+              AppButton(
+                label: 'عرض سجل الحضور',
+                icon: Icons.chevron_left_rounded,
+                style: AppButtonStyle.outline,
+                small: true,
+                onPressed: onOpenFullLog,
+              ),
+              Tooltip(
+                message: 'تحديث الآن',
+                child: IconActionButton(
+                  icon: Icons.refresh_rounded,
+                  size: 36,
+                  background: Colors.white,
+                  hoverBackground: AppColors.canvas,
+                  onPressed: refreshing ? null : onRefresh,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           if (shown.isEmpty)
             const EmptyView(
               message: 'لا توجد بصمات دخول مسجّلة اليوم بعد',
               icon: Icons.fingerprint,
             )
           else
-            AppDataTable(
-              dataRowHeight: 52,
-              columns: [
-                tableColumn('الطالب'),
-                tableColumn('الصف والشعبة'),
-                tableColumn('وقت الدخول'),
-              ],
-              rows: [
-                for (final e in shown)
-                  DataRow(
-                    key: ValueKey(e.studentId),
-                    cells: [
-                      DataCell(
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const AppAvatar(size: 32),
-                            const SizedBox(width: 10),
-                            ClippedText(
-                              e.fullName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.text,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      DataCell(
-                        Text(
-                          students[e.studentId]?.gradeSection ?? '—',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      DataCell(
-                        Text(
-                          e.checkInTime ?? '—',
-                          textDirection: TextDirection.ltr,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSub,
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceMuted,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Row(
-              children: [
-                const PulseDot(color: AppColors.green, size: 10, ping: true),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'يتحدّث تلقائياً كل 20 ثانية • آخر تحديث $lastUpdated',
+            for (var i = 0; i < shown.length; i++)
+              _ArrivalRow(
+                key: ValueKey(shown[i].studentId),
+                entry: shown[i],
+                student: students[shown[i].studentId],
+                last: i == shown.length - 1,
+              ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ArrivalRow extends StatefulWidget {
+  final AttendanceEntry entry;
+  final Student? student;
+  final bool last;
+
+  const _ArrivalRow({
+    super.key,
+    required this.entry,
+    required this.student,
+    required this.last,
+  });
+
+  @override
+  State<_ArrivalRow> createState() => _ArrivalRowState();
+}
+
+class _ArrivalRowState extends State<_ArrivalRow> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final e = widget.entry;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: EdgeInsets.symmetric(vertical: 12, horizontal: _hover ? 10 : 0),
+        decoration: BoxDecoration(
+          color: _hover ? AppColors.rowHover : Colors.transparent,
+          borderRadius: BorderRadius.circular(_hover ? 14 : 0),
+          border: widget.last || _hover
+              ? null
+              : const Border(bottom: BorderSide(color: AppColors.line)),
+        ),
+        child: Row(
+          children: [
+            LetterAvatar(name: e.fullName, size: 40, radius: 20),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    e.fullName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textSub,
+                      fontSize: 14,
+                      height: 1.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.text,
                     ),
                   ),
-                ),
-                IconButton(
-                  tooltip: 'تحديث الآن',
-                  onPressed: refreshing ? null : onRefresh,
-                  style: IconButton.styleFrom(
-                    hoverColor: AppColors.border,
-                    minimumSize: const Size(32, 32),
+                  Text(
+                    widget.student?.gradeSection ?? '—',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textMuted,
+                    ),
                   ),
-                  icon: SpinningIcon(
-                    icon: Icons.refresh,
-                    spinning: refreshing,
-                    color: refreshing ? AppColors.primary : AppColors.textMuted,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+            Pill.tone(e.checkInTime ?? '—', BadgeTone.ok, ltr: true),
+          ],
+        ),
       ),
     );
   }

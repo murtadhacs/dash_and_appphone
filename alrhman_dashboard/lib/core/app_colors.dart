@@ -44,6 +44,27 @@ class AppColors {
   static const warnSoft = Color(0xFFFEF3C7);
 
   static const toastDark = Color(0xFF2A313D);
+
+  // Figma tokens (Al-Rahman Soft Institutional)
+  static const canvas = Color(0xFFF0F1F3);
+  static const line = Color(0xFFE2E8F0);
+  static const tint = Color(0xFFE7EEFE);
+  static const warnText = Color(0xFFD98600);
+  static const warnBg = Color(0xFFFFFBEB);
+  static const okBg = Color(0xFFECFDF5);
+  static const badBg = Color(0xFFFEF2F2);
+  static const rowHover = Color(0xFFF8FAFC);
+  static const slate = Color(0xFF425AA6);
+
+  /// ألوان مربعات الحرف الأول (خلفية، نص) بالتناوب.
+  static const avatarPalette = [
+    (Color(0xFFE7EEFE), Color(0xFF1E3A8A)),
+    (Color(0xFFECFDF5), Color(0xFF0B8F63)),
+    (Color(0xFFFFF1D6), Color(0xFFB26B00)),
+    (Color(0xFFFDE8E8), Color(0xFFC23030)),
+    (Color(0xFFEDE9FE), Color(0xFF5B3FC2)),
+    (Color(0xFFE0F2FE), Color(0xFF0B6FA4)),
+  ];
 }
 
 /// الظلال والأنصاف الموحّدة للتصميم الجديد (بطاقات عائمة بلا حدود قاسية).

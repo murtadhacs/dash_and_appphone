@@ -17,8 +17,12 @@ import '../widgets/attendance/attendance_table.dart';
 import '../widgets/attendance/attendance_toolbar.dart';
 import '../widgets/attendance/leave_dialog.dart';
 import '../widgets/attendance/holiday_controls.dart';
-import '../widgets/attendance/manual_attendance_dialog.dart';
+import '../widgets/common/app_button.dart';
 import '../widgets/common/app_card.dart';
+import '../widgets/common/app_dialog.dart';
+import '../widgets/common/pill.dart';
+import '../widgets/layout/app_header.dart';
+import '../widgets/layout/shell_scope.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/common/async_states.dart';
 
@@ -44,6 +48,7 @@ class AttendanceScreen extends StatefulWidget {
 class _AttendanceScreenState extends State<AttendanceScreen> {
   static final _labelFmt = DateFormat('EEEE، d MMMM y', 'ar');
   static final _timeFmt = DateFormat('HH:mm:ss', 'en');
+  static final _clockFmt = DateFormat('HH:mm', 'en');
 
   final _search = TextEditingController();
   late DateTime _date = BaghdadTime.today();
@@ -110,6 +115,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         _error = null;
         _lastUpdated = BaghdadTime.now();
       });
+      if (_isToday) ShellScope.maybeOf(context)?.reportDay(day.dayInfo);
       if (widget.openLeaveOnStart && !silent) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
@@ -206,27 +212,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Future<void> _cancelLeave(AttendanceEntry e) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('إلغاء الإجازة'),
-        content: Text(
+    final ok = await showConfirmDialog(
+      context,
+      title: 'إلغاء الإجازة',
+      message:
           'هل تريد إلغاء إجازة "${e.fullName}" ليوم ${_labelFmt.format(_date)}؟\n'
           'سيتم تحديث حالة الطالب وفق سجل حضوره ونوع اليوم.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('تراجع'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('نعم، ألغِ الإجازة'),
-          ),
-        ],
-      ),
+      confirmLabel: 'نعم، ألغِ الإجازة',
+      danger: true,
+      icon: Icons.event_busy_outlined,
     );
-    if (ok != true || !mounted) return;
+    if (!ok || !mounted) return;
     try {
       await _api.cancelLeave(studentId: e.studentId, date: _date);
       if (!mounted) return;
@@ -273,10 +269,45 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   @override
   Widget build(BuildContext context) {
     final day = _day;
+    final header = PageHeader(
+      title: 'الحضور والغياب',
+      badge: _isToday
+          ? Pill.tone(
+              'عرض حي · آخر تحديث ${_lastUpdated == null ? '—' : _clockFmt.format(_lastUpdated!)}',
+              BadgeTone.ok,
+            )
+          : Pill.tone('يوم سابق · لا يتحدث تلقائياً', BadgeTone.gray),
+      cta: AppButton(
+        label: 'منح إجازة',
+        icon: Icons.event_busy_outlined,
+        style: AppButtonStyle.amber,
+        onPressed: _openLeave,
+      ),
+    );
+    final dateBar = AttendanceDateBar(
+      dateLabel: _labelFmt.format(_date),
+      canGoNext: !_isToday,
+      onPrev: () => _goTo(_date.subtract(const Duration(days: 1))),
+      onNext: () => _goTo(_date.add(const Duration(days: 1))),
+      onToday: () => _goTo(BaghdadTime.today()),
+      onPickDate: _pickDate,
+      awaitingArrival: _policy.awaitingArrival,
+      holidayActions: HolidayControls(api: _api, onChanged: () => _load()),
+    );
+
     if (day == null) {
-      return _error != null
-          ? ErrorView(message: _error!, onRetry: _load)
-          : const LoadingView();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          header,
+          const SizedBox(height: 24),
+          dateBar,
+          const SizedBox(height: 24),
+          _error != null
+              ? ErrorView(message: _error!, onRetry: _load)
+              : const LoadingView(),
+        ],
+      );
     }
 
     final counts = {
@@ -287,11 +318,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           : day.count(PresenceStatus.absent),
       AttendanceFilter.excused: day.count(PresenceStatus.excused),
     };
+    final closed = !day.dayInfo.isSchool || _policy.weekend;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        HolidayControls(api: _api, onChanged: () => _load()),
-        const SizedBox(height: 16),
+        header,
+        const SizedBox(height: 24),
+        dateBar,
+        const SizedBox(height: 24),
         AttendanceKpiRow(
           day: day,
           hideAbsence: _policy.hideAbsence,
@@ -300,87 +335,69 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               ? '—'
               : '\u2066${_timeFmt.format(_lastUpdated!)}\u2069',
         ),
+        const SizedBox(height: 24),
+        AttendanceTools(
+          searchController: _search,
+          onSearchChanged: (_) => setState(() {}),
+          filter: _filter,
+          onFilterChanged: (f) => setState(() => _filter = f),
+          counts: counts,
+          hideAbsence: _policy.hideAbsence,
+          onExport: _exportExcel,
+          exporting: _exporting,
+        ),
         const SizedBox(height: 20),
+        if (_error != null) ...[
+          DialogNote('$_error — تُعرض آخر بيانات محمّلة', tone: NoteTone.bad),
+          const SizedBox(height: 16),
+        ],
         AppCard(
-          padding: EdgeInsets.zero,
-          clip: true,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AttendanceToolbar(
-                dateLabel: _labelFmt.format(_date),
-                isToday: _isToday,
-                canGoNext: !_isToday,
-                onPrev: () => _goTo(_date.subtract(const Duration(days: 1))),
-                onNext: () => _goTo(_date.add(const Duration(days: 1))),
-                onToday: () => _goTo(BaghdadTime.today()),
-                onPickDate: _pickDate,
-                filter: _filter,
-                onFilterChanged: (f) => setState(() => _filter = f),
-                counts: counts,
-                onGrantLeave: _openLeave,
-                onExport: _exportExcel,
-                exporting: _exporting,
-                hideAbsence: _policy.hideAbsence,
-              ),
-              if (!day.dayInfo.isSchool || _policy.weekend)
-                Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Text(
-                    _policy.weekend ? 'عطلة نهاية الأسبوع' : day.dayInfo.label,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+          child: closed
+              ? Padding(
+                  padding: const EdgeInsets.all(28),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.event_busy_outlined,
+                        size: 36,
+                        color: AppColors.warnText,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        _policy.weekend
+                            ? 'عطلة نهاية الأسبوع'
+                            : day.dayInfo.label,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.text,
+                        ),
+                      ),
+                      if (!day.dayInfo.isSchool && day.dayInfo.notes != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            day.dayInfo.notes!,
+                            style: const TextStyle(color: AppColors.textSub),
+                          ),
+                        ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'لا دوام في هذا اليوم ولا يُحتسب غياب.',
+                        style: TextStyle(color: AppColors.textMuted),
+                      ),
+                    ],
                   ),
-                ),
-              if (!day.dayInfo.isSchool && day.dayInfo.notes != null)
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Text(day.dayInfo.notes!),
-                ),
-              if (day.dayInfo.isSchool && _policy.awaitingArrival)
-                const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Text(
-                    'قبل 09:31 بتوقيت بغداد: الطلاب الذين لم يصلوا بعد لا يُحتسبون غائبين.',
-                  ),
-                ),
-              if (_error != null)
-                Container(
-                  width: double.infinity,
-                  color: AppColors.redSoft,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
-                  ),
-                  child: Text(
-                    '$_error — تُعرض آخر بيانات محمّلة',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.redDark,
-                    ),
-                  ),
-                ),
-              if (day.dayInfo.isSchool && !_policy.weekend)
-                AttendanceTable(
+                )
+              : AttendanceTable(
                   entries: _filtered,
                   students: _studentsById,
-                  live: _isToday,
-                  searchController: _search,
-                  onSearchChanged: (_) => setState(() {}),
                   onRegisterExcuse: (e) => _openLeave(e.studentId),
                   onCancelLeave: _cancelLeave,
-                  onManualAttendance: (e) => ManualAttendanceDialog.show(
-                    context,
-                    student: e,
-                    initialDate: _date,
-                  ),
                   weekend: _policy.weekend,
                   awaitingArrival: _policy.awaitingArrival,
                 ),
-            ],
-          ),
         ),
       ],
     );

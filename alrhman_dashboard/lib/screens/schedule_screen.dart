@@ -7,9 +7,15 @@ import '../models/schedule_class.dart';
 import '../models/schedule_period.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/common/app_button.dart';
-import '../widgets/common/app_data_table.dart';
 import '../widgets/common/async_states.dart';
+import '../widgets/common/app_dialog.dart';
+import '../widgets/common/app_dropdown.dart';
+import '../widgets/common/page_button.dart';
 import '../widgets/common/pill.dart';
+import '../widgets/layout/app_header.dart';
+import '../widgets/ui/hover.dart';
+import '../widgets/ui/letter_avatar.dart';
+import '../widgets/ui/seg_tabs.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/schedule/schedule_editor_dialog.dart';
 
@@ -125,18 +131,24 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     }
     final selected = await showDialog<ScheduleClass>(
       context: context,
-      builder: (context) => SimpleDialog(
-        title: const Text('اختر الصف لإعداد جدوله'),
-        children: [
-          for (final c in _classes!)
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(context, c),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Text(c.label),
+      builder: (context) => AppDialog(
+        icon: Icons.calendar_today_outlined,
+        title: 'اختر الصف لإعداد جدوله',
+        subtitle: 'يُفتح محرر الجدول الأسبوعي للصف المختار',
+        maxWidth: 520,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final c in _classes!)
+              _ClassTile(
+                schoolClass: c,
+                status: _statusPill(c),
+                selected: false,
+                onTap: () => Navigator.pop(context, c),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
     if (selected != null && mounted) await _edit(selected);
@@ -200,34 +212,41 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     }
   }
 
-  Widget _statusPill(ScheduleClass c) => Pill(
-    label: c.periodCount == 0
-        ? 'بانتظار الإعداد'
-        : _complete(c)
-        ? 'الأسبوع مكتمل'
-        : 'جدول جزئي',
-    background: c.periodCount == 0
-        ? AppColors.warnSoft
-        : _complete(c)
-        ? AppColors.greenSoft
-        : AppColors.accentSoft,
-    foreground: c.periodCount == 0
-        ? AppColors.warnDeep
-        : _complete(c)
-        ? AppColors.greenDeep
-        : AppColors.brand,
-    icon: c.periodCount == 0
-        ? Icons.schedule
-        : _complete(c)
-        ? Icons.check_circle_outline
-        : Icons.view_week_outlined,
-  );
+  Widget _statusPill(ScheduleClass c) => c.periodCount == 0
+      ? Pill.tone('فارغ', BadgeTone.bad)
+      : _complete(c)
+      ? Pill.tone('مكتمل', BadgeTone.ok)
+      : Pill.tone('جزئي', BadgeTone.warn);
+
+  bool _isSelected(ScheduleClass c) =>
+      _selected != null && _classKey(c) == _classKey(_selected!);
+
   @override
   Widget build(BuildContext context) {
+    final header = PageHeader(
+      title: 'الجداول الأسبوعية',
+      search: HeaderSearch(
+        controller: _search,
+        hint: 'ابحث باسم الصف أو الشعبة',
+        onChanged: (_) => setState(() => _page = 0),
+      ),
+      cta: AppButton(
+        label: 'إضافة جدول',
+        icon: Icons.add_rounded,
+        style: AppButtonStyle.amber,
+        onPressed: _classes == null || _editing ? null : _quickSchedule,
+      ),
+    );
     if (_classes == null) {
-      return _error == null
-          ? const LoadingView()
-          : ErrorView(message: _error!, onRetry: _load);
+      return Column(
+        children: [
+          header,
+          const SizedBox(height: 24),
+          _error == null
+              ? const LoadingView()
+              : ErrorView(message: _error!, onRetry: _load),
+        ],
+      );
     }
     final classes = _filtered;
     final pages = (classes.length / _pageSize).ceil();
@@ -237,224 +256,192 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _header(grades),
+        header,
         const SizedBox(height: 24),
+        _readiness(),
+        const SizedBox(height: 24),
+        _tools(grades),
+        const SizedBox(height: 20),
         if (_error != null) ...[
-          Text(_error!, style: const TextStyle(color: AppColors.redDark)),
+          DialogNote(_error!, tone: NoteTone.bad),
           const SizedBox(height: 12),
         ],
-        if (_loading) const LinearProgressIndicator(),
-        _classList(visible, classes.length, page, pages),
-        const SizedBox(height: 24),
-        _preview(),
+        if (_loading) ...[
+          const LinearProgressIndicator(minHeight: 3),
+          const SizedBox(height: 12),
+        ],
+        LayoutBuilder(
+          builder: (context, c) {
+            final list = _classList(visible, classes.length, page, pages);
+            if (c.maxWidth >= 1100) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: _grid ? 520 : 420, child: list),
+                  const SizedBox(width: 20),
+                  Expanded(child: _preview()),
+                ],
+              );
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [list, const SizedBox(height: 20), _preview()],
+            );
+          },
+        ),
       ],
     );
   }
 
-  Widget _header(List<String> grades) {
+  Widget _readiness() {
     final complete = _classes!.where(_complete).length;
     final ratio = _classes!.isEmpty ? 0.0 : complete / _classes!.length;
-    final readiness = Container(
-      width: 230,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'تغطية الجداول للأسبوع الدراسي',
-            style: TextStyle(color: AppColors.textMuted, fontSize: 12),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '$complete من ${_classes!.length} صفوف مكتملة',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: LinearProgressIndicator(
-                  value: ratio,
-                  minHeight: 7,
-                  borderRadius: BorderRadius.circular(8),
-                  color: AppColors.brand,
-                  backgroundColor: AppColors.border,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                '${(ratio * 100).round()}%',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.brand,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
     final title = Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.all(12),
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
-            color: AppColors.accentSoft,
-            borderRadius: BorderRadius.circular(12),
+            color: AppColors.okBg,
+            borderRadius: BorderRadius.circular(16),
           ),
           child: const Icon(
-            Icons.calendar_view_week_outlined,
-            color: AppColors.brand,
-            size: 26,
+            Icons.calendar_today_outlined,
+            size: 24,
+            color: AppColors.green,
           ),
         ),
         const SizedBox(width: 14),
-        const Expanded(
+        Flexible(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'إدارة الجداول الدراسية',
+              const Text(
+                'جاهزية الجداول',
                 style: TextStyle(
-                  fontSize: 23,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: AppColors.text,
                 ),
               ),
-              SizedBox(height: 6),
               Text(
-                'اختر الصف لمعاينة جدوله، وأضف المواد والمعلمين أو عدّل الحصص مباشرةً.',
-                style: TextStyle(fontSize: 13, color: AppColors.textMuted),
+                '$complete صفاً مكتملاً من أصل ${_classes!.length}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
+                ),
               ),
             ],
+          ),
+        ),
+      ],
+    );
+    final bar = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 320,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: ratio),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.easeOutCubic,
+              builder: (_, v, _) => LinearProgressIndicator(
+                value: v,
+                minHeight: 8,
+                color: AppColors.green,
+                backgroundColor: AppColors.canvas,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 18),
+        Text(
+          '${(ratio * 100).round()}%',
+          textDirection: TextDirection.ltr,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: AppColors.text,
           ),
         ),
       ],
     );
     return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          LayoutBuilder(
-            builder: (_, constraints) => constraints.maxWidth < 700
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [title, const SizedBox(height: 16), readiness],
-                  )
-                : Row(
-                    children: [
-                      Expanded(child: title),
-                      const SizedBox(width: 24),
-                      readiness,
-                    ],
-                  ),
-          ),
-          const SizedBox(height: 20),
-          const Divider(color: AppColors.border),
-          const SizedBox(height: 14),
-          Wrap(
+      hover: true,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      child: LayoutBuilder(
+        builder: (context, c) => c.maxWidth >= 700
+            ? Row(children: [Expanded(child: title), bar])
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  title,
+                  const SizedBox(height: 14),
+                  FittedBox(child: bar),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _tools(List<String> grades) {
+    return Row(
+      children: [
+        Expanded(
+          child: Wrap(
             spacing: 12,
             runSpacing: 12,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              SizedBox(
-                width: 280,
-                child: TextField(
-                  controller: _search,
-                  decoration: const InputDecoration(
-                    hintText: 'البحث باسم الصف أو الشعبة…',
-                    prefixIcon: Icon(Icons.search),
-                    isDense: true,
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (_) => setState(() => _page = 0),
-                ),
+              SegTabs<String>(
+                items: const [
+                  ('all', 'الكل'),
+                  ('complete', 'مكتمل'),
+                  ('partial', 'جزئي'),
+                  ('empty', 'فارغ'),
+                ],
+                value: _status,
+                onChanged: (v) => setState(() {
+                  _status = v;
+                  _page = 0;
+                }),
               ),
               SizedBox(
                 width: 200,
-                child: DropdownButtonFormField<String>(
-                  key: ValueKey('grade/$_grade/${grades.join()}'),
-                  initialValue: _grade,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    border: OutlineInputBorder(),
-                  ),
-                  hint: const Text('جميع الصفوف'),
+                child: AppDropdown<String>(
+                  value: _grade ?? '',
                   items: [
-                    const DropdownMenuItem(
-                      value: null,
-                      child: Text('جميع الصفوف'),
-                    ),
-                    for (final g in grades)
-                      DropdownMenuItem(value: g, child: Text(g)),
+                    const DropdownItem('', 'كل المراحل'),
+                    for (final g in grades) DropdownItem(g, g),
                   ],
                   onChanged: (v) => setState(() {
-                    _grade = v;
+                    _grade = v.isEmpty ? null : v;
                     _page = 0;
                   }),
                 ),
-              ),
-              SizedBox(
-                width: 175,
-                child: DropdownButtonFormField<String>(
-                  initialValue: _status,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    border: OutlineInputBorder(),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: 'all', child: Text('كافة الحالات')),
-                    DropdownMenuItem(
-                      value: 'complete',
-                      child: Text('الأسبوع مكتمل'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'partial',
-                      child: Text('جدول جزئي'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'empty',
-                      child: Text('بانتظار الإعداد'),
-                    ),
-                  ],
-                  onChanged: (v) => setState(() {
-                    _status = v!;
-                    _page = 0;
-                  }),
-                ),
-              ),
-              SegmentedButton<bool>(
-                segments: const [
-                  ButtonSegment(
-                    value: false,
-                    icon: Icon(Icons.view_list_outlined),
-                    label: Text('قائمة الصفوف'),
-                  ),
-                  ButtonSegment(
-                    value: true,
-                    icon: Icon(Icons.grid_view_outlined),
-                    label: Text('عرض شبكي'),
-                  ),
-                ],
-                selected: {_grid},
-                onSelectionChanged: (values) =>
-                    setState(() => _grid = values.first),
-              ),
-              IconButton(
-                tooltip: 'تحديث الجداول',
-                onPressed: _loading || _editing ? null : _load,
-                icon: const Icon(Icons.refresh),
               ),
             ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 12),
+        SegTabs<bool>(
+          items: const [(false, ''), (true, '')],
+          icons: const [Icons.view_list_rounded, Icons.grid_view_rounded],
+          tooltips: const ['قائمة الصفوف', 'عرض شبكي'],
+          value: _grid,
+          onChanged: (v) => setState(() => _grid = v),
+        ),
+        const SizedBox(width: 10),
+        AppButton(
+          label: 'تحديث',
+          icon: Icons.refresh_rounded,
+          style: AppButtonStyle.outline,
+          small: true,
+          onPressed: _loading || _editing ? null : _load,
+        ),
+      ],
     );
   }
 
@@ -464,458 +451,425 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     int page,
     int pages,
   ) => AppCard(
-    padding: EdgeInsets.zero,
-    clip: true,
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.all(20),
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
             children: [
-              const Text(
-                'سجل الصفوف والشعب الدراسية',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              const Expanded(
+                child: Text(
+                  'الصفوف والشعب',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.text,
+                  ),
+                ),
               ),
-              Pill(
-                label: '${_classes!.length} صفوف مسجّلة',
-                background: AppColors.accentSoft,
-                foreground: AppColors.brand,
-              ),
-              const Text(
-                'اختر صفاً لعرض المعاينة',
-                style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-              ),
+              Pill.tone('${_classes!.length} صفوف مسجّلة', BadgeTone.tint),
             ],
           ),
         ),
+        const SizedBox(height: 10),
         if (visible.isEmpty)
           EmptyView(
             message: _classes!.isEmpty
                 ? 'لا توجد صفوف مسجّلة. حدّد الصف والشعبة في بيانات الطلاب أولاً.'
                 : 'لا توجد صفوف مطابقة للبحث',
           ),
-        if (!_grid && visible.isNotEmpty)
-          AppDataTable(
-            dataRowHeight: 88,
-            columnSpacing: 16,
-            columns: [
-              tableColumn('الصف والشعبة'),
-              tableColumn('الطلاب'),
-              tableColumn('الحصص'),
-              tableColumn('حالة الجدول'),
-              tableColumn('الإجراءات'),
-            ],
-            rows: [
-              for (final c in visible)
-                DataRow(
-                  key: ValueKey(_classKey(c)),
-                  selected:
-                      _selected != null &&
-                      _classKey(c) == _classKey(_selected!),
-                  color: WidgetStateProperty.resolveWith(
-                    (states) => states.contains(WidgetState.selected)
-                        ? AppColors.accentSoft.withValues(alpha: .45)
-                        : null,
-                  ),
-                  cells: [
-                    DataCell(
-                      SizedBox(
-                        width: 125,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              c.label,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            if (c.studentCount == 0)
-                              const Text(
-                                'بدون طلاب فعّالين',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: AppColors.textMuted,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      onTap: () => _select(c),
-                    ),
-                    DataCell(Text('${c.studentCount}')),
-                    DataCell(
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${c.periodCount} حصة',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            '${c.dayCount} أيام',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: AppColors.textMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    DataCell(_statusPill(c)),
-                    DataCell(
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            tooltip: 'معاينة ${c.label}',
-                            onPressed: () => _select(c),
-                            icon: const Icon(
-                              Icons.visibility_outlined,
-                              color: AppColors.brand,
-                              size: 20,
-                            ),
-                          ),
-                          AppButton(
-                            onPressed: _editing ? null : () => _edit(c),
-                            label: c.periodCount == 0 ? 'إعداد' : 'تعديل',
-                            icon: Icons.edit_outlined,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-            ],
-          ),
-        if (_grid && visible.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: LayoutBuilder(
-              builder: (_, constraints) {
-                final width = constraints.maxWidth > 600
-                    ? (constraints.maxWidth - 12) / 2
-                    : constraints.maxWidth;
-                return Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    for (final c in visible)
-                      SizedBox(
-                        width: width,
-                        child: InkWell(
-                          onTap: () => _select(c),
-                          borderRadius: BorderRadius.circular(12),
-                          child: AppCard(
-                            color:
-                                _selected != null &&
-                                    _classKey(c) == _classKey(_selected!)
-                                ? AppColors.accentSoft
-                                : AppColors.surface,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  c.label,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  '${c.studentCount} طالب • ${c.periodCount} حصة • ${c.dayCount} أيام',
-                                ),
-                                const SizedBox(height: 12),
-                                _statusPill(c),
-                                const SizedBox(height: 12),
-                                TextButton.icon(
-                                  onPressed: _editing ? null : () => _edit(c),
-                                  icon: const Icon(Icons.edit_outlined),
-                                  label: Text(
-                                    c.periodCount == 0
-                                        ? 'إعداد الجدول'
-                                        : 'تعديل الجدول',
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
+        if (!_grid)
+          for (final c in visible)
+            _ClassTile(
+              key: ValueKey(_classKey(c)),
+              schoolClass: c,
+              status: _statusPill(c),
+              selected: _isSelected(c),
+              onTap: () => _select(c),
             ),
-          ),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            spacing: 12,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                total == 0
-                    ? '0 صفوف'
-                    : 'عرض ${page * _pageSize + 1}–${(page * _pageSize + visible.length)} من $total صفوف',
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: AppColors.textMuted,
-                ),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+        if (_grid && visible.isNotEmpty)
+          LayoutBuilder(
+            builder: (_, constraints) {
+              final width = (constraints.maxWidth - 12) / 2;
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
                 children: [
-                  OutlinedButton(
-                    onPressed: page > 0
-                        ? () => setState(() => _page = page - 1)
-                        : null,
-                    child: const Text('السابق'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('${pages == 0 ? 0 : page + 1} / $pages'),
-                  ),
-                  OutlinedButton(
-                    onPressed: page + 1 < pages
-                        ? () => setState(() => _page = page + 1)
-                        : null,
-                    child: const Text('التالي'),
-                  ),
+                  for (final c in visible)
+                    SizedBox(
+                      width: width,
+                      child: _ClassGridCard(
+                        schoolClass: c,
+                        status: _statusPill(c),
+                        selected: _isSelected(c),
+                        onTap: () => _select(c),
+                        onEdit: _editing ? null : () => _edit(c),
+                      ),
+                    ),
                 ],
-              ),
-            ],
+              );
+            },
           ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Tooltip(
+              message: 'السابق',
+              child: PageButton(
+                icon: Icons.chevron_right_rounded,
+                bordered: true,
+                onTap: page > 0 ? () => setState(() => _page = page - 1) : null,
+              ),
+            ),
+            const SizedBox(width: 6),
+            for (var i = 0; i < pages; i++) ...[
+              PageButton(
+                label: '${i + 1}',
+                active: i == page,
+                bordered: true,
+                onTap: () => setState(() => _page = i),
+              ),
+              const SizedBox(width: 6),
+            ],
+            Tooltip(
+              message: 'التالي',
+              child: PageButton(
+                icon: Icons.chevron_left_rounded,
+                bordered: true,
+                onTap: page + 1 < pages
+                    ? () => setState(() => _page = page + 1)
+                    : null,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          total == 0
+              ? '0 صفوف'
+              : 'عرض ${page * _pageSize + 1}–${(page * _pageSize + visible.length)} من $total صفوف',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
         ),
       ],
     ),
   );
-  Widget _preview() => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      AppCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.calendar_month_outlined,
-                  color: AppColors.brand,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _selected == null
-                        ? 'معاينة الجدول'
-                        : 'معاينة جدول ${_selected!.label}',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _selected == null
-                  ? 'اختر صفاً من القائمة'
-                  : '${_selected!.studentCount} طالب • ${_periods?.length ?? _selected!.periodCount} حصة',
-              style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-            ),
-            const SizedBox(height: 18),
-            if (_previewLoading)
-              const LoadingView(height: 180)
-            else if (_previewError != null)
-              ErrorView(
-                message: _previewError!,
-                height: 210,
-                onRetry: () => _select(_selected!),
-              )
-            else if (_periods != null && _periods!.isEmpty) ...[
-              const Icon(
-                Icons.calendar_today_outlined,
-                size: 38,
-                color: AppColors.outline,
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'لم يُعدّ جدول هذا الصف بعد',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              FilledButton.icon(
+
+  Widget _preview() => AppCard(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        CardTitle(
+          _selected == null ? 'معاينة الجدول' : 'معاينة: ${_selected!.label}',
+          trailing: [
+            if (_selected != null)
+              AppButton(
+                label: (_periods?.isEmpty ?? _selected!.periodCount == 0)
+                    ? 'إعداد الجدول'
+                    : 'تعديل الجدول',
+                icon: Icons.edit_outlined,
+                style: AppButtonStyle.primary,
+                small: true,
                 onPressed: _editing ? null : () => _edit(_selected!),
-                icon: const Icon(Icons.add),
-                label: const Text('إعداد جدول الصف'),
               ),
-            ] else if (_periods != null) ...[
-              _weekTable(),
-            ],
           ],
         ),
+        const SizedBox(height: 4),
+        Text(
+          _selected == null
+              ? 'اختر صفاً من القائمة'
+              : '${_selected!.studentCount} طالب • ${_periods?.length ?? _selected!.periodCount} حصة',
+          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+        ),
+        const SizedBox(height: 16),
+        if (_previewLoading)
+          const LoadingView(height: 180)
+        else if (_previewError != null)
+          ErrorView(
+            message: _previewError!,
+            height: 210,
+            onRetry: () => _select(_selected!),
+          )
+        else if (_periods != null && _periods!.isEmpty) ...[
+          const SizedBox(height: 12),
+          const Icon(
+            Icons.calendar_today_outlined,
+            size: 38,
+            color: AppColors.outline,
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'لم يُعدّ جدول هذا الصف بعد',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.textSub),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: AppButton(
+              label: 'إعداد جدول الصف',
+              icon: Icons.add_rounded,
+              style: AppButtonStyle.amber,
+              onPressed: _editing ? null : () => _edit(_selected!),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ] else if (_periods != null)
+          _weekTable(),
+        const SizedBox(height: 14),
+        const Text(
+          'الأحد إلى الخميس · ست حصص يومياً · مكتمل = 5 أيام و 25 إلى 30 حصة',
+          style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+        ),
+        if (_periods != null &&
+            _periods!.any((p) => p.teacher?.isNotEmpty ?? false)) ...[
+          const SizedBox(height: 8),
+          Text(
+            'المعلمون: ${_periods!.map((p) => p.teacher).whereType<String>().where((s) => s.isNotEmpty).toSet().join('، ')}',
+            style: const TextStyle(fontSize: 12, color: AppColors.textSub),
+          ),
+        ],
+      ],
+    ),
+  );
+
+  Widget _weekTable() {
+    final byCell = {for (final p in _periods!) '${p.day}/${p.number}': p};
+    Widget cell(String text, {Color? bg, Color? fg, String? tip}) {
+      final box = AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        constraints: const BoxConstraints(minHeight: 44),
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        decoration: BoxDecoration(
+          color: bg ?? AppColors.canvas,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12,
+            height: 1.5,
+            fontWeight: FontWeight.w600,
+            color: fg ?? AppColors.textSub,
+          ),
+        ),
+      );
+      return Padding(
+        padding: const EdgeInsets.all(4),
+        child: tip == null
+            ? box
+            : Tooltip(message: tip, child: HoverLift(lift: 2, scale: 1.04, child: box)),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (_, constraints) => SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: constraints.maxWidth < 640 ? 640 : constraints.maxWidth,
+          child: Table(
+            columnWidths: const {0: FixedColumnWidth(84)},
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: [
+              TableRow(
+                children: [
+                  const SizedBox(),
+                  for (var n = 1; n <= 6; n++) cell('الحصة $n'),
+                ],
+              ),
+              for (final day in scheduleWeekdays)
+                TableRow(
+                  children: [
+                    cell(day),
+                    for (var n = 1; n <= 6; n++)
+                      () {
+                        final period = byCell['$day/$n'];
+                        if (period == null) {
+                          return cell(
+                            '—',
+                            bg: AppColors.background,
+                            fg: AppColors.outline,
+                          );
+                        }
+                        const palette = AppColors.avatarPalette;
+                        final (bg, fg) =
+                            palette[period.subject.trim().hashCode.abs() %
+                                palette.length];
+                        return cell(
+                          period.subject,
+                          bg: bg,
+                          fg: fg,
+                          tip: period.teacher == null
+                              ? period.subject
+                              : '${period.subject}\n${period.teacher}',
+                        );
+                      }(),
+                  ],
+                ),
+            ],
+          ),
+        ),
       ),
-      const SizedBox(height: 18),
-      AppCard(
-        color: AppColors.surfaceMuted,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'تنظيم الجدول',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              '• أيام الدراسة من الأحد إلى الخميس.\n• كل يوم مسجّل يحتوي 5 أو 6 حصص متتالية.\n• يمكن ترك يوم كامل دون حصص.\n• الحفظ يحدّث جدول الصف المحدد لأولياء الأمور.',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSub,
-                height: 1.8,
+    );
+  }
+}
+
+/// سطر صف في قائمة الصفوف: مربع الحرف، الاسم، الطلاب والحصص، والحالة.
+class _ClassTile extends StatefulWidget {
+  final ScheduleClass schoolClass;
+  final Widget status;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _ClassTile({
+    super.key,
+    required this.schoolClass,
+    required this.status,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  State<_ClassTile> createState() => _ClassTileState();
+}
+
+class _ClassTileState extends State<_ClassTile> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = widget.schoolClass;
+    final on = widget.selected || _hover;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          margin: const EdgeInsets.only(bottom: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: widget.selected
+                ? const Color(0xFFF7F8FA)
+                : (_hover ? AppColors.rowHover : Colors.transparent),
+            borderRadius: BorderRadius.circular(16),
+            border: on
+                ? Border.all(
+                    color: widget.selected ? AppColors.line : Colors.transparent,
+                  )
+                : null,
+          ),
+          child: Row(
+            children: [
+              LetterAvatar(
+                name: c.section.trim().isEmpty
+                    ? c.label
+                    : c.section.trim().characters.last,
               ),
-            ),
-            if (_periods != null &&
-                _periods!.any((p) => p.teacher?.isNotEmpty ?? false)) ...[
-              const SizedBox(height: 12),
-              const Divider(),
-              const Text(
-                'معلمو حصص الصف',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      c.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.text,
+                      ),
+                    ),
+                    Text(
+                      '${c.studentCount} طالباً · ${c.periodCount} حصة',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 6),
+              widget.status,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// بطاقة صف في العرض الشبكي مع زر تعديل/إعداد الجدول.
+class _ClassGridCard extends StatelessWidget {
+  final ScheduleClass schoolClass;
+  final Widget status;
+  final bool selected;
+  final VoidCallback onTap;
+  final VoidCallback? onEdit;
+
+  const _ClassGridCard({
+    required this.schoolClass,
+    required this.status,
+    required this.selected,
+    required this.onTap,
+    required this.onEdit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = schoolClass;
+    return HoverLift(
+      borderRadius: BorderRadius.circular(18),
+      hoverShadow: hoverCardShadow,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.tint : AppColors.canvas,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
-                _periods!
-                    .map((p) => p.teacher)
-                    .whereType<String>()
-                    .where((s) => s.isNotEmpty)
-                    .toSet()
-                    .join('، '),
+                c.label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.text,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${c.studentCount} طالب • ${c.periodCount} حصة • ${c.dayCount} أيام',
                 style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.textMuted,
                 ),
               ),
+              const SizedBox(height: 10),
+              status,
+              const SizedBox(height: 10),
+              AppButton(
+                label: c.periodCount == 0 ? 'إعداد' : 'تعديل',
+                icon: Icons.edit_outlined,
+                style: AppButtonStyle.outline,
+                small: true,
+                onPressed: onEdit,
+              ),
             ],
-          ],
+          ),
         ),
       ),
-    ],
-  );
-  Widget _weekTable() {
-    final byCell = {for (final p in _periods!) '${p.day}/${p.number}': p};
-    return LayoutBuilder(
-      builder: (_, constraints) {
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SizedBox(
-            width: constraints.maxWidth < 820 ? 820 : constraints.maxWidth,
-            child: Table(
-              columnWidths: const {0: FixedColumnWidth(90)},
-              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              border: const TableBorder(
-                horizontalInside: BorderSide(color: AppColors.border),
-              ),
-              children: [
-                TableRow(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      child: Text(
-                        'اليوم',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    ),
-                    for (var n = 1; n <= 6; n++)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Text(
-                          '$n',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                for (final day in scheduleWeekdays)
-                  TableRow(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Text(
-                          day,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      for (var n = 1; n <= 6; n++)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 2,
-                            vertical: 8,
-                          ),
-                          child: () {
-                            final period = byCell['$day/$n'];
-                            return Tooltip(
-                              message: period == null
-                                  ? 'لا توجد حصة'
-                                  : '${period.subject}${period.teacher == null ? '' : '\n${period.teacher}'}',
-                              child: Container(
-                                constraints: const BoxConstraints(
-                                  minHeight: 64,
-                                ),
-                                alignment: Alignment.center,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 16,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: period == null
-                                      ? AppColors.background
-                                      : AppColors.accentSoft,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  period?.subject ?? '—',
-                                  softWrap: true,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    height: 1.5,
-                                    color: period == null
-                                        ? AppColors.outline
-                                        : AppColors.brand,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }(),
-                        ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

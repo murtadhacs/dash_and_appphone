@@ -151,36 +151,36 @@ void main() {
       );
       await tester.pumpAndSettle();
       for (final label in [
-        'الوقت',
-        'من',
-        'الإجراء',
+        'الوقت (بغداد)',
+        'المنفذ',
+        'العملية',
         'الهدف',
         'النتيجة',
         'عنوان IP',
-        'التفصيل',
+        'التفاصيل',
       ]) {
         expect(find.text(label), findsOneWidget);
       }
-      expect(find.text('معاينة • dry_run'), findsOneWidget);
+      expect(find.text('dry_run'), findsOneWidget);
       expect(find.text('unknown'), findsOneWidget);
       expect(find.text('2026-10-13 09:15:04'), findsNWidgets(2));
       final success = tester.widget<Pill>(find.widgetWithText(Pill, 'نجاح'));
       final rejected = tester.widget<Pill>(
-        find.widgetWithText(Pill, 'طلب مرفوض'),
+        find.widgetWithText(Pill, 'مرفوض'),
       );
-      expect(success.background, AppColors.greenSoft);
-      expect(rejected.background, AppColors.warnSoft);
-      await tester.tap(find.text('تحميل المزيد'));
+      expect(success.background, AppColors.okBg);
+      expect(rejected.background, AppColors.warnBg);
+      await tester.tap(find.text('تحميل المزيد من السجلات'));
       await tester.pumpAndSettle();
       expect(find.text('تسجيل إجازة'), findsOneWidget);
       expect(find.text('إعادة المحاولة'), findsOneWidget);
       await tester.tap(find.text('إعادة المحاولة'));
       await tester.pumpAndSettle();
       expect(find.text('new.code'), findsOneWidget);
-      expect(find.text('تحميل المزيد'), findsNothing);
+      expect(find.text('تحميل المزيد من السجلات'), findsNothing);
       expect(
-        tester.widget<Pill>(find.widgetWithText(Pill, 'خطأ')).background,
-        AppColors.redSoft,
+        tester.widget<Pill>(find.widgetWithText(Pill, 'فشل')).background,
+        AppColors.badBg,
       );
       expect(requests.map((r) => r.url.queryParameters['before']).toList(), [
         null,

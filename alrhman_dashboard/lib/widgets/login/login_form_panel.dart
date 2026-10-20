@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../api/api_exception.dart';
 import '../../api/app_services.dart';
 import '../../core/app_colors.dart';
+import '../common/app_button.dart';
 
 /// حقول الدخول المدمجة في خلفية الصفحة مع الحفاظ على المصادقة.
 class LoginFormPanel extends StatefulWidget {
@@ -55,29 +56,20 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Text(
-          'أهلاً بعودتك',
+          'تسجيل الدخول',
           style: TextStyle(
-            fontSize: 30,
+            fontSize: 28,
             height: 1.4,
             fontWeight: FontWeight.bold,
             color: AppColors.text,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 4),
         const Text(
-          'مرحباً بك مجدداً في بوابة الإدارة',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSub,
-          ),
+          'أدخل بيانات حساب الإدارة للمتابعة',
+          style: TextStyle(fontSize: 14, color: AppColors.textMuted),
         ),
-        const SizedBox(height: 8),
-        const Text(
-          'سجّل دخولك وابدأ إدارة يومك المدرسي.',
-          style: TextStyle(fontSize: 13, color: AppColors.textMuted),
-        ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 24),
         if (_error != null) _errorBanner(),
         AutofillGroup(
           child: Form(
@@ -86,16 +78,16 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _label('اسم المستخدم'),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 _field(
                   controller: _username,
                   hint: 'أدخل اسم المستخدم',
                   icon: Icons.person_outline_rounded,
                   autofillHints: const [AutofillHints.username],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 _label('كلمة المرور'),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 _field(
                   controller: _password,
                   hint: 'أدخل كلمة المرور',
@@ -103,25 +95,17 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
                   password: true,
                   autofillHints: const [AutofillHints.password],
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 _submitButton(),
               ],
             ),
           ),
         ),
-        const SizedBox(height: 22),
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.verified_user_outlined, size: 15, color: AppColors.textMuted),
-            SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                'وصول مخصص لإدارة المدرسة',
-                style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-              ),
-            ),
-          ],
+        const SizedBox(height: 18),
+        const Text(
+          'في حال نسيان كلمة المرور تواصل مع الدعم الفني',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: AppColors.textMuted),
         ),
       ],
     );
@@ -169,8 +153,8 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
         filled: true,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 19,
+          horizontal: 16,
+          vertical: 15,
         ),
         prefixIcon: Icon(icon, size: 20, color: AppColors.textMuted),
         suffixIcon: password
@@ -231,38 +215,29 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
     );
   }
 
-  Widget _submitButton() => SizedBox(
-    height: 54,
-    child: FilledButton(
-      onPressed: _loading ? null : _submit,
-      style: FilledButton.styleFrom(
-        backgroundColor: AppColors.amber,
-        foregroundColor: AppColors.text,
-        disabledBackgroundColor: AppColors.amber.withValues(alpha: .6),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.control),
-        ),
-      ),
-      child: _loading
-          ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppColors.text,
-              ),
-            )
-          : const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'تسجيل الدخول للنظام',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(width: 12),
-                Icon(Icons.arrow_forward_rounded, size: 19),
-              ],
+  Widget _submitButton() => _loading
+      ? Container(
+          height: 50,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: AppColors.amber.withValues(alpha: .6),
+            borderRadius: BorderRadius.circular(AppRadius.control),
+          ),
+          child: const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppColors.text,
             ),
-    ),
-  );
+          ),
+        )
+      : AppButton(
+          label: 'دخول إلى اللوحة',
+          icon: Icons.login_rounded,
+          style: AppButtonStyle.amber,
+          height: 50,
+          expand: true,
+          onPressed: _submit,
+        );
 }

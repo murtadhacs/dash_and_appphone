@@ -69,41 +69,35 @@ void main() {
         ),
       );
       await t.pumpAndSettle();
-      await tap(t, 'معاينة عدد المستلمين');
+      await tap(t, 'معاينة وإرسال');
       expect(posts, isEmpty);
       await t.enterText(find.byType(TextFormField).at(0), 'عنوان');
       await t.enterText(find.byType(TextFormField).at(1), 'نص');
-      Future<void> pick(String choice) async {
-        final dropdown = find.byType(DropdownButtonFormField<String>).first;
-        await t.ensureVisible(dropdown);
-        await t.tap(dropdown);
-        await t.pumpAndSettle();
-        await tap(t, choice);
-      }
+      Future<void> pick(String choice) => tap(t, choice);
 
       Future<void> preview(Map<String, dynamic> expected) async {
-        await tap(t, 'معاينة عدد المستلمين');
+        await tap(t, 'معاينة وإرسال');
         expect(posts.last['audience'], expected);
         await tap(t, 'إلغاء');
       }
 
-      await pick('ولي أمر واحد');
+      await pick('ولي أمر');
       await t.tap(find.byKey(const ValueKey('broadcast-parent')));
       await t.pumpAndSettle();
       await t.tap(find.textContaining('ولي أمر •').last);
       await t.pumpAndSettle();
       await preview({'type': 'parent', 'parent_phone': '+9647000000101'});
-      await pick('مرحلة كاملة');
+      await pick('صف');
       await t.tap(find.byKey(const ValueKey('grade-المرحلة')));
       await t.pumpAndSettle();
       await tap(t, 'G3');
       await preview({'type': 'class', 'grade': 'G3'});
-      await pick('شعبة في جميع المراحل');
+      await pick('شعبة');
       await t.tap(find.byKey(const ValueKey('section-الشعبة')));
       await t.pumpAndSettle();
       await tap(t, 'A');
       await preview({'type': 'class', 'section': 'A'});
-      await pick('مرحلة وشعبة');
+      await pick('صف وشعبة');
       await t.tap(find.byKey(const ValueKey('class-المرحلة')));
       await t.pumpAndSettle();
       await tap(t, 'G3');
@@ -111,7 +105,7 @@ void main() {
       await t.pumpAndSettle();
       await tap(t, 'A');
       await preview({'type': 'class', 'grade': 'G3', 'section': 'A'});
-      await pick('جميع أولياء الأمور');
+      await pick('الجميع');
       await preview({'type': 'all'});
       expect(posts.every((p) => p['dry_run'] == true), true);
       expect(t.takeException(), isNull);
@@ -204,7 +198,7 @@ void main() {
       expect(cursors, [null, '120']);
       await t.enterText(find.byType(TextFormField).at(0), 'عنوان جديد');
       await t.enterText(find.byType(TextFormField).at(1), 'نص جديد');
-      await tap(t, 'معاينة عدد المستلمين');
+      await tap(t, 'معاينة وإرسال');
       expect(
         find.text('سيصل الإشعار إلى 24 من أولياء الأمور ولا يمكن سحبه'),
         findsOneWidget,
@@ -213,7 +207,7 @@ void main() {
       expect(posts.single['dry_run'], true);
       await tap(t, 'إلغاء');
       expect(posts.length, 1);
-      await tap(t, 'معاينة عدد المستلمين');
+      await tap(t, 'معاينة وإرسال');
       await tap(t, 'إرسال الإشعار');
       expect(posts.length, 3);
       expect(posts.last.containsKey('dry_run'), false);
