@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_colors.dart';
+import '../core/assets.dart';
 import '../widgets/login/login_brand_panel.dart';
 import '../widgets/login/login_form_panel.dart';
 
@@ -144,13 +145,14 @@ class _Logo extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     children: [
       Container(
-        width: 44,
-        height: 44,
+        width: 52,
+        height: 52,
+        padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: .14),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(AppRadius.control),
         ),
-        child: const Icon(Icons.school_outlined, color: AppColors.amber),
+        child: Image.asset(appLogoAsset, fit: BoxFit.contain),
       ),
       const SizedBox(width: 12),
       const Expanded(

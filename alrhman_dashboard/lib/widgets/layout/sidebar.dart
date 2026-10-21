@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/app_colors.dart';
+import '../../core/assets.dart';
 import '../../core/responsive.dart';
 import '../../models/navigation_tab.dart';
 import '../common/app_toast.dart';
@@ -137,17 +138,14 @@ class _Brand extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 44,
-          height: 44,
+          width: 48,
+          height: 48,
+          padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: .14),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(AppRadius.control),
           ),
-          child: const Icon(
-            Icons.school_outlined,
-            size: 24,
-            color: AppColors.amber,
-          ),
+          child: Image.asset(appLogoAsset, fit: BoxFit.contain),
         ),
         const SizedBox(width: 12),
         const Expanded(

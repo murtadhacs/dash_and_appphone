@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../api/api_exception.dart';
 import '../../api/app_services.dart';
 import '../../core/app_colors.dart';
+import '../../core/assets.dart';
 import '../common/app_button.dart';
 
 /// حقول الدخول المدمجة في خلفية الصفحة مع الحفاظ على المصادقة.
@@ -55,6 +56,21 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Container(
+            width: 72,
+            height: 72,
+            padding: const EdgeInsets.all(6),
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: AppShadows.card,
+            ),
+            child: Image.asset(appLogoAsset, fit: BoxFit.contain),
+          ),
+        ),
         const Text(
           'تسجيل الدخول',
           style: TextStyle(
