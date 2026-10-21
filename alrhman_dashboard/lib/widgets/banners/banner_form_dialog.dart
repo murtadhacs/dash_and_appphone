@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../api/admin_api.dart';
 import '../../api/api_exception.dart';
@@ -150,7 +151,7 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
   Widget build(BuildContext context) => PopScope(
     canPop: !_busy,
     child: AppDialog(
-      icon: Icons.image_outlined,
+      icon: LucideIcons.image,
       title: widget.editing == null ? 'إضافة بانر' : 'تعديل البانر',
       subtitle: 'يظهر في تطبيق ولي الأمر بنسبة 16:7',
       maxWidth: 580,
@@ -179,7 +180,7 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
                         ),
                         child: Center(
                           child: Icon(
-                            Icons.add_photo_alternate_outlined,
+                            LucideIcons.imagePlus,
                             size: 44,
                             color: Colors.white,
                           ),
@@ -199,7 +200,7 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
                       : (_bytes == null && widget.image == null
                             ? 'رفع الصورة'
                             : 'استبدال الصورة'),
-                  icon: Icons.upload_rounded,
+                  icon: LucideIcons.upload,
                   style: AppButtonStyle.outline,
                   small: true,
                   onPressed: _busy ? null : _pick,
@@ -288,7 +289,7 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
                 ),
                 AppButton(
                   label: _saving ? 'جارٍ الحفظ…' : 'حفظ البانر',
-                  icon: Icons.check_rounded,
+                  icon: LucideIcons.check,
                   style: AppButtonStyle.amber,
                   onPressed: _busy ? null : _save,
                 ),

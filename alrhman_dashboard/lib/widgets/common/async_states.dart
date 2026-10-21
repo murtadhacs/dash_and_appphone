@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import 'app_button.dart';
@@ -45,7 +46,7 @@ class ErrorView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
-              Icons.cloud_off_outlined,
+              LucideIcons.cloudOff,
               size: 36,
               color: AppColors.textMuted,
             ),
@@ -58,7 +59,7 @@ class ErrorView extends StatelessWidget {
             const SizedBox(height: 16),
             AppButton(
               label: 'إعادة المحاولة',
-              icon: Icons.refresh,
+              icon: LucideIcons.refreshCw,
               style: AppButtonStyle.soft,
               onPressed: onRetry,
             ),
@@ -76,7 +77,7 @@ class EmptyView extends StatelessWidget {
   const EmptyView({
     super.key,
     required this.message,
-    this.icon = Icons.inbox_outlined,
+    this.icon = LucideIcons.inbox,
   });
 
   @override

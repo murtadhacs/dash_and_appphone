@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import '../../models/attendance_entry.dart';
@@ -34,14 +35,14 @@ class AttendanceKpiRow extends StatelessWidget {
         KpiTile(
           label: 'الكل',
           value: '$total',
-          icon: Icons.groups_outlined,
+          icon: LucideIcons.users,
           iconBackground: AppColors.tint,
           iconForeground: AppColors.brand,
         ),
         KpiTile(
           label: 'الحاضرون',
           value: '$present',
-          icon: Icons.check_rounded,
+          icon: LucideIcons.check,
           iconBackground: AppColors.okBg,
           iconForeground: AppColors.green,
           extra: pct(present),
@@ -51,7 +52,7 @@ class AttendanceKpiRow extends StatelessWidget {
           KpiTile(
             label: 'الغائبون',
             value: '$absent',
-            icon: Icons.person_off_outlined,
+            icon: LucideIcons.userX,
             iconBackground: AppColors.badBg,
             iconForeground: AppColors.red,
             extra: pct(absent),
@@ -60,7 +61,7 @@ class AttendanceKpiRow extends StatelessWidget {
         KpiTile(
           label: 'المجازون',
           value: '$excused',
-          icon: Icons.event_busy_outlined,
+          icon: LucideIcons.calendarX,
           iconBackground: AppColors.warnBg,
           iconForeground: AppColors.warnText,
           extra: pct(excused),

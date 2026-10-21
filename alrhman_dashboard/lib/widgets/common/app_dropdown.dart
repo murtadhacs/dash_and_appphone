@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import 'app_text_field.dart';
@@ -34,7 +35,7 @@ class AppDropdown<T> extends StatelessWidget {
       isDense: true,
       borderRadius: BorderRadius.circular(AppRadius.control),
       icon: const Icon(
-        Icons.keyboard_arrow_down_rounded,
+        LucideIcons.chevronDown,
         size: 18,
         color: AppColors.textMuted,
       ),

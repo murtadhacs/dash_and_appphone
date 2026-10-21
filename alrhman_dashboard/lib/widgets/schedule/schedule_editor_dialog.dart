@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../api/admin_api.dart';
 import '../../api/api_exception.dart';
 import '../../core/app_colors.dart';
@@ -96,7 +97,7 @@ class _ScheduleEditorDialogState extends State<ScheduleEditorDialog> {
     final confirmed = await showConfirmDialog(
       context,
       title: 'حفظ جدول الصف',
-      icon: Icons.save_outlined,
+      icon: LucideIcons.save,
       message:
           'الصف: ${widget.schoolClass.label}\n${periods.length} حصة موزّعة على ${_counts.values.where((c) => c > 0).length} أيام.\n'
           '${periods.isEmpty ? 'سيُمسح الجدول الحالي.' : 'سيحل هذا الجدول محل الجدول الحالي ويظهر لأولياء الأمور.'}'
@@ -130,7 +131,7 @@ class _ScheduleEditorDialogState extends State<ScheduleEditorDialog> {
   Widget build(BuildContext context) => PopScope(
     canPop: !_saving,
     child: AppDialog(
-      icon: Icons.calendar_today_outlined,
+      icon: LucideIcons.calendar,
       title:
           '${widget.periods.isEmpty ? 'إعداد' : 'تعديل'} جدول ${widget.schoolClass.label}',
       subtitle: 'كل يوم يحتوي 5 أو 6 حصص، ويمكن ترك يوم كامل دون حصص',
@@ -248,7 +249,7 @@ class _ScheduleEditorDialogState extends State<ScheduleEditorDialog> {
               ),
               AppButton(
                 label: _saving ? 'جارٍ الحفظ…' : 'حفظ الجدول',
-                icon: Icons.save_outlined,
+                icon: LucideIcons.save,
                 style: AppButtonStyle.amber,
                 onPressed: _saving ? null : _save,
               ),

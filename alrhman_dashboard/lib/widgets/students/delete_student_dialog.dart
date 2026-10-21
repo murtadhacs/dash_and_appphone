@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import '../../models/student.dart';
@@ -22,7 +23,7 @@ class DeleteStudentDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppDialog(
-      icon: Icons.person_off_outlined,
+      icon: LucideIcons.userX,
       iconBackground: AppColors.badBg,
       iconForeground: AppColors.red,
       title: 'تأكيد تعطيل الطالب',
@@ -66,7 +67,7 @@ class DeleteStudentDialog extends StatelessWidget {
               ),
               AppButton(
                 label: 'نعم، عطّل الطالب',
-                icon: Icons.person_off_outlined,
+                icon: LucideIcons.userX,
                 style: AppButtonStyle.danger,
                 onPressed: () => Navigator.of(context).pop(true),
               ),

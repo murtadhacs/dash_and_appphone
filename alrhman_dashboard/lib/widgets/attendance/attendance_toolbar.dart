@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import '../common/app_button.dart';
@@ -42,7 +43,7 @@ class AttendanceDateBar extends StatelessWidget {
       children: [
         HeaderSquareButton(
           tooltip: 'اليوم السابق',
-          icon: Icons.chevron_right_rounded,
+          icon: LucideIcons.chevronRight,
           onTap: onPrev,
         ),
         _DateChip(label: dateLabel, onTap: onPickDate),
@@ -50,14 +51,14 @@ class AttendanceDateBar extends StatelessWidget {
           opacity: canGoNext ? 1 : .4,
           child: HeaderSquareButton(
             tooltip: 'اليوم التالي',
-            icon: Icons.chevron_left_rounded,
+            icon: LucideIcons.chevronLeft,
             onTap: canGoNext ? onNext : null,
           ),
         ),
         const SizedBox(width: 4),
         AppButton(
           label: 'اليوم',
-          icon: Icons.schedule_rounded,
+          icon: LucideIcons.clock,
           style: AppButtonStyle.outline,
           small: true,
           onPressed: onToday,
@@ -133,7 +134,7 @@ class _DateChipState extends State<_DateChip> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
-                  Icons.calendar_today_outlined,
+                  LucideIcons.calendar,
                   size: 16,
                   color: AppColors.textSub,
                 ),
@@ -200,13 +201,13 @@ class AttendanceTools extends StatelessWidget {
       children: [
         AppButton(
           label: exporting ? 'جارٍ التنزيل...' : 'تصدير Excel',
-          icon: Icons.download_rounded,
+          icon: LucideIcons.download,
           style: AppButtonStyle.outline,
           onPressed: exporting ? null : onExport,
         ),
         AppButton(
           label: 'تسجيل حضور يدوي',
-          icon: Icons.lock_outline_rounded,
+          icon: LucideIcons.lock,
           style: AppButtonStyle.outline,
           tooltip: 'التسجيل اليدوي غير مربوط بالخادم حالياً',
           onPressed: onManualAttendance,

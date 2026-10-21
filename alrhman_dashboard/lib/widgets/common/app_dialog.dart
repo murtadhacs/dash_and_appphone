@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import 'app_button.dart';
@@ -94,7 +95,7 @@ class AppDialog extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
-                        Icons.close,
+                        LucideIcons.x,
                         size: 18,
                         color: AppColors.textSub,
                       ),
@@ -148,14 +149,14 @@ class DialogNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (bg, fg, defaultIcon) = switch (tone) {
-      NoteTone.info => (AppColors.tint, AppColors.brand, Icons.info_outline),
+      NoteTone.info => (AppColors.tint, AppColors.brand, LucideIcons.info),
       NoteTone.warn => (
         AppColors.warnBg,
         const Color(0xFFB26B00),
-        Icons.warning_amber_rounded,
+        LucideIcons.triangleAlert,
       ),
-      NoteTone.ok => (AppColors.okBg, const Color(0xFF0B8F63), Icons.check),
-      NoteTone.bad => (AppColors.badBg, AppColors.redDark, Icons.error_outline),
+      NoteTone.ok => (AppColors.okBg, const Color(0xFF0B8F63), LucideIcons.check),
+      NoteTone.bad => (AppColors.badBg, AppColors.redDark, LucideIcons.circleAlert),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -191,7 +192,7 @@ Future<bool> showConfirmDialog(
   required String confirmLabel,
   String cancelLabel = 'تراجع',
   bool danger = false,
-  IconData icon = Icons.help_outline_rounded,
+  IconData icon = LucideIcons.circleQuestionMark,
   Widget? extra,
 }) async {
   final ok = await showDialog<bool>(

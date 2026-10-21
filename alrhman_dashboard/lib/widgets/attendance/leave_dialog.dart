@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../api/api_exception.dart';
 import '../../core/attendance_policy.dart';
 import '../../core/baghdad_time.dart';
@@ -179,7 +180,7 @@ class _LeaveDialogState extends State<LeaveDialog> {
       suffixIcon: IconButton(
         tooltip: 'اختيار تاريخ',
         onPressed: _locked ? null : () => _pick(controller),
-        icon: const Icon(Icons.calendar_today_outlined, size: 18),
+        icon: const Icon(LucideIcons.calendar, size: 18),
         color: AppColors.textMuted,
       ),
     ),
@@ -219,7 +220,7 @@ class _LeaveDialogState extends State<LeaveDialog> {
       canPop: !_saving,
       child: AppDialog(
         maxWidth: 600,
-        icon: Icons.event_busy_outlined,
+        icon: LucideIcons.calendarX,
         iconBackground: AppColors.warnBg,
         iconForeground: AppColors.warnText,
         title: 'منح إجازة',
@@ -233,7 +234,7 @@ class _LeaveDialogState extends State<LeaveDialog> {
               const DialogNote(
                 'سجّل الإجازات قبل 12:00 بتوقيت بغداد',
                 tone: NoteTone.warn,
-                icon: Icons.schedule_rounded,
+                icon: LucideIcons.clock,
               ),
               const SizedBox(height: 16),
               if (_error != null)
@@ -263,7 +264,7 @@ class _LeaveDialogState extends State<LeaveDialog> {
                       decoration: appInputDecoration(
                         hint: 'ابحث بالاسم أو الصف أو رقم البصمة',
                         prefix: const Icon(
-                          Icons.search_rounded,
+                          LucideIcons.search,
                           size: 18,
                           color: AppColors.textMuted,
                         ),
@@ -349,7 +350,7 @@ class _LeaveDialogState extends State<LeaveDialog> {
                               ),
                             ),
                             const Icon(
-                              Icons.check_circle_rounded,
+                              LucideIcons.circleCheck,
                               color: AppColors.green,
                               size: 20,
                             ),
@@ -384,7 +385,7 @@ class _LeaveDialogState extends State<LeaveDialog> {
                     DialogNote(
                       '${_days.length} أيام دوام (الجمعة والسبت مستثناتان). ستُرسل كل يوم على حدة.',
                       tone: NoteTone.ok,
-                      icon: Icons.check_rounded,
+                      icon: LucideIcons.check,
                     ),
                     const SizedBox(height: 14),
                     const FieldLabel('السبب / ملاحظات'),
@@ -435,7 +436,7 @@ class _LeaveDialogState extends State<LeaveDialog> {
                     ),
                   if (!_complete)
                     AppButton(
-                      icon: Icons.check_rounded,
+                      icon: LucideIcons.check,
                       style: AppButtonStyle.amber,
                       onPressed: _saving ? null : _submit,
                       label: _saving

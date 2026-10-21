@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../api/api_exception.dart';
 import '../api/app_services.dart';
@@ -146,7 +147,7 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
           actions: [
             AppButton(
               label: _loading ? 'جارٍ التحديث…' : 'تحديث',
-              icon: Icons.refresh_rounded,
+              icon: LucideIcons.refreshCw,
               style: AppButtonStyle.outline,
               onPressed: _loading ? null : () => _load(),
             ),
@@ -163,28 +164,28 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
               KpiTile(
                 label: 'العمليات المحمّلة',
                 value: '${_items.length}',
-                icon: Icons.description_outlined,
+                icon: LucideIcons.fileText,
                 iconBackground: AppColors.tint,
                 iconForeground: AppColors.brand,
               ),
               KpiTile(
                 label: 'ناجحة',
                 value: '${count('success')}',
-                icon: Icons.check_rounded,
+                icon: LucideIcons.check,
                 iconBackground: AppColors.okBg,
                 iconForeground: AppColors.green,
               ),
               KpiTile(
                 label: 'مرفوضة',
                 value: '${count('rejected')}',
-                icon: Icons.lock_outline_rounded,
+                icon: LucideIcons.lock,
                 iconBackground: AppColors.warnBg,
                 iconForeground: AppColors.warnText,
               ),
               KpiTile(
                 label: 'فاشلة',
                 value: '${count('failed')}',
-                icon: Icons.error_outline_rounded,
+                icon: LucideIcons.circleAlert,
                 iconBackground: AppColors.badBg,
                 iconForeground: AppColors.red,
               ),
@@ -210,7 +211,7 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
                     child: Row(
                       children: [
                         const Icon(
-                          Icons.error_outline,
+                          LucideIcons.circleAlert,
                           size: 18,
                           color: AppColors.redDark,
                         ),
@@ -226,7 +227,7 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
                         ),
                         AppButton(
                           label: 'إعادة المحاولة',
-                          icon: Icons.refresh_rounded,
+                          icon: LucideIcons.refreshCw,
                           style: AppButtonStyle.outline,
                           small: true,
                           onPressed: _loading
@@ -241,7 +242,7 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
                 if (_items.isEmpty)
                   const EmptyView(
                     message: 'لا توجد عمليات مسجّلة بعد.',
-                    icon: Icons.history,
+                    icon: LucideIcons.history,
                   )
                 else
                   _table(),
@@ -252,7 +253,7 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
                       label: _loading
                           ? 'جارٍ التحميل…'
                           : 'تحميل المزيد من السجلات',
-                      icon: Icons.schedule_rounded,
+                      icon: LucideIcons.clock,
                       style: AppButtonStyle.outline,
                       onPressed: _loading ? null : () => _load(more: true),
                     ),

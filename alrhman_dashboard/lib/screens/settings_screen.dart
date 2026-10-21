@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../api/admin_api.dart';
 import '../api/api_exception.dart';
@@ -120,7 +121,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       showAppToast(
         context,
         e.message,
-        icon: Icons.error_outline,
+        icon: LucideIcons.circleAlert,
         iconColor: AppColors.red,
       );
     }
@@ -193,7 +194,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: const Icon(
-                          Icons.tune_rounded,
+                          LucideIcons.slidersHorizontal,
                           size: 24,
                           color: AppColors.brand,
                         ),
@@ -214,7 +215,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 6),
                   AppTextField(
                     controller: _name,
-                    prefixIcon: Icons.school_outlined,
+                    prefixIcon: LucideIcons.graduationCap,
                     requiredField: true,
                     onChanged: (_) => setState(() {}),
                   ),
@@ -229,7 +230,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ltr: true,
                     hint: '07XXXXXXXXX',
                     keyboardType: TextInputType.phone,
-                    prefixIcon: Icons.chat_bubble_outline,
+                    prefixIcon: LucideIcons.messageCircle,
                     validator: (v) {
                       final t = v?.trim() ?? '';
                       if (t.isEmpty) return null; // اختياري
@@ -251,13 +252,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       AppButton(
                         label: _saving ? 'جارٍ الحفظ...' : 'حفظ التغييرات',
-                        icon: Icons.save_outlined,
+                        icon: LucideIcons.save,
                         style: AppButtonStyle.amber,
                         onPressed: (!_dirty || _saving) ? null : _save,
                       ),
                       AppButton(
                         label: 'استعادة القيم المحفوظة',
-                        icon: Icons.undo_rounded,
+                        icon: LucideIcons.undo2,
                         style: AppButtonStyle.outline,
                         onPressed: (!_dirty || _saving) ? null : _reset,
                       ),

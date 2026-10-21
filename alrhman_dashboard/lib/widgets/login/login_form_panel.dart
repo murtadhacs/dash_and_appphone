@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../api/api_exception.dart';
 import '../../api/app_services.dart';
@@ -98,7 +99,7 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
                 _field(
                   controller: _username,
                   hint: 'أدخل اسم المستخدم',
-                  icon: Icons.person_outline_rounded,
+                  icon: LucideIcons.user,
                   autofillHints: const [AutofillHints.username],
                 ),
                 const SizedBox(height: 20),
@@ -107,7 +108,7 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
                 _field(
                   controller: _password,
                   hint: 'أدخل كلمة المرور',
-                  icon: Icons.lock_outline_rounded,
+                  icon: LucideIcons.lock,
                   password: true,
                   autofillHints: const [AutofillHints.password],
                 ),
@@ -181,8 +182,8 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
                 onPressed: () => setState(() => _showPassword = !_showPassword),
                 icon: Icon(
                   _showPassword
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
+                      ? LucideIcons.eyeOff
+                      : LucideIcons.eye,
                   size: 19,
                   color: AppColors.textMuted,
                 ),
@@ -210,7 +211,7 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.error_outline, size: 16, color: AppColors.redDark),
+          const Icon(LucideIcons.circleAlert, size: 16, color: AppColors.redDark),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -224,7 +225,7 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
           ),
           InkWell(
             onTap: () => setState(() => _error = null),
-            child: const Icon(Icons.close, size: 16, color: AppColors.redDark),
+            child: const Icon(LucideIcons.x, size: 16, color: AppColors.redDark),
           ),
         ],
       ),
@@ -250,7 +251,7 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
         )
       : AppButton(
           label: 'دخول إلى اللوحة',
-          icon: Icons.login_rounded,
+          icon: LucideIcons.logIn,
           style: AppButtonStyle.amber,
           height: 50,
           expand: true,

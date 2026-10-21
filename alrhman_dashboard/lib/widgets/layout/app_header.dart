@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/baghdad_time.dart';
@@ -40,7 +41,7 @@ class PageHeader extends StatelessWidget {
         if (shell?.showMenuButton ?? false) ...[
           HeaderSquareButton(
             tooltip: 'القائمة',
-            icon: Icons.menu_rounded,
+            icon: LucideIcons.menu,
             onTap: shell!.onOpenMenu,
           ),
           const SizedBox(width: 12),
@@ -70,7 +71,7 @@ class PageHeader extends StatelessWidget {
       if (shell != null)
         HeaderSquareButton(
           tooltip: 'تسجيل الخروج',
-          icon: Icons.logout_rounded,
+          icon: LucideIcons.logOut,
           onTap: shell.onLogout,
           hoverColor: AppColors.redSoft,
           hoverIconColor: AppColors.red,
@@ -142,7 +143,7 @@ class HeaderSearch extends StatelessWidget {
           hintText: hint,
           hintStyle: const TextStyle(fontSize: 13, color: AppColors.textMuted),
           prefixIcon: const Icon(
-            Icons.search_rounded,
+            LucideIcons.search,
             size: 20,
             color: AppColors.textMuted,
           ),
@@ -154,7 +155,7 @@ class HeaderSearch extends StatelessWidget {
                     controller.clear();
                     onChanged('');
                   },
-                  icon: const Icon(Icons.close_rounded, size: 18),
+                  icon: const Icon(LucideIcons.x, size: 18),
                   color: AppColors.textMuted,
                 ),
           isDense: true,
@@ -355,7 +356,7 @@ class _BaghdadClockState extends State<_BaghdadClock> {
       message: 'توقيت بغداد',
       child: HeaderChip(
         leading: const Icon(
-          Icons.schedule_rounded,
+          LucideIcons.clock,
           size: 18,
           color: AppColors.textSub,
         ),

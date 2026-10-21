@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/baghdad_time.dart';
@@ -47,7 +48,7 @@ class DevicesSummaryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
-                  none ? Icons.warning_amber_rounded : Icons.memory_rounded,
+                  none ? LucideIcons.triangleAlert : LucideIcons.cpu,
                   size: 24,
                   color: none ? AppColors.red : AppColors.brand,
                 ),
@@ -88,7 +89,7 @@ class DevicesSummaryCard extends StatelessWidget {
               const SizedBox(width: 18),
               AppButton(
                 label: 'إدارة الأجهزة',
-                icon: Icons.memory_rounded,
+                icon: LucideIcons.cpu,
                 style: none ? AppButtonStyle.amber : AppButtonStyle.primary,
                 onPressed: onManageDevices,
               ),

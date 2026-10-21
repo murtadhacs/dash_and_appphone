@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../api/admin_api.dart';
 import '../api/api_exception.dart';
 import '../api/app_services.dart';
@@ -132,7 +133,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     final selected = await showDialog<ScheduleClass>(
       context: context,
       builder: (context) => AppDialog(
-        icon: Icons.calendar_today_outlined,
+        icon: LucideIcons.calendar,
         title: 'اختر الصف لإعداد جدوله',
         subtitle: 'يُفتح محرر الجدول الأسبوعي للصف المختار',
         maxWidth: 520,
@@ -203,7 +204,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         showAppToast(
           context,
           scheduleError(e),
-          icon: Icons.error_outline,
+          icon: LucideIcons.circleAlert,
           iconColor: AppColors.red,
         );
       }
@@ -232,7 +233,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       ),
       cta: AppButton(
         label: 'إضافة جدول',
-        icon: Icons.add_rounded,
+        icon: LucideIcons.plus,
         style: AppButtonStyle.amber,
         onPressed: _classes == null || _editing ? null : _quickSchedule,
       ),
@@ -306,7 +307,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
           child: const Icon(
-            Icons.calendar_today_outlined,
+            LucideIcons.calendar,
             size: 24,
             color: AppColors.green,
           ),
@@ -428,7 +429,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         const SizedBox(width: 12),
         SegTabs<bool>(
           items: const [(false, ''), (true, '')],
-          icons: const [Icons.view_list_rounded, Icons.grid_view_rounded],
+          icons: const [LucideIcons.list, LucideIcons.layoutGrid],
           tooltips: const ['قائمة الصفوف', 'عرض شبكي'],
           value: _grid,
           onChanged: (v) => setState(() => _grid = v),
@@ -436,7 +437,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         const SizedBox(width: 10),
         AppButton(
           label: 'تحديث',
-          icon: Icons.refresh_rounded,
+          icon: LucideIcons.refreshCw,
           style: AppButtonStyle.outline,
           small: true,
           onPressed: _loading || _editing ? null : _load,
@@ -519,7 +520,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             Tooltip(
               message: 'السابق',
               child: PageButton(
-                icon: Icons.chevron_right_rounded,
+                icon: LucideIcons.chevronRight,
                 bordered: true,
                 onTap: page > 0 ? () => setState(() => _page = page - 1) : null,
               ),
@@ -537,7 +538,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             Tooltip(
               message: 'التالي',
               child: PageButton(
-                icon: Icons.chevron_left_rounded,
+                icon: LucideIcons.chevronLeft,
                 bordered: true,
                 onTap: page + 1 < pages
                     ? () => setState(() => _page = page + 1)
@@ -570,7 +571,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 label: (_periods?.isEmpty ?? _selected!.periodCount == 0)
                     ? 'إعداد الجدول'
                     : 'تعديل الجدول',
-                icon: Icons.edit_outlined,
+                icon: LucideIcons.pencil,
                 style: AppButtonStyle.primary,
                 small: true,
                 onPressed: _editing ? null : () => _edit(_selected!),
@@ -596,7 +597,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         else if (_periods != null && _periods!.isEmpty) ...[
           const SizedBox(height: 12),
           const Icon(
-            Icons.calendar_today_outlined,
+            LucideIcons.calendar,
             size: 38,
             color: AppColors.outline,
           ),
@@ -610,7 +611,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           Center(
             child: AppButton(
               label: 'إعداد جدول الصف',
-              icon: Icons.add_rounded,
+              icon: LucideIcons.plus,
               style: AppButtonStyle.amber,
               onPressed: _editing ? null : () => _edit(_selected!),
             ),
@@ -861,7 +862,7 @@ class _ClassGridCard extends StatelessWidget {
               const SizedBox(height: 10),
               AppButton(
                 label: c.periodCount == 0 ? 'إعداد' : 'تعديل',
-                icon: Icons.edit_outlined,
+                icon: LucideIcons.pencil,
                 style: AppButtonStyle.outline,
                 small: true,
                 onPressed: onEdit,

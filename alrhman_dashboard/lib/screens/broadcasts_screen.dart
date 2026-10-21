@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../api/app_services.dart';
 import '../api/api_exception.dart';
 import '../core/app_colors.dart';
@@ -132,7 +133,7 @@ class _BroadcastsScreenState extends State<BroadcastsScreen> {
         context: context,
         barrierDismissible: false,
         builder: (ctx) => AppDialog(
-          icon: Icons.send_rounded,
+          icon: LucideIcons.send,
           title: 'تأكيد إرسال الإشعار',
           subtitle: 'راجع النص قبل الإرسال؛ لا يمكن تعديله بعد ذلك',
           maxWidth: 560,
@@ -184,7 +185,7 @@ class _BroadcastsScreenState extends State<BroadcastsScreen> {
                   ),
                   AppButton(
                     label: 'إرسال الإشعار',
-                    icon: Icons.send_rounded,
+                    icon: LucideIcons.send,
                     style: AppButtonStyle.amber,
                     onPressed: () => Navigator.pop(ctx, true),
                   ),
@@ -436,7 +437,7 @@ class _BroadcastsScreenState extends State<BroadcastsScreen> {
             const SizedBox(height: 16),
             AppButton(
               label: _sending ? 'جارٍ التحقق والإرسال…' : 'معاينة وإرسال',
-              icon: Icons.send_rounded,
+              icon: LucideIcons.send,
               style: AppButtonStyle.amber,
               height: 50,
               expand: true,
@@ -461,7 +462,7 @@ class _BroadcastsScreenState extends State<BroadcastsScreen> {
             trailing: [
               AppButton(
                 label: 'تحديث',
-                icon: Icons.refresh_rounded,
+                icon: LucideIcons.refreshCw,
                 style: AppButtonStyle.outline,
                 small: true,
                 onPressed: _loading ? null : _loadLog,
@@ -492,7 +493,7 @@ class _BroadcastsScreenState extends State<BroadcastsScreen> {
               alignment: AlignmentDirectional.centerStart,
               child: AppButton(
                 label: 'تحميل إشعارات أقدم',
-                icon: Icons.schedule_rounded,
+                icon: LucideIcons.clock,
                 style: AppButtonStyle.outline,
                 small: true,
                 onPressed: _loading ? null : () => _loadLog(more: true),
@@ -510,7 +511,7 @@ class _BroadcastsScreenState extends State<BroadcastsScreen> {
           title: 'التواصل والإعلانات',
           cta: AppButton(
             label: 'تحديث السجل',
-            icon: Icons.refresh_rounded,
+            icon: LucideIcons.refreshCw,
             style: AppButtonStyle.outline,
             onPressed: _loading ? null : _loadLog,
           ),

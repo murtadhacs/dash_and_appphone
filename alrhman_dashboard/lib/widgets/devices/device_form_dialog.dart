@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../api/api_exception.dart';
 import '../../core/app_colors.dart';
@@ -81,7 +82,7 @@ class _DeviceFormDialogState extends State<DeviceFormDialog> {
   Widget build(BuildContext context) {
     return AppDialog(
       maxWidth: 540,
-      icon: Icons.memory_rounded,
+      icon: LucideIcons.cpu,
       title: _isEdit ? 'تعديل موقع الجهاز' : 'إضافة جهاز',
       subtitle: _isEdit
           ? widget.editing!.serialNumber
@@ -143,7 +144,7 @@ class _DeviceFormDialogState extends State<DeviceFormDialog> {
                   label: _saving
                       ? 'جارٍ الحفظ...'
                       : (_isEdit ? 'حفظ الموقع' : 'إضافة الجهاز'),
-                  icon: _isEdit ? Icons.save_outlined : Icons.add_rounded,
+                  icon: _isEdit ? LucideIcons.save : LucideIcons.plus,
                   style: AppButtonStyle.amber,
                   onPressed: _saving ? null : _submit,
                 ),

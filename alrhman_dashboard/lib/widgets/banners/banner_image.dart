@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../api/api_exception.dart';
 import '../../core/app_colors.dart';
@@ -35,7 +36,7 @@ class BannerImage extends StatelessWidget {
           snapshot.data!,
           fit: fit,
           errorBuilder: (_, _, _) =>
-              const Center(child: Icon(Icons.broken_image_outlined)),
+              const Center(child: Icon(LucideIcons.imageOff)),
         );
       },
     ),

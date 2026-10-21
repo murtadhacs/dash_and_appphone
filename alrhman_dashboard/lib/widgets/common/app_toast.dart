@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 
@@ -7,7 +8,7 @@ void showAppToast(
   BuildContext context,
   String message, {
   Color background = AppColors.toastDark,
-  IconData icon = Icons.check_circle_outline,
+  IconData icon = LucideIcons.circleCheck,
   Color iconColor = AppColors.greenMint,
   String? subtitle,
 }) {

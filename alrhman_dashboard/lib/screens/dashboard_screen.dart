@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../api/admin_api.dart';
 import '../api/api_exception.dart';
@@ -146,7 +147,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _toastError(String message) => showAppToast(
     context,
     message,
-    icon: Icons.error_outline,
+    icon: LucideIcons.circleAlert,
     iconColor: AppColors.red,
   );
 
@@ -226,21 +227,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
             KpiTile(
               label: 'إجمالي الطلاب',
               value: '${s.totalStudents}',
-              icon: Icons.school_outlined,
+              icon: LucideIcons.graduationCap,
               iconBackground: AppColors.tint,
               iconForeground: AppColors.brand,
             ),
             KpiTile(
               label: 'أولياء الأمور',
               value: '${s.totalParents}',
-              icon: Icons.groups_outlined,
+              icon: LucideIcons.users,
               iconBackground: AppColors.tint,
               iconForeground: AppColors.brand,
             ),
             KpiTile(
               label: 'الحاضرون اليوم',
               value: '${s.presentToday}',
-              icon: Icons.check_rounded,
+              icon: LucideIcons.check,
               iconBackground: AppColors.okBg,
               iconForeground: AppColors.green,
               extra: pct(s.presentToday),
@@ -249,7 +250,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             KpiTile(
               label: 'الغائبون اليوم',
               value: '${s.absentToday}',
-              icon: Icons.person_off_outlined,
+              icon: LucideIcons.userX,
               iconBackground: AppColors.badBg,
               iconForeground: AppColors.red,
               extra: pct(s.absentToday),
@@ -258,7 +259,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             KpiTile(
               label: 'المجازون اليوم',
               value: '${s.excusedToday}',
-              icon: Icons.event_busy_outlined,
+              icon: LucideIcons.calendarX,
               iconBackground: AppColors.warnBg,
               iconForeground: AppColors.warnText,
               extra: pct(s.excusedToday),

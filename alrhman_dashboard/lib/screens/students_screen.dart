@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../api/admin_api.dart';
 import '../api/api_exception.dart';
@@ -198,7 +199,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
   void _toastError(String message) => showAppToast(
     context,
     message,
-    icon: Icons.error_outline,
+    icon: LucideIcons.circleAlert,
     iconColor: AppColors.red,
   );
 
@@ -219,7 +220,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
       ),
       cta: AppButton(
         label: 'إضافة طالب',
-        icon: Icons.person_add_alt_1_outlined,
+        icon: LucideIcons.userPlus,
         style: AppButtonStyle.amber,
         onPressed: _students == null ? null : _openAdd,
       ),
@@ -257,21 +258,21 @@ class _StudentsScreenState extends State<StudentsScreen> {
             KpiTile(
               label: 'الطلاب',
               value: '${all.length}',
-              icon: Icons.school_outlined,
+              icon: LucideIcons.graduationCap,
               iconBackground: AppColors.tint,
               iconForeground: AppColors.brand,
             ),
             KpiTile(
               label: 'أولياء الأمور',
               value: '$parents',
-              icon: Icons.groups_outlined,
+              icon: LucideIcons.users,
               iconBackground: AppColors.okBg,
               iconForeground: AppColors.green,
             ),
             KpiTile(
               label: 'بدون RFID حقيقي',
               value: '$withoutRfid',
-              icon: Icons.memory_rounded,
+              icon: LucideIcons.cpu,
               iconBackground: AppColors.warnBg,
               iconForeground: AppColors.warnText,
               note: withoutRfid == 0
@@ -284,7 +285,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
               child: Center(
                 child: AppButton(
                   label: 'تصدير Excel',
-                  icon: Icons.download_rounded,
+                  icon: LucideIcons.download,
                   style: AppButtonStyle.outline,
                   onPressed: _exportExcel,
                 ),
@@ -322,7 +323,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
             ),
             AppButton(
               label: 'إعادة ضبط',
-              icon: Icons.undo_rounded,
+              icon: LucideIcons.undo2,
               style: AppButtonStyle.outline,
               onPressed: _reset,
             ),

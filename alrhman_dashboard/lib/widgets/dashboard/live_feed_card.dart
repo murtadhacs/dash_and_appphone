@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import '../../models/attendance_entry.dart';
@@ -55,7 +56,7 @@ class LiveFeedCard extends StatelessWidget {
             trailing: [
               AppButton(
                 label: 'عرض سجل الحضور',
-                icon: Icons.chevron_left_rounded,
+                icon: LucideIcons.chevronLeft,
                 style: AppButtonStyle.outline,
                 small: true,
                 onPressed: onOpenFullLog,
@@ -63,7 +64,7 @@ class LiveFeedCard extends StatelessWidget {
               Tooltip(
                 message: 'تحديث الآن',
                 child: IconActionButton(
-                  icon: Icons.refresh_rounded,
+                  icon: LucideIcons.refreshCw,
                   size: 36,
                   background: Colors.white,
                   hoverBackground: AppColors.canvas,
@@ -76,7 +77,7 @@ class LiveFeedCard extends StatelessWidget {
           if (shown.isEmpty)
             const EmptyView(
               message: 'لا توجد بصمات دخول مسجّلة اليوم بعد',
-              icon: Icons.fingerprint,
+              icon: LucideIcons.fingerprint,
             )
           else
             for (var i = 0; i < shown.length; i++)

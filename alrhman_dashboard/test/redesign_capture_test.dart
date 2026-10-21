@@ -178,6 +178,13 @@ Future<void> _loadFonts() async {
       ),
     );
   await icons.load();
+  final lucidePath =
+      '${Platform.environment['LOCALAPPDATA']}/Pub/Cache/hosted/pub.dev/lucide_icons_flutter-4.0.1/assets/lucide.ttf';
+  final lucide = FontLoader('packages/lucide_icons_flutter/Lucide')
+    ..addFont(
+      Future.value(ByteData.sublistView(File(lucidePath).readAsBytesSync())),
+    );
+  await lucide.load();
 }
 
 FakeServer _server() {

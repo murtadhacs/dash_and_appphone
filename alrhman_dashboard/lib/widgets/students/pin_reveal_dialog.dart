@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import '../common/app_button.dart';
@@ -52,7 +53,7 @@ class _PinRevealDialogState extends State<PinRevealDialog> {
   @override
   Widget build(BuildContext context) {
     return AppDialog(
-      icon: Icons.key_rounded,
+      icon: LucideIcons.keyRound,
       iconBackground: AppColors.okBg,
       iconForeground: AppColors.green,
       title: 'رمز دخول ولي الأمر',
@@ -106,7 +107,7 @@ class _PinRevealDialogState extends State<PinRevealDialog> {
             children: [
               AppButton(
                 label: 'نسخ الرمز',
-                icon: Icons.copy_rounded,
+                icon: LucideIcons.copy,
                 style: AppButtonStyle.outline,
                 small: true,
                 onPressed: _copy,
@@ -116,8 +117,8 @@ class _PinRevealDialogState extends State<PinRevealDialog> {
                 label: _show ? 'إخفاء' : 'إظهار',
                 tooltip: _show ? 'إخفاء' : 'إظهار',
                 icon: _show
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
+                    ? LucideIcons.eyeOff
+                    : LucideIcons.eye,
                 style: AppButtonStyle.outline,
                 small: true,
                 onPressed: () => setState(() => _show = !_show),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 
@@ -20,7 +21,7 @@ class AppAvatar extends StatelessWidget {
         border: Border.all(color: AppColors.border),
       ),
       child: Icon(
-        Icons.person_outline,
+        LucideIcons.user,
         size: size * 0.55,
         color: AppColors.brand,
       ),

@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../api/admin_api.dart';
 import '../api/api_exception.dart';
@@ -103,7 +104,7 @@ class _BannersScreenState extends State<BannersScreen> {
           'سيتم حذف البانر وصورته نهائياً من تطبيق ولي الأمر. هل تريد المتابعة؟',
       confirmLabel: 'حذف',
       danger: true,
-      icon: Icons.delete_outline_rounded,
+      icon: LucideIcons.trash2,
     );
     if (!confirmed || !mounted) return;
     await _action(banner, () async {
@@ -148,7 +149,7 @@ class _BannersScreenState extends State<BannersScreen> {
         showAppToast(
           context,
           e is ApiException ? e.message : 'تعذر تنفيذ العملية، حاول مرة أخرى',
-          icon: Icons.error_outline,
+          icon: LucideIcons.circleAlert,
           iconColor: AppColors.red,
         );
       }
@@ -160,7 +161,7 @@ class _BannersScreenState extends State<BannersScreen> {
   Future<void> _preview(SchoolBanner banner) => showDialog<void>(
     context: context,
     builder: (ctx) => AppDialog(
-      icon: Icons.image_outlined,
+      icon: LucideIcons.image,
       title: banner.title.isEmpty ? 'معاينة البانر' : banner.title,
       subtitle: 'كما يظهر في تطبيق ولي الأمر بنسبة 16:7',
       maxWidth: 860,
@@ -201,7 +202,7 @@ class _BannersScreenState extends State<BannersScreen> {
           title: 'التواصل والإعلانات',
           cta: AppButton(
             label: 'إضافة بانر',
-            icon: Icons.add_rounded,
+            icon: LucideIcons.plus,
             style: AppButtonStyle.amber,
             onPressed: _loading ? null : () => _edit(),
           ),
@@ -220,7 +221,7 @@ class _BannersScreenState extends State<BannersScreen> {
             Pill.tone('$active مفعّلة في تطبيق ولي الأمر', BadgeTone.ok),
             AppButton(
               label: _loading ? 'جارٍ التحديث…' : 'تحديث',
-              icon: Icons.refresh_rounded,
+              icon: LucideIcons.refreshCw,
               style: AppButtonStyle.outline,
               onPressed: _loading ? null : _load,
             ),
@@ -232,7 +233,7 @@ class _BannersScreenState extends State<BannersScreen> {
         if (banners != null && banners.isEmpty)
           const EmptyView(
             message: 'لا توجد إعلانات بعد. أضف أول بانر لتطبيق ولي الأمر.',
-            icon: Icons.image_outlined,
+            icon: LucideIcons.image,
           ),
         if (banners != null && banners.isNotEmpty)
           ResponsiveGrid(
@@ -301,25 +302,25 @@ class _BannersScreenState extends State<BannersScreen> {
                 Row(
                   children: [
                     IconActionButton(
-                      icon: Icons.visibility_outlined,
+                      icon: LucideIcons.eye,
                       tooltip: 'معاينة',
                       onPressed: busy ? null : () => _preview(banner),
                     ),
                     const SizedBox(width: 8),
                     IconActionButton(
-                      icon: Icons.edit_outlined,
+                      icon: LucideIcons.pencil,
                       tooltip: 'تعديل',
                       onPressed: busy ? null : () => _edit(banner),
                     ),
                     const SizedBox(width: 8),
                     IconActionButton(
-                      icon: Icons.download_rounded,
+                      icon: LucideIcons.download,
                       tooltip: 'تحميل',
                       onPressed: busy ? null : () => _download(banner),
                     ),
                     const SizedBox(width: 8),
                     IconActionButton.danger(
-                      icon: Icons.delete_outline_rounded,
+                      icon: LucideIcons.trash2,
                       tooltip: 'حذف',
                       onPressed: busy ? null : () => _delete(banner),
                     ),

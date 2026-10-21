@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../api/admin_api.dart';
 import '../../api/api_exception.dart';
@@ -62,7 +63,7 @@ class _HolidayControlsState extends State<HolidayControls> {
       await showDialog<bool>(
         context: context,
         builder: (ctx) => AppDialog(
-          icon: Icons.visibility_outlined,
+          icon: LucideIcons.eye,
           title: title,
           subtitle: subtitle,
           maxWidth: 560,
@@ -129,7 +130,7 @@ class _HolidayControlsState extends State<HolidayControls> {
                   ),
                   AppButton(
                     label: confirmLabel,
-                    icon: Icons.check_rounded,
+                    icon: LucideIcons.check,
                     style: AppButtonStyle.amber,
                     onPressed: () => Navigator.pop(ctx, true),
                   ),
@@ -289,7 +290,7 @@ class _HolidayControlsState extends State<HolidayControls> {
         if (_error != null)
           Tooltip(
             message: _error!,
-            child: Pill.tone(_error!, BadgeTone.bad, icon: Icons.error_outline),
+            child: Pill.tone(_error!, BadgeTone.bad, icon: LucideIcons.circleAlert),
           ),
         if (active != null)
           Pill.tone(
@@ -300,14 +301,14 @@ class _HolidayControlsState extends State<HolidayControls> {
           ),
         AppButton(
           label: 'إدارة العطل',
-          icon: Icons.calendar_month_outlined,
+          icon: LucideIcons.calendarDays,
           style: AppButtonStyle.outline,
           small: true,
           onPressed: _busy ? null : () => _manage('day'),
         ),
         AppButton(
           label: 'إيقاف الدوام',
-          icon: Icons.pause_rounded,
+          icon: LucideIcons.pause,
           style: AppButtonStyle.outline,
           small: true,
           onPressed: _busy ? null : () => _manage('pause'),
@@ -439,7 +440,7 @@ class _ManageDialogState extends State<_ManageDialog> {
               ),
               const SizedBox(width: 10),
               const Icon(
-                Icons.calendar_today_outlined,
+                LucideIcons.calendar,
                 size: 18,
                 color: AppColors.textMuted,
               ),
@@ -551,7 +552,7 @@ class _ManageDialogState extends State<_ManageDialog> {
               ),
               AppButton(
                 label: 'معاينة الأثر',
-                icon: Icons.visibility_outlined,
+                icon: LucideIcons.eye,
                 style: AppButtonStyle.amber,
                 onPressed: _submit,
               ),
@@ -633,8 +634,8 @@ class _ManageDialogState extends State<_ManageDialog> {
                         ? 'استئناف الدوام'
                         : 'إلغاء/تقصير',
                     icon: h.kind == 'pause' && h.active
-                        ? Icons.play_arrow_rounded
-                        : Icons.delete_outline_rounded,
+                        ? LucideIcons.play
+                        : LucideIcons.trash2,
                     style: h.kind == 'pause' && h.active
                         ? AppButtonStyle.amber
                         : AppButtonStyle.dangerSoft,
@@ -652,7 +653,7 @@ class _ManageDialogState extends State<_ManageDialog> {
     );
 
     return AppDialog(
-      icon: Icons.calendar_month_outlined,
+      icon: LucideIcons.calendarDays,
       title: 'إدارة العطل وإيقاف الدوام',
       subtitle: 'أنشئ عطلة أو أوقف الدوام، وراجع الأثر قبل التنفيذ',
       maxWidth: 880,
@@ -740,7 +741,7 @@ class _CancelOptionsState extends State<_CancelOptions> {
 
   @override
   Widget build(BuildContext context) => AppDialog(
-    icon: Icons.event_busy_outlined,
+    icon: LucideIcons.calendarX,
     title: 'إنهاء / إلغاء ${widget.holiday.title}',
     subtitle: 'الإلغاء من اليوم فصاعداً؛ تبقى الأيام الماضية عطلة.',
     maxWidth: 520,
@@ -774,7 +775,7 @@ class _CancelOptionsState extends State<_CancelOptions> {
             ),
             AppButton(
               label: 'معاينة الإلغاء',
-              icon: Icons.visibility_outlined,
+              icon: LucideIcons.eye,
               style: AppButtonStyle.amber,
               onPressed: () => Navigator.pop(context, <String, dynamic>{
                 'notify': _notify,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import '../../models/attendance_entry.dart';
@@ -113,7 +114,7 @@ class AttendanceTable extends StatelessWidget {
       case PresenceStatus.absent:
         return AppButton(
           label: 'منح إجازة',
-          icon: Icons.event_busy_outlined,
+          icon: LucideIcons.calendarX,
           style: AppButtonStyle.outline,
           small: true,
           onPressed: () => onRegisterExcuse(e),
@@ -121,7 +122,7 @@ class AttendanceTable extends StatelessWidget {
       case PresenceStatus.excused:
         return AppButton(
           label: 'إلغاء الإجازة',
-          icon: Icons.delete_outline_rounded,
+          icon: LucideIcons.trash2,
           style: AppButtonStyle.dangerSoft,
           small: true,
           onPressed: () => onCancelLeave(e),

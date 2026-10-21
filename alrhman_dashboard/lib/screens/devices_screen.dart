@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../api/admin_api.dart';
 import '../api/api_exception.dart';
@@ -102,7 +103,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
             '${d.locationName.isEmpty ? d.serialNumber : d.locationName}',
         confirmLabel: 'نعم، عطّل الجهاز',
         danger: true,
-        icon: Icons.pause_rounded,
+        icon: LucideIcons.pause,
       );
       if (!ok || !mounted) return;
     }
@@ -123,7 +124,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
   void _toastError(String message) => showAppToast(
     context,
     message,
-    icon: Icons.error_outline,
+    icon: LucideIcons.circleAlert,
     iconColor: AppColors.red,
   );
 
@@ -144,14 +145,14 @@ class _DevicesScreenState extends State<DevicesScreen> {
           actions: [
             AppButton(
               label: _refreshing ? 'جارٍ التحديث…' : 'تحديث',
-              icon: Icons.refresh_rounded,
+              icon: LucideIcons.refreshCw,
               style: AppButtonStyle.outline,
               onPressed: _refreshing ? null : _load,
             ),
           ],
           cta: AppButton(
             label: 'إضافة جهاز',
-            icon: Icons.add_rounded,
+            icon: LucideIcons.plus,
             style: AppButtonStyle.amber,
             onPressed: _add,
           ),
@@ -167,21 +168,21 @@ class _DevicesScreenState extends State<DevicesScreen> {
               KpiTile(
                 label: 'أجهزة مفعّلة إدارياً',
                 value: '$active',
-                icon: Icons.wifi_rounded,
+                icon: LucideIcons.wifi,
                 iconBackground: AppColors.okBg,
                 iconForeground: AppColors.green,
               ),
               KpiTile(
                 label: 'أجهزة معطلة',
                 value: '$disabled',
-                icon: Icons.pause_rounded,
+                icon: LucideIcons.pause,
                 iconBackground: AppColors.badBg,
                 iconForeground: AppColors.red,
               ),
               KpiTile(
                 label: 'بدون مزامنة',
                 value: '$unsynced',
-                icon: Icons.schedule_rounded,
+                icon: LucideIcons.clock,
                 iconBackground: AppColors.warnBg,
                 iconForeground: AppColors.warnText,
               ),
@@ -192,7 +193,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
             const EmptyView(
               message:
                   'لا توجد أجهزة مسجّلة. اضغط "إضافة جهاز" لتسجيل أول جهاز بصمة.',
-              icon: Icons.memory_rounded,
+              icon: LucideIcons.cpu,
             )
           else
             ResponsiveGrid(

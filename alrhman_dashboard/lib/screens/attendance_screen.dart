@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../api/admin_api.dart';
 import '../api/api_exception.dart';
@@ -220,7 +221,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           'سيتم تحديث حالة الطالب وفق سجل حضوره ونوع اليوم.',
       confirmLabel: 'نعم، ألغِ الإجازة',
       danger: true,
-      icon: Icons.event_busy_outlined,
+      icon: LucideIcons.calendarX,
     );
     if (!ok || !mounted) return;
     try {
@@ -262,7 +263,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   void _toastError(String message) => showAppToast(
     context,
     message,
-    icon: Icons.error_outline,
+    icon: LucideIcons.circleAlert,
     iconColor: AppColors.red,
   );
 
@@ -279,7 +280,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           : Pill.tone('يوم سابق · لا يتحدث تلقائياً', BadgeTone.gray),
       cta: AppButton(
         label: 'منح إجازة',
-        icon: Icons.event_busy_outlined,
+        icon: LucideIcons.calendarX,
         style: AppButtonStyle.amber,
         onPressed: _openLeave,
       ),
@@ -359,7 +360,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   child: Column(
                     children: [
                       const Icon(
-                        Icons.event_busy_outlined,
+                        LucideIcons.calendarX,
                         size: 36,
                         color: AppColors.warnText,
                       ),

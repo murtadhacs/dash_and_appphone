@@ -1,6 +1,7 @@
 import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import '../ui/hover.dart';
@@ -27,7 +28,7 @@ class DashboardHero extends StatelessWidget {
         index: 1,
         label: 'إضافة طالب',
         hint: 'سجل طالباً جديداً',
-        icon: Icons.person_add_alt_1_outlined,
+        icon: LucideIcons.userPlus,
         background: AppColors.green,
         onTap: onAddStudent,
       ),
@@ -35,7 +36,7 @@ class DashboardHero extends StatelessWidget {
         index: 2,
         label: 'منح إجازة',
         hint: 'إجازة رسمية لطالب',
-        icon: Icons.event_busy_outlined,
+        icon: LucideIcons.calendarX,
         background: AppColors.brand,
         onTap: onGrantLeave,
       ),
@@ -43,7 +44,7 @@ class DashboardHero extends StatelessWidget {
         index: 3,
         label: 'تصدير الحضور',
         hint: 'ملف Excel لليوم',
-        icon: Icons.download_rounded,
+        icon: LucideIcons.download,
         background: AppColors.amber,
         foreground: AppColors.text,
         onTap: onExport,
@@ -52,7 +53,7 @@ class DashboardHero extends StatelessWidget {
         index: 4,
         label: 'إضافة جدول',
         hint: 'جدول أسبوعي لصف',
-        icon: Icons.calendar_today_outlined,
+        icon: LucideIcons.calendar,
         background: AppColors.slate,
         onTap: onAddSchedule,
       ),
@@ -60,7 +61,7 @@ class DashboardHero extends StatelessWidget {
         index: 5,
         label: 'إضافة بانر',
         hint: 'إعلان لتطبيق الأهل',
-        icon: Icons.image_outlined,
+        icon: LucideIcons.image,
         background: AppColors.textSub,
         onTap: onAddBanner,
       ),
@@ -175,7 +176,7 @@ class _AddCardState extends State<_AddCard> {
                   duration: const Duration(milliseconds: 300),
                   turns: _hover ? .25 : 0,
                   child: Icon(
-                    Icons.add_rounded,
+                    LucideIcons.plus,
                     size: 24,
                     color: _hover ? AppColors.brand : AppColors.textMuted,
                   ),
@@ -281,7 +282,7 @@ class _QuickCard extends StatelessWidget {
                       style: TextStyle(fontSize: 12, color: soft),
                     ),
                     const Spacer(),
-                    Icon(Icons.more_vert_rounded, size: 18, color: soft),
+                    Icon(LucideIcons.ellipsisVertical, size: 18, color: soft),
                   ],
                 ),
                 const SizedBox(height: 14),

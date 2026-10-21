@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import '../ui/hover.dart';
@@ -39,14 +40,14 @@ class LoginBrandPanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _Feature(
-                Icons.assignment_turned_in_outlined,
+                LucideIcons.clipboardCheck,
                 'حضور لحظي عبر بطاقات RFID',
               ),
               SizedBox(height: 12),
-              _Feature(Icons.campaign_outlined, 'إشعارات وبنرات لتطبيق ولي الأمر'),
+              _Feature(LucideIcons.megaphone, 'إشعارات وبنرات لتطبيق ولي الأمر'),
               SizedBox(height: 12),
               _Feature(
-                Icons.calendar_today_outlined,
+                LucideIcons.calendar,
                 'جداول أسبوعية لكل صف وشعبة',
               ),
             ],

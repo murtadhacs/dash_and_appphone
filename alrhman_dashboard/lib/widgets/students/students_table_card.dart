@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/iraqi_phone.dart';
@@ -82,13 +83,13 @@ class StudentsTableCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconActionButton(
-              icon: Icons.edit_outlined,
+              icon: LucideIcons.pencil,
               tooltip: 'تعديل بيانات الطالب',
               onPressed: () => onEdit(s),
             ),
             const SizedBox(width: 8),
             IconActionButton.danger(
-              icon: Icons.person_off_outlined,
+              icon: LucideIcons.userX,
               tooltip: 'تعطيل الطالب',
               onPressed: () => onDelete(s),
             ),

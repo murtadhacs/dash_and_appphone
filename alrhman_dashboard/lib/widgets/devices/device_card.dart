@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/baghdad_time.dart';
@@ -43,7 +44,7 @@ class DeviceCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
-                  Icons.memory_rounded,
+                  LucideIcons.cpu,
                   size: 24,
                   color: active ? AppColors.brand : AppColors.textMuted,
                 ),
@@ -127,7 +128,7 @@ class DeviceCard extends StatelessWidget {
             children: [
               AppButton(
                 label: 'تعديل الموقع',
-                icon: Icons.edit_outlined,
+                icon: LucideIcons.pencil,
                 style: AppButtonStyle.outline,
                 small: true,
                 onPressed: busy ? null : onEditLocation,
@@ -142,7 +143,7 @@ class DeviceCard extends StatelessWidget {
               else
                 AppButton(
                   label: active ? 'تعطيل' : 'تفعيل',
-                  icon: active ? Icons.pause_rounded : Icons.check_rounded,
+                  icon: active ? LucideIcons.pause : LucideIcons.check,
                   style: active
                       ? AppButtonStyle.dangerSoft
                       : AppButtonStyle.amber,

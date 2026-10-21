@@ -2,6 +2,7 @@ import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/assets.dart';
@@ -18,22 +19,22 @@ class _NavItem {
 }
 
 const _navItems = [
-  _NavItem(NavigationTab.dashboard, 'نظرة عامة', Icons.grid_view_rounded),
-  _NavItem(NavigationTab.students, 'الطلاب', Icons.school_outlined),
+  _NavItem(NavigationTab.dashboard, 'نظرة عامة', LucideIcons.layoutGrid),
+  _NavItem(NavigationTab.students, 'الطلاب', LucideIcons.graduationCap),
   _NavItem(
     NavigationTab.attendance,
     'الحضور والإجازات',
-    Icons.assignment_turned_in_outlined,
+    LucideIcons.clipboardCheck,
   ),
-  _NavItem(NavigationTab.devices, 'الأجهزة', Icons.memory_rounded),
-  _NavItem(NavigationTab.banners, 'التواصل والإعلانات', Icons.campaign_outlined),
+  _NavItem(NavigationTab.devices, 'الأجهزة', LucideIcons.cpu),
+  _NavItem(NavigationTab.banners, 'التواصل والإعلانات', LucideIcons.megaphone),
   _NavItem(
     NavigationTab.schedule,
     'الجداول الأسبوعية',
-    Icons.calendar_today_outlined,
+    LucideIcons.calendar,
   ),
-  _NavItem(NavigationTab.settings, 'إعدادات المدرسة', Icons.tune_rounded),
-  _NavItem(NavigationTab.activityLog, 'سجل النشاط', Icons.description_outlined),
+  _NavItem(NavigationTab.settings, 'إعدادات المدرسة', LucideIcons.slidersHorizontal),
+  _NavItem(NavigationTab.activityLog, 'سجل النشاط', LucideIcons.fileText),
 ];
 
 /// الشريط الجانبي الكحلي كما في Figma: الهوية، بطاقة المدير، القائمة مع
@@ -450,7 +451,7 @@ class _PhoneButtonState extends State<_PhoneButton> {
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  Icons.phone_outlined,
+                  LucideIcons.phone,
                   size: 18,
                   color: AppColors.primary,
                 ),
