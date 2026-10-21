@@ -461,7 +461,10 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                   const Expanded(
                     child: Text(
                       'لإضافة أخ أو أخت لطالب مسجّل، اختر ولي أمره لربط الأبناء بالحساب نفسه.',
-                      style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                      ),
                     ),
                   ),
                 ],
@@ -586,9 +589,7 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                 tooltip: _showPin ? 'إخفاء' : 'إظهار',
                 onPressed: () => setState(() => _showPin = !_showPin),
                 icon: Icon(
-                  _showPin
-                      ? LucideIcons.eyeOff
-                      : LucideIcons.eye,
+                  _showPin ? LucideIcons.eyeOff : LucideIcons.eye,
                   size: 16,
                 ),
                 color: AppColors.textMuted,

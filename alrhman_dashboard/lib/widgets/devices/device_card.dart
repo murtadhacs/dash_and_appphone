@@ -36,19 +36,7 @@ class DeviceCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: active ? AppColors.tint : const Color(0xFFEDEEF0),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  LucideIcons.cpu,
-                  size: 24,
-                  color: active ? AppColors.brand : AppColors.textMuted,
-                ),
-              ),
+              const Icon(LucideIcons.cpu, size: 28, color: AppColors.brand),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

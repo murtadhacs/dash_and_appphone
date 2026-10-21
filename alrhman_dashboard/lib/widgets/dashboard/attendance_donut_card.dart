@@ -169,7 +169,10 @@ class _LegendTile extends StatelessWidget {
               Text(
                 percent,
                 textDirection: TextDirection.ltr,
-                style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textMuted,
+                ),
               ),
             ],
           ),

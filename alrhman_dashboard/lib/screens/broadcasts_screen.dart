@@ -279,10 +279,8 @@ class _BroadcastsScreenState extends State<BroadcastsScreen> {
             const SizedBox(height: 18),
             ValueListenableBuilder(
               valueListenable: _title,
-              builder: (_, v, _) => FieldLabel(
-                'العنوان',
-                hint: '(${v.text.runes.length}/100)',
-              ),
+              builder: (_, v, _) =>
+                  FieldLabel('العنوان', hint: '(${v.text.runes.length}/100)'),
             ),
             const SizedBox(height: 6),
             TextFormField(
@@ -372,7 +370,9 @@ class _BroadcastsScreenState extends State<BroadcastsScreen> {
                         ),
                       ),
                   ],
-                  onChanged: _sending ? null : (v) => setState(() => _phone = v),
+                  onChanged: _sending
+                      ? null
+                      : (v) => setState(() => _phone = v),
                   validator: (v) => v == null ? 'اختر ولي الأمر' : null,
                 ),
               ],
@@ -518,7 +518,10 @@ class _BroadcastsScreenState extends State<BroadcastsScreen> {
         ),
         if (widget.tabs != null) ...[
           const SizedBox(height: 24),
-          Align(alignment: AlignmentDirectional.centerStart, child: widget.tabs),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: widget.tabs,
+          ),
         ],
         const SizedBox(height: 24),
         LayoutBuilder(

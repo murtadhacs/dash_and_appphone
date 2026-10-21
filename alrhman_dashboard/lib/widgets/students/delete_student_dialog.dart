@@ -24,8 +24,6 @@ class DeleteStudentDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppDialog(
       icon: LucideIcons.userX,
-      iconBackground: AppColors.badBg,
-      iconForeground: AppColors.red,
       title: 'تأكيد تعطيل الطالب',
       subtitle: student.name,
       maxWidth: 480,

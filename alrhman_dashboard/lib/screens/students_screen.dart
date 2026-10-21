@@ -259,22 +259,16 @@ class _StudentsScreenState extends State<StudentsScreen> {
               label: 'الطلاب',
               value: '${all.length}',
               icon: LucideIcons.graduationCap,
-              iconBackground: AppColors.tint,
-              iconForeground: AppColors.brand,
             ),
             KpiTile(
               label: 'أولياء الأمور',
               value: '$parents',
               icon: LucideIcons.users,
-              iconBackground: AppColors.okBg,
-              iconForeground: AppColors.green,
             ),
             KpiTile(
               label: 'بدون RFID حقيقي',
               value: '$withoutRfid',
               icon: LucideIcons.cpu,
-              iconBackground: AppColors.warnBg,
-              iconForeground: AppColors.warnText,
               note: withoutRfid == 0
                   ? null
                   : 'لن تُسجَّل بصماتهم حتى يُحدَّد المعرّف',

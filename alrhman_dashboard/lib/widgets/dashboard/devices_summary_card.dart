@@ -40,18 +40,10 @@ class DevicesSummaryCard extends StatelessWidget {
         builder: (context, c) {
           final info = Row(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: none ? AppColors.badBg : AppColors.tint,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  none ? LucideIcons.triangleAlert : LucideIcons.cpu,
-                  size: 24,
-                  color: none ? AppColors.red : AppColors.brand,
-                ),
+              Icon(
+                none ? LucideIcons.triangleAlert : LucideIcons.cpu,
+                size: 28,
+                color: AppColors.brand,
               ),
               const SizedBox(width: 18),
               Expanded(

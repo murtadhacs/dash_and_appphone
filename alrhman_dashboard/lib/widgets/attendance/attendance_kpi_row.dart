@@ -32,19 +32,11 @@ class AttendanceKpiRow extends StatelessWidget {
 
     return KpiGrid(
       children: [
-        KpiTile(
-          label: 'الكل',
-          value: '$total',
-          icon: LucideIcons.users,
-          iconBackground: AppColors.tint,
-          iconForeground: AppColors.brand,
-        ),
+        KpiTile(label: 'الكل', value: '$total', icon: LucideIcons.users),
         KpiTile(
           label: 'الحاضرون',
           value: '$present',
           icon: LucideIcons.check,
-          iconBackground: AppColors.okBg,
-          iconForeground: AppColors.green,
           extra: pct(present),
           extraColor: AppColors.green,
         ),
@@ -53,8 +45,6 @@ class AttendanceKpiRow extends StatelessWidget {
             label: 'الغائبون',
             value: '$absent',
             icon: LucideIcons.userX,
-            iconBackground: AppColors.badBg,
-            iconForeground: AppColors.red,
             extra: pct(absent),
             extraColor: AppColors.red,
           ),
@@ -62,8 +52,6 @@ class AttendanceKpiRow extends StatelessWidget {
           label: 'المجازون',
           value: '$excused',
           icon: LucideIcons.calendarX,
-          iconBackground: AppColors.warnBg,
-          iconForeground: AppColors.warnText,
           extra: pct(excused),
           extraColor: AppColors.warnText,
         ),

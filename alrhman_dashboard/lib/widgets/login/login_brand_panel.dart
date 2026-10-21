@@ -30,7 +30,11 @@ class LoginBrandPanel extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 420),
           child: const Text(
             'تابع الحضور والغياب لحظة بلحظة، وأدر الطلاب والجداول والإشعارات لأولياء الأمور من مكان واحد.',
-            style: TextStyle(color: Color(0xCCFFFFFF), fontSize: 16, height: 1.75),
+            style: TextStyle(
+              color: Color(0xCCFFFFFF),
+              fontSize: 16,
+              height: 1.75,
+            ),
           ),
         ),
         SizedBox(height: compact ? 24 : 40),
@@ -39,17 +43,14 @@ class LoginBrandPanel extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _Feature(
-                LucideIcons.clipboardCheck,
-                'حضور لحظي عبر بطاقات RFID',
-              ),
-              SizedBox(height: 12),
-              _Feature(LucideIcons.megaphone, 'إشعارات وبنرات لتطبيق ولي الأمر'),
+              _Feature(LucideIcons.clipboardCheck, 'حضور لحظي عبر بطاقات RFID'),
               SizedBox(height: 12),
               _Feature(
-                LucideIcons.calendar,
-                'جداول أسبوعية لكل صف وشعبة',
+                LucideIcons.megaphone,
+                'إشعارات وبنرات لتطبيق ولي الأمر',
               ),
+              SizedBox(height: 12),
+              _Feature(LucideIcons.calendar, 'جداول أسبوعية لكل صف وشعبة'),
             ],
           ),
         ),

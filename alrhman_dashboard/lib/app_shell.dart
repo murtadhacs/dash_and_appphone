@@ -216,10 +216,7 @@ class _AppShellState extends State<AppShell> {
               child: child,
             ),
           ),
-          child: KeyedSubtree(
-            key: ValueKey(screenKey),
-            child: _buildScreen(),
-          ),
+          child: KeyedSubtree(key: ValueKey(screenKey), child: _buildScreen()),
         ),
       ),
     );

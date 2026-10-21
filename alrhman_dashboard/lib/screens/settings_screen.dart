@@ -186,18 +186,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   Row(
                     children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: AppColors.tint,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Icon(
-                          LucideIcons.slidersHorizontal,
-                          size: 24,
-                          color: AppColors.brand,
-                        ),
+                      const Icon(
+                        LucideIcons.slidersHorizontal,
+                        size: 28,
+                        color: AppColors.brand,
                       ),
                       const SizedBox(width: 12),
                       const Text(
@@ -220,10 +212,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 18),
-                  const FieldLabel(
-                    'رقم واتساب المدرسة',
-                    hint: '(اختياري)',
-                  ),
+                  const FieldLabel('رقم واتساب المدرسة', hint: '(اختياري)'),
                   const SizedBox(height: 6),
                   AppTextField(
                     controller: _whatsapp,

@@ -181,9 +181,7 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
                     : 'إظهار كلمة المرور',
                 onPressed: () => setState(() => _showPassword = !_showPassword),
                 icon: Icon(
-                  _showPassword
-                      ? LucideIcons.eyeOff
-                      : LucideIcons.eye,
+                  _showPassword ? LucideIcons.eyeOff : LucideIcons.eye,
                   size: 19,
                   color: AppColors.textMuted,
                 ),
@@ -211,7 +209,11 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(LucideIcons.circleAlert, size: 16, color: AppColors.redDark),
+          const Icon(
+            LucideIcons.circleAlert,
+            size: 16,
+            color: AppColors.redDark,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -225,7 +227,11 @@ class _LoginFormPanelState extends State<LoginFormPanel> {
           ),
           InkWell(
             onTap: () => setState(() => _error = null),
-            child: const Icon(LucideIcons.x, size: 16, color: AppColors.redDark),
+            child: const Icon(
+              LucideIcons.x,
+              size: 16,
+              color: AppColors.redDark,
+            ),
           ),
         ],
       ),

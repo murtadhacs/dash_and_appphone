@@ -172,34 +172,34 @@ class _LeaveDialogState extends State<LeaveDialog> {
 
   Widget _dateInput(TextEditingController controller, {bool end = false}) =>
       TextFormField(
-    controller: controller,
-    readOnly: _locked,
-    textDirection: TextDirection.ltr,
-    style: const TextStyle(fontSize: 14),
-    decoration: appInputDecoration(hint: 'yyyy-MM-dd').copyWith(
-      suffixIcon: IconButton(
-        tooltip: 'اختيار تاريخ',
-        onPressed: _locked ? null : () => _pick(controller),
-        icon: const Icon(LucideIcons.calendar, size: 18),
-        color: AppColors.textMuted,
-      ),
-    ),
-    onChanged: (_) => setState(() {}),
-    validator: (v) {
-      final d = _parse(v ?? '');
-      if (d == null ||
-          d.isBefore(DateTime(2020)) ||
-          d.isAfter(DateTime(2100, 12, 31))) {
-        return 'اكتب تاريخاً صحيحاً بصيغة yyyy-MM-dd';
-      }
-      if (end &&
-          _parse(_start.text) != null &&
-          d.isBefore(_parse(_start.text)!)) {
-        return 'النهاية يجب أن تكون بعد البداية أو في اليوم نفسه';
-      }
-      return null;
-    },
-  );
+        controller: controller,
+        readOnly: _locked,
+        textDirection: TextDirection.ltr,
+        style: const TextStyle(fontSize: 14),
+        decoration: appInputDecoration(hint: 'yyyy-MM-dd').copyWith(
+          suffixIcon: IconButton(
+            tooltip: 'اختيار تاريخ',
+            onPressed: _locked ? null : () => _pick(controller),
+            icon: const Icon(LucideIcons.calendar, size: 18),
+            color: AppColors.textMuted,
+          ),
+        ),
+        onChanged: (_) => setState(() {}),
+        validator: (v) {
+          final d = _parse(v ?? '');
+          if (d == null ||
+              d.isBefore(DateTime(2020)) ||
+              d.isAfter(DateTime(2100, 12, 31))) {
+            return 'اكتب تاريخاً صحيحاً بصيغة yyyy-MM-dd';
+          }
+          if (end &&
+              _parse(_start.text) != null &&
+              d.isBefore(_parse(_start.text)!)) {
+            return 'النهاية يجب أن تكون بعد البداية أو في اليوم نفسه';
+          }
+          return null;
+        },
+      );
   void _close() {
     if (!_saving) Navigator.pop(context, _savedAny);
   }
@@ -221,8 +221,6 @@ class _LeaveDialogState extends State<LeaveDialog> {
       child: AppDialog(
         maxWidth: 600,
         icon: LucideIcons.calendarX,
-        iconBackground: AppColors.warnBg,
-        iconForeground: AppColors.warnText,
         title: 'منح إجازة',
         subtitle: 'تُحتسب أيام الدوام فقط',
         onClose: _close,
@@ -396,9 +394,7 @@ class _LeaveDialogState extends State<LeaveDialog> {
                       minLines: 3,
                       maxLines: 4,
                       style: const TextStyle(fontSize: 14, height: 1.6),
-                      decoration: appInputDecoration(
-                        hint: 'مثال: مراجعة طبية',
-                      ),
+                      decoration: appInputDecoration(hint: 'مثال: مراجعة طبية'),
                       validator: (v) => v == null || v.trim().isEmpty
                           ? 'اكتب تفاصيل العذر'
                           : null,

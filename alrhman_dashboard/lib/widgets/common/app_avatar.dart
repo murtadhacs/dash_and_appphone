@@ -20,11 +20,7 @@ class AppAvatar extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius ?? size / 2),
         border: Border.all(color: AppColors.border),
       ),
-      child: Icon(
-        LucideIcons.user,
-        size: size * 0.55,
-        color: AppColors.brand,
-      ),
+      child: Icon(LucideIcons.user, size: size * 0.55, color: AppColors.brand),
     );
   }
 }

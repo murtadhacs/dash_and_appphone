@@ -8,8 +8,6 @@ import 'icon_tile.dart';
 /// نافذة منبثقة بترويسة ملونة (أيقونة + عنوان + وصف + زر إغلاق) ومحتوى قابل للتمرير.
 class AppDialog extends StatelessWidget {
   final IconData icon;
-  final Color iconBackground;
-  final Color iconForeground;
   final String title;
   final String? subtitle;
   final Widget child;
@@ -22,8 +20,6 @@ class AppDialog extends StatelessWidget {
     required this.title,
     required this.child,
     this.subtitle,
-    this.iconBackground = AppColors.tint,
-    this.iconForeground = AppColors.brand,
     this.maxWidth = 672,
     this.onClose,
   });
@@ -51,14 +47,7 @@ class AppDialog extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(28, 24, 28, 4),
               child: Row(
                 children: [
-                  IconTile(
-                    icon: icon,
-                    background: iconBackground,
-                    foreground: iconForeground,
-                    size: 44,
-                    iconSize: 22,
-                    radius: AppRadius.control,
-                  ),
+                  IconTile(icon: icon, size: 26),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -144,7 +133,12 @@ class DialogNote extends StatelessWidget {
   final NoteTone tone;
   final IconData? icon;
 
-  const DialogNote(this.text, {super.key, this.tone = NoteTone.info, this.icon});
+  const DialogNote(
+    this.text, {
+    super.key,
+    this.tone = NoteTone.info,
+    this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -155,8 +149,16 @@ class DialogNote extends StatelessWidget {
         const Color(0xFFB26B00),
         LucideIcons.triangleAlert,
       ),
-      NoteTone.ok => (AppColors.okBg, const Color(0xFF0B8F63), LucideIcons.check),
-      NoteTone.bad => (AppColors.badBg, AppColors.redDark, LucideIcons.circleAlert),
+      NoteTone.ok => (
+        AppColors.okBg,
+        const Color(0xFF0B8F63),
+        LucideIcons.check,
+      ),
+      NoteTone.bad => (
+        AppColors.badBg,
+        AppColors.redDark,
+        LucideIcons.circleAlert,
+      ),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -201,8 +203,6 @@ Future<bool> showConfirmDialog(
       icon: icon,
       title: title,
       maxWidth: 520,
-      iconBackground: danger ? AppColors.badBg : AppColors.tint,
-      iconForeground: danger ? AppColors.red : AppColors.brand,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,

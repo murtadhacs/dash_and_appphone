@@ -218,7 +218,7 @@ class _DashPainter extends CustomPainter {
   bool shouldRepaint(_DashPainter old) => old.color != color;
 }
 
-/// بطاقة إجراء سريع: رقم ونقاط، مربع أيقونة، ثم العنوان والتلميح أسفلها.
+/// بطاقة إجراء سريع: رقم ونقاط، أيقونة مسطحة، ثم العنوان والتلميح أسفلها.
 class _QuickCard extends StatelessWidget {
   final int index;
   final String label;
@@ -286,17 +286,7 @@ class _QuickCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 14),
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: foreground == Colors.white
-                        ? Colors.white.withValues(alpha: .22)
-                        : AppColors.text.withValues(alpha: .12),
-                    borderRadius: BorderRadius.circular(AppRadius.control),
-                  ),
-                  child: Icon(icon, size: 22, color: foreground),
-                ),
+                Icon(icon, size: 28, color: foreground),
                 const Spacer(),
                 Text(
                   label,

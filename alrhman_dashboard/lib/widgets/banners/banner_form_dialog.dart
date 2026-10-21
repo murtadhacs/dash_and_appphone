@@ -270,7 +270,9 @@ class _BannerFormDialogState extends State<BannerFormDialog> {
                     value: _active,
                     activeThumbColor: Colors.white,
                     activeTrackColor: AppColors.primary,
-                    onChanged: _busy ? null : (v) => setState(() => _active = v),
+                    onChanged: _busy
+                        ? null
+                        : (v) => setState(() => _active = v),
                   ),
                 ],
               ),

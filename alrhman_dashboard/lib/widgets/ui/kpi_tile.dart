@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../common/app_card.dart';
 
-/// بطاقة مؤشر Figma: مربع أيقونة 48 ثم العنوان والقيمة ونسبة اختيارية.
+/// بطاقة مؤشر Figma: أيقونة مسطحة بلون العلامة ثم العنوان والقيمة ونسبة اختيارية.
 class KpiTile extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
-  final Color iconBackground;
-  final Color iconForeground;
   final String? extra;
   final Color? extraColor;
   final String? note;
@@ -19,8 +17,6 @@ class KpiTile extends StatelessWidget {
     required this.label,
     required this.value,
     required this.icon,
-    required this.iconBackground,
-    required this.iconForeground,
     this.extra,
     this.extraColor,
     this.note,
@@ -33,15 +29,7 @@ class KpiTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       child: Row(
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: iconBackground,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(icon, size: 24, color: iconForeground),
-          ),
+          Icon(icon, size: 28, color: AppColors.brand),
           const SizedBox(width: 14),
           Expanded(
             child: Column(

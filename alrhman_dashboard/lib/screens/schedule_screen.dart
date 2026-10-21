@@ -299,19 +299,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     final ratio = _classes!.isEmpty ? 0.0 : complete / _classes!.length;
     final title = Row(
       children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: AppColors.okBg,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Icon(
-            LucideIcons.calendar,
-            size: 24,
-            color: AppColors.green,
-          ),
-        ),
+        const Icon(LucideIcons.calendar, size: 28, color: AppColors.brand),
         const SizedBox(width: 14),
         Flexible(
           child: Column(
@@ -374,7 +362,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: LayoutBuilder(
         builder: (context, c) => c.maxWidth >= 700
-            ? Row(children: [Expanded(child: title), bar])
+            ? Row(
+                children: [
+                  Expanded(child: title),
+                  bar,
+                ],
+              )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -596,11 +589,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           )
         else if (_periods != null && _periods!.isEmpty) ...[
           const SizedBox(height: 12),
-          const Icon(
-            LucideIcons.calendar,
-            size: 38,
-            color: AppColors.outline,
-          ),
+          const Icon(LucideIcons.calendar, size: 38, color: AppColors.outline),
           const SizedBox(height: 12),
           const Text(
             'لم يُعدّ جدول هذا الصف بعد',
@@ -663,7 +652,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         padding: const EdgeInsets.all(4),
         child: tip == null
             ? box
-            : Tooltip(message: tip, child: HoverLift(lift: 2, scale: 1.04, child: box)),
+            : Tooltip(
+                message: tip,
+                child: HoverLift(lift: 2, scale: 1.04, child: box),
+              ),
       );
     }
 
@@ -762,7 +754,9 @@ class _ClassTileState extends State<_ClassTile> {
             borderRadius: BorderRadius.circular(16),
             border: on
                 ? Border.all(
-                    color: widget.selected ? AppColors.line : Colors.transparent,
+                    color: widget.selected
+                        ? AppColors.line
+                        : Colors.transparent,
                   )
                 : null,
           ),

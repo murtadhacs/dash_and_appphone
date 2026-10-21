@@ -120,7 +120,10 @@ class _ArrivalRowState extends State<_ArrivalRow> {
       onExit: (_) => setState(() => _hover = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: _hover ? 10 : 0),
+        padding: EdgeInsets.symmetric(
+          vertical: 12,
+          horizontal: _hover ? 10 : 0,
+        ),
         decoration: BoxDecoration(
           color: _hover ? AppColors.rowHover : Colors.transparent,
           borderRadius: BorderRadius.circular(_hover ? 14 : 0),

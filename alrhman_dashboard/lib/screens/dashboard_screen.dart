@@ -113,7 +113,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _lastUpdated = DateTime.now();
         _refreshing = false;
       });
-      ShellScope.maybeOf(context)?.reportDay((results[0] as DashboardStats).dayInfo);
+      ShellScope.maybeOf(
+        context,
+      )?.reportDay((results[0] as DashboardStats).dayInfo);
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -228,22 +230,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               label: 'إجمالي الطلاب',
               value: '${s.totalStudents}',
               icon: LucideIcons.graduationCap,
-              iconBackground: AppColors.tint,
-              iconForeground: AppColors.brand,
             ),
             KpiTile(
               label: 'أولياء الأمور',
               value: '${s.totalParents}',
               icon: LucideIcons.users,
-              iconBackground: AppColors.tint,
-              iconForeground: AppColors.brand,
             ),
             KpiTile(
               label: 'الحاضرون اليوم',
               value: '${s.presentToday}',
               icon: LucideIcons.check,
-              iconBackground: AppColors.okBg,
-              iconForeground: AppColors.green,
               extra: pct(s.presentToday),
               extraColor: AppColors.green,
             ),
@@ -251,8 +247,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               label: 'الغائبون اليوم',
               value: '${s.absentToday}',
               icon: LucideIcons.userX,
-              iconBackground: AppColors.badBg,
-              iconForeground: AppColors.red,
               extra: pct(s.absentToday),
               extraColor: AppColors.red,
             ),
@@ -260,8 +254,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               label: 'المجازون اليوم',
               value: '${s.excusedToday}',
               icon: LucideIcons.calendarX,
-              iconBackground: AppColors.warnBg,
-              iconForeground: AppColors.warnText,
               extra: pct(s.excusedToday),
               extraColor: AppColors.warnText,
             ),

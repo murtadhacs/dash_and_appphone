@@ -22,13 +22,7 @@ class SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        IconTile(
-          icon: icon,
-          background: AppColors.accentSoft,
-          foreground: AppColors.brand,
-          size: tileSize,
-          iconSize: tileSize * 0.55,
-        ),
+        IconTile(icon: icon, size: tileSize * 0.6),
         const SizedBox(width: 12),
         Flexible(
           child: Column(

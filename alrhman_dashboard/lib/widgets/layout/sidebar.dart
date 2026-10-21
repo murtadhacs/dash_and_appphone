@@ -28,12 +28,12 @@ const _navItems = [
   ),
   _NavItem(NavigationTab.devices, 'الأجهزة', LucideIcons.cpu),
   _NavItem(NavigationTab.banners, 'التواصل والإعلانات', LucideIcons.megaphone),
+  _NavItem(NavigationTab.schedule, 'الجداول الأسبوعية', LucideIcons.calendar),
   _NavItem(
-    NavigationTab.schedule,
-    'الجداول الأسبوعية',
-    LucideIcons.calendar,
+    NavigationTab.settings,
+    'إعدادات المدرسة',
+    LucideIcons.slidersHorizontal,
   ),
-  _NavItem(NavigationTab.settings, 'إعدادات المدرسة', LucideIcons.slidersHorizontal),
   _NavItem(NavigationTab.activityLog, 'سجل النشاط', LucideIcons.fileText),
 ];
 

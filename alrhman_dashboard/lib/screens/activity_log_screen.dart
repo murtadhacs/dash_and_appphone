@@ -77,7 +77,8 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
       runSpacing: 4,
       children: [
         Pill.tone(label, tone),
-        if (item.isPreview) Pill.tone('dry_run', BadgeTone.tint, ltr: true, mono: true),
+        if (item.isPreview)
+          Pill.tone('dry_run', BadgeTone.tint, ltr: true, mono: true),
       ],
     );
   }
@@ -165,29 +166,21 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
                 label: 'العمليات المحمّلة',
                 value: '${_items.length}',
                 icon: LucideIcons.fileText,
-                iconBackground: AppColors.tint,
-                iconForeground: AppColors.brand,
               ),
               KpiTile(
                 label: 'ناجحة',
                 value: '${count('success')}',
                 icon: LucideIcons.check,
-                iconBackground: AppColors.okBg,
-                iconForeground: AppColors.green,
               ),
               KpiTile(
                 label: 'مرفوضة',
                 value: '${count('rejected')}',
                 icon: LucideIcons.lock,
-                iconBackground: AppColors.warnBg,
-                iconForeground: AppColors.warnText,
               ),
               KpiTile(
                 label: 'فاشلة',
                 value: '${count('failed')}',
                 icon: LucideIcons.circleAlert,
-                iconBackground: AppColors.badBg,
-                iconForeground: AppColors.red,
               ),
             ],
           ),

@@ -209,7 +209,10 @@ class _BannersScreenState extends State<BannersScreen> {
         ),
         if (widget.tabs != null) ...[
           const SizedBox(height: 24),
-          Align(alignment: AlignmentDirectional.centerStart, child: widget.tabs),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: widget.tabs,
+          ),
         ],
         const SizedBox(height: 24),
         Wrap(

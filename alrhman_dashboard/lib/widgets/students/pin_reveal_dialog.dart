@@ -54,8 +54,6 @@ class _PinRevealDialogState extends State<PinRevealDialog> {
   Widget build(BuildContext context) {
     return AppDialog(
       icon: LucideIcons.keyRound,
-      iconBackground: AppColors.okBg,
-      iconForeground: AppColors.green,
       title: 'رمز دخول ولي الأمر',
       subtitle: widget.parentName,
       maxWidth: 480,
@@ -116,9 +114,7 @@ class _PinRevealDialogState extends State<PinRevealDialog> {
               AppButton(
                 label: _show ? 'إخفاء' : 'إظهار',
                 tooltip: _show ? 'إخفاء' : 'إظهار',
-                icon: _show
-                    ? LucideIcons.eyeOff
-                    : LucideIcons.eye,
+                icon: _show ? LucideIcons.eyeOff : LucideIcons.eye,
                 style: AppButtonStyle.outline,
                 small: true,
                 onPressed: () => setState(() => _show = !_show),

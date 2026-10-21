@@ -290,7 +290,11 @@ class _HolidayControlsState extends State<HolidayControls> {
         if (_error != null)
           Tooltip(
             message: _error!,
-            child: Pill.tone(_error!, BadgeTone.bad, icon: LucideIcons.circleAlert),
+            child: Pill.tone(
+              _error!,
+              BadgeTone.bad,
+              icon: LucideIcons.circleAlert,
+            ),
           ),
         if (active != null)
           Pill.tone(
@@ -483,7 +487,9 @@ class _ManageDialogState extends State<_ManageDialog> {
             maxLength: 80,
             style: const TextStyle(fontSize: 14),
             decoration: appInputDecoration(
-              hint: _mode == 'pause' ? 'مثال: العطلة الصيفية' : 'مثال: عطلة رسمية',
+              hint: _mode == 'pause'
+                  ? 'مثال: العطلة الصيفية'
+                  : 'مثال: عطلة رسمية',
             ).copyWith(counterText: ''),
             validator: (v) =>
                 v == null || v.trim().isEmpty ? 'أدخل العنوان' : null,
