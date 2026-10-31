@@ -123,7 +123,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(24),
-                              border: Border.all(color: AppColors.purple50),
                               boxShadow: AppShadows.sm,
                             ),
                             child: const Center(
@@ -206,29 +205,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         Tap(
                           onTap: (_loading || _blocked) ? null : _handleLogin,
                           child: Container(
-                            height: 48,
+                            height: 50,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               color: (_loading || _blocked)
                                   ? AppColors.brandPurple.withValues(alpha: 0.6)
                                   : AppColors.brandPurple,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: const [
                                 BoxShadow(
-                                  color: const Color(
-                                    0xFFA855F7,
-                                  ).withValues(alpha: 0.2),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 10),
-                                  spreadRadius: -3,
-                                ),
-                                BoxShadow(
-                                  color: const Color(
-                                    0xFFA855F7,
-                                  ).withValues(alpha: 0.2),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 4),
-                                  spreadRadius: -4,
+                                  color: Color(0x33282C46),
+                                  blurRadius: 20,
+                                  offset: Offset(0, 8),
                                 ),
                               ],
                             ),
@@ -330,14 +318,20 @@ class _InputField extends StatelessWidget {
     final focused = focusNode.hasFocus;
 
     return Container(
-      height: 48,
+      height: 52,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: focused ? AppColors.brandPurple : AppColors.gray200,
-        ),
-        boxShadow: AppShadows.sm,
+        borderRadius: BorderRadius.circular(18),
+        // No colored border: focus is shown by a stronger float shadow.
+        boxShadow: focused
+            ? const [
+                BoxShadow(
+                  color: Color(0x33282C46),
+                  blurRadius: 24,
+                  offset: Offset(0, 8),
+                ),
+              ]
+            : AppShadows.sm,
       ),
       child: Stack(
         children: [
@@ -423,11 +417,9 @@ class _Notice extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: error ? AppColors.rose50 : AppColors.purple50,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: error ? AppColors.rose100 : AppColors.purple100,
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: AppShadows.sm,
       ),
       child: Row(
         children: [

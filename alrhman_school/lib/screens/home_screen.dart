@@ -110,36 +110,22 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(width: 12),
               Tap(
                 onTap: onNavigateToNotifications,
-                child: Container(
+                child: SizedBox(
                   width: 36,
                   height: 36,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.gray100),
-                    boxShadow: AppShadows.sm,
-                  ),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       const Icon(
-                        LucideIcons.bell,
-                        size: 16,
+                        LucideIcons.bell300,
+                        size: 24,
                         color: AppColors.brandPurple,
                       ),
                       if (data.unreadCount > 0)
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: AppColors.rose500,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white),
-                            ),
-                          ),
+                        const Positioned(
+                          top: 5,
+                          right: 6,
+                          child: _UnreadDot(),
                         ),
                     ],
                   ),
@@ -178,9 +164,7 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _QuickActionCard(
-                      icon: LucideIcons.calendar,
-                      iconBg: AppColors.purple50,
-                      iconColor: AppColors.brandPurple,
+                      icon: LucideIcons.userRoundCheck300,
                       title: 'تقويم الحضور',
                       subtitle: 'سجل الشهر والغياب',
                       onTap: onNavigateToAttendance,
@@ -189,9 +173,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _QuickActionCard(
-                      icon: LucideIcons.bookOpen,
-                      iconBg: AppColors.blue50,
-                      iconColor: AppColors.brandBlue,
+                      icon: LucideIcons.notebookTabs300,
                       title: 'الجدول الدراسي',
                       subtitle: todayPeriods > 0
                           ? '$todayPeriods حصص اليوم'
@@ -219,9 +201,6 @@ class _StatusLook {
   final String headline;
   final String detail;
   final Color color;
-  final Color dark;
-  final Color bg;
-  final Color border;
   final IconData icon;
 
   const _StatusLook({
@@ -229,9 +208,6 @@ class _StatusLook {
     required this.headline,
     required this.detail,
     required this.color,
-    required this.dark,
-    required this.bg,
-    required this.border,
     required this.icon,
   });
 
@@ -243,9 +219,6 @@ class _StatusLook {
         headline: 'عطلة نهاية الأسبوع',
         detail: 'لا دوام اليوم، نراكم يوم الأحد',
         color: AppColors.gray500,
-        dark: AppColors.gray800,
-        bg: AppColors.gray50,
-        border: AppColors.gray200,
         icon: LucideIcons.sun,
       );
     }
@@ -255,9 +228,6 @@ class _StatusLook {
         headline: 'لا توجد بيانات حضور اليوم',
         detail: 'اسحب للأسفل لتحديث البيانات',
         color: AppColors.gray500,
-        dark: AppColors.gray800,
-        bg: AppColors.gray50,
-        border: AppColors.gray200,
         icon: LucideIcons.circleHelp,
       );
     }
@@ -274,9 +244,6 @@ class _StatusLook {
               ? 'وقت الانصراف: ${BaghdadTime.arabicTime(outTime)}'
               : 'سُجّلت بصمة الطالب عند البوابة',
           color: AppColors.present,
-          dark: AppColors.presentDark,
-          bg: AppColors.presentBg,
-          border: AppColors.emerald100,
           icon: LucideIcons.check,
         );
       case PresenceStatus.excused:
@@ -285,9 +252,6 @@ class _StatusLook {
           headline: 'في إجازة معتمدة اليوم',
           detail: 'سجّلت الإدارة إجازة للطالب لهذا اليوم',
           color: AppColors.holiday,
-          dark: AppColors.holidayDark,
-          bg: AppColors.holidayBg,
-          border: AppColors.amber100,
           icon: LucideIcons.calendarCheck,
         );
       case PresenceStatus.absent:
@@ -298,9 +262,6 @@ class _StatusLook {
             headline: 'لم تُسجَّل بصمة دخول حتى الآن',
             detail: 'يُحدَّث تلقائياً عند وصول الطالب للبوابة',
             color: AppColors.gray500,
-            dark: AppColors.gray800,
-            bg: AppColors.gray50,
-            border: AppColors.gray200,
             icon: LucideIcons.clock,
           );
         }
@@ -309,9 +270,6 @@ class _StatusLook {
           headline: 'لم يُسجَّل حضور الطالب اليوم',
           detail: 'تواصل مع الإدارة إن كان لديه عذر',
           color: AppColors.rose600,
-          dark: AppColors.rose700,
-          bg: AppColors.rose50,
-          border: AppColors.rose100,
           icon: LucideIcons.x,
         );
     }
@@ -341,11 +299,10 @@ class _StudentStatusCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: look.border, width: 2),
         boxShadow: AppShadows.sm,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -367,9 +324,8 @@ class _StudentStatusCard extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: look.bg,
+                    color: AppColors.chip,
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: look.border),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -390,7 +346,7 @@ class _StudentStatusCard extends StatelessWidget {
                         style: AppText.style(
                           size: 10,
                           weight: AppText.bold,
-                          color: look.color,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ],
@@ -433,22 +389,12 @@ class _StudentStatusCard extends StatelessWidget {
                     ),
                     if (canSwitch) ...[
                       const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.purple50,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'تبديل',
-                          style: AppText.style(
-                            size: 10,
-                            weight: AppText.bold,
-                            color: AppColors.brandPurple,
-                          ),
+                      Text(
+                        'تبديل',
+                        style: AppText.style(
+                          size: 11,
+                          weight: AppText.bold,
+                          color: AppColors.brandPurple,
                         ),
                       ),
                     ],
@@ -460,24 +406,15 @@ class _StudentStatusCard extends StatelessWidget {
 
             // Arrival / leave times
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: look.bg.withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: look.border),
+                color: AppColors.inset,
+                borderRadius: BorderRadius.circular(18),
               ),
               child: Row(
                 children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: look.color,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(look.icon, size: 14, color: Colors.white),
-                  ),
-                  const SizedBox(width: 8),
+                  Icon(look.icon, size: 20, color: AppColors.brandPurple),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -485,14 +422,16 @@ class _StudentStatusCard extends StatelessWidget {
                         Text(
                           look.headline,
                           style: AppText.style(
-                            size: 11,
+                            size: 12,
                             weight: AppText.bold,
-                            color: look.dark,
                           ),
                         ),
                         Text(
                           look.detail,
-                          style: AppText.style(size: 9, color: look.color),
+                          style: AppText.style(
+                            size: 10,
+                            color: AppColors.textMuted,
+                          ),
                         ),
                       ],
                     ),
@@ -503,11 +442,8 @@ class _StudentStatusCard extends StatelessWidget {
             const SizedBox(height: 12),
 
             // Today's schedule summary
-            Container(
-              padding: const EdgeInsets.only(top: 4),
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: AppColors.gray100)),
-              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -535,7 +471,7 @@ class _StudentStatusCard extends StatelessWidget {
                         const SizedBox(width: 2),
                         const Icon(
                           LucideIcons.chevronLeft,
-                          size: 12,
+                          size: 14,
                           color: AppColors.brandPurple,
                         ),
                       ],
@@ -551,22 +487,36 @@ class _StudentStatusCard extends StatelessWidget {
   }
 }
 
+/// Unread marker: brand-purple dot with a white ring (no extra colors).
+class _UnreadDot extends StatelessWidget {
+  const _UnreadDot();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 9,
+      height: 9,
+      decoration: const BoxDecoration(
+        color: AppColors.brandPurple,
+        shape: BoxShape.circle,
+        boxShadow: [BoxShadow(color: Color(0xFFE8E9EE), spreadRadius: 2)],
+      ),
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Quick-Action Card
 // ---------------------------------------------------------------------------
 class _QuickActionCard extends StatelessWidget {
   const _QuickActionCard({
     required this.icon,
-    required this.iconBg,
-    required this.iconColor,
     required this.title,
     required this.subtitle,
     this.onTap,
   });
 
   final IconData icon;
-  final Color iconBg;
-  final Color iconColor;
   final String title;
   final String subtitle;
   final VoidCallback? onTap;
@@ -576,24 +526,15 @@ class _QuickActionCard extends StatelessWidget {
     return Tap(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.gray100),
+          borderRadius: BorderRadius.circular(24),
           boxShadow: AppShadows.sm,
         ),
         child: Row(
           children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: iconBg,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, size: 16, color: iconColor),
-            ),
+            Icon(icon, size: 24, color: AppColors.brandPurple),
             const SizedBox(width: 10),
             Expanded(
               child: Column(

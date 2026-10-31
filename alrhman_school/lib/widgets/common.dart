@@ -52,6 +52,9 @@ double pageTopInset(BuildContext context) =>
 double navBottomInset(BuildContext context) =>
     math.max(MediaQuery.paddingOf(context).bottom + 4, 16);
 
+/// Space the scroll body keeps free for the floating nav bar (60px + gaps).
+const double navClearance = 96;
+
 /// Scrollable body used by every tab page:
 /// `flex-1 overflow-y-auto no-scrollbar pt-10 pb-20 bg-[#F8F9FC]`.
 class TabPageScroll extends StatelessWidget {
@@ -80,7 +83,7 @@ class TabPageScroll extends StatelessWidget {
                 : const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.only(
               top: pageTopInset(context),
-              bottom: 80 + (navBottomInset(context) - 16),
+              bottom: navClearance + (navBottomInset(context) - 16),
               left: horizontalPadding,
               right: horizontalPadding,
             ),
@@ -239,7 +242,7 @@ class LogoGlow extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.brandPurple.withValues(alpha: 0.15),
+            color: const Color(0x1F282C46),
             blurRadius: 40,
           ),
         ],

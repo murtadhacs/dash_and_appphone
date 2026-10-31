@@ -19,8 +19,8 @@ class _NavTab {
 
   final AppTab id;
   final String label;
-  final IconData icon; // stroke ≈ 1.8
-  final IconData activeIcon; // stroke 2.5
+  final IconData icon; // light stroke
+  final IconData activeIcon; // medium stroke
   final int badge;
 }
 
@@ -43,33 +43,33 @@ class PhoneBottomNav extends StatelessWidget {
       const _NavTab(
         id: AppTab.home,
         label: 'الرئيسية',
-        icon: LucideIcons.home400,
-        activeIcon: LucideIcons.home500,
+        icon: LucideIcons.school300,
+        activeIcon: LucideIcons.school500,
       ),
       const _NavTab(
         id: AppTab.attendance,
         label: 'الحضور',
-        icon: LucideIcons.calendarCheck400,
-        activeIcon: LucideIcons.calendarCheck500,
+        icon: LucideIcons.userRoundCheck300,
+        activeIcon: LucideIcons.userRoundCheck500,
       ),
       const _NavTab(
         id: AppTab.schedule,
         label: 'الجدول',
-        icon: LucideIcons.bookOpen400,
-        activeIcon: LucideIcons.bookOpen500,
+        icon: LucideIcons.notebookTabs300,
+        activeIcon: LucideIcons.notebookTabs500,
       ),
       _NavTab(
         id: AppTab.notifications,
         label: 'الإشعارات',
-        icon: LucideIcons.bell400,
+        icon: LucideIcons.bell300,
         activeIcon: LucideIcons.bell500,
         badge: unreadNotificationsCount,
       ),
       const _NavTab(
         id: AppTab.settings,
         label: 'الإعدادات',
-        icon: LucideIcons.settings400,
-        activeIcon: LucideIcons.settings500,
+        icon: LucideIcons.slidersHorizontal300,
+        activeIcon: LucideIcons.slidersHorizontal500,
       ),
     ];
 
@@ -82,23 +82,21 @@ class PhoneBottomNav extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: Container(
-            height: 56,
+            height: 60,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.95),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: AppColors.gray100),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
-                  color: AppColors.brandPurple.withValues(alpha: 0.14),
-                  blurRadius: 36,
-                  spreadRadius: -4,
-                  offset: const Offset(0, 12),
+                  color: Color(0x29282C46),
+                  blurRadius: 30,
+                  offset: Offset(0, 10),
                 ),
-                const BoxShadow(
-                  color: Color(0x0A000000),
-                  blurRadius: 16,
-                  offset: Offset(0, 4),
+                BoxShadow(
+                  color: Color(0x0F282C46),
+                  blurRadius: 6,
+                  offset: Offset(0, 2),
                 ),
               ],
             ),
@@ -148,20 +146,22 @@ class _NavButton extends StatelessWidget {
               children: [
                 Icon(
                   isActive ? tab.activeIcon : tab.icon,
-                  size: 16,
+                  size: 20,
                   color: color,
                 ),
                 if (tab.badge > 0 && !isActive)
                   Positioned(
-                    top: -4,
-                    right: -6,
+                    top: -2,
+                    right: -3,
                     child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: AppColors.rose500,
+                      width: 9,
+                      height: 9,
+                      decoration: const BoxDecoration(
+                        color: AppColors.brandPurple,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white),
+                        boxShadow: [
+                          BoxShadow(color: Colors.white, spreadRadius: 2),
+                        ],
                       ),
                     ),
                   ),

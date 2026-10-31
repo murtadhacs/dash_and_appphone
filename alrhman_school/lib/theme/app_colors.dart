@@ -8,7 +8,12 @@ class AppColors {
   static const Color brandPurple = Color(0xFFA91FAF);
   static const Color brandPurpleHover = Color(0xFF921897);
   static const Color brandBlue = Color(0xFF4F5CF5);
-  static const Color background = Color(0xFFF8F9FC);
+  /// Gray canvas: white cards float on it (no borders, only a soft shadow).
+  static const Color background = Color(0xFFE8E9EE);
+  /// Neutral fills for pills / chips / inset panels (replace tinted + bordered ones).
+  static const Color chip = Color(0xFFF2F3F7);
+  static const Color inset = Color(0xFFF5F6FA);
+  static const Color faint = Color(0xFFC4C7D6);
   static const Color textPrimary = Color(0xFF3F3F46);
   static const Color textMuted = Color(0xFF969AB8);
 
@@ -62,9 +67,10 @@ class AppColors {
 class AppShadows {
   AppShadows._();
 
-  /// `shadow-sm`
+  /// Soft float shadow shared by every card, chip and tile.
   static const List<BoxShadow> sm = [
-    BoxShadow(color: Color(0x0D000000), blurRadius: 2, offset: Offset(0, 1)),
+    BoxShadow(color: Color(0x17282C46), blurRadius: 24, offset: Offset(0, 8)),
+    BoxShadow(color: Color(0x0F282C46), blurRadius: 3, offset: Offset(0, 1)),
   ];
 
   /// `shadow-md`

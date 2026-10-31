@@ -234,3 +234,40 @@ class SchoolBanner {
 }
 
 enum AppTab { home, attendance, schedule, notifications, settings }
+
+/// المتبقي من القسط لابن واحد (`GET /api/mobile/tuition`).
+/// لا يعرض التطبيق القسط ولا الخصم ولا الدفعات، المتبقي فقط.
+class ChildTuition {
+  final int studentId;
+  final String fullName;
+  final String academicYear;
+
+  /// دنانير صحيحة. null عندما لا يوجد قسط محدد: يُعرض «لم يُحدَّد القسط بعد»
+  /// وليس صفراً أبداً، لأن الصفر يعني أنه مسدّد.
+  final int? remaining;
+  final bool feeSet;
+
+  /// آخر تغيّر في الرصيد (قسط، خصم، دفعة، إلغاء) بتوقيت بغداد، أو null.
+  final DateTime? lastUpdated;
+
+  const ChildTuition({
+    required this.studentId,
+    required this.fullName,
+    required this.academicYear,
+    required this.remaining,
+    required this.feeSet,
+    required this.lastUpdated,
+  });
+
+  factory ChildTuition.fromJson(Map<String, dynamic> json) {
+    final updated = DateTime.tryParse(json['last_updated'] as String? ?? '');
+    return ChildTuition(
+      studentId: (json['student_id'] as num).toInt(),
+      fullName: json['full_name'] as String? ?? '',
+      academicYear: json['academic_year'] as String? ?? '',
+      remaining: (json['remaining'] as num?)?.toInt(),
+      feeSet: json['fee_set'] as bool? ?? json['remaining'] != null,
+      lastUpdated: updated == null ? null : BaghdadTime.fromInstant(updated),
+    );
+  }
+}

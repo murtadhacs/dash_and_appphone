@@ -100,13 +100,8 @@ class _StudentBottomSheetState extends State<StudentBottomSheet>
                       const SizedBox(height: 16),
 
                       // Header
-                      Container(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(color: AppColors.gray100),
-                          ),
-                        ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -131,17 +126,13 @@ class _StudentBottomSheetState extends State<StudentBottomSheet>
                             ),
                             Tap(
                               onTap: widget.onClose,
-                              child: Container(
-                                width: 24,
-                                height: 24,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.gray100,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
+                              child: const SizedBox(
+                                width: 28,
+                                height: 28,
+                                child: Icon(
                                   LucideIcons.x,
-                                  size: 14,
-                                  color: AppColors.gray500,
+                                  size: 22,
+                                  color: AppColors.textMuted,
                                 ),
                               ),
                             ),
@@ -216,16 +207,10 @@ class _StudentRow extends StatelessWidget {
     return Tap(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.brandPurple.withValues(alpha: 0.05)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? AppColors.brandPurple : AppColors.gray200,
-            width: isSelected ? 2 : 1,
-          ),
+          color: AppColors.inset,
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -251,10 +236,8 @@ class _StudentRow extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.brandPurple.withValues(alpha: 0.1)
-                              : AppColors.gray100,
-                          borderRadius: BorderRadius.circular(4),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
                           isSelected ? 'محدد حالياً' : student.todayLabel,
@@ -278,15 +261,14 @@ class _StudentRow extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Container(
-              width: 20,
-              height: 20,
+              width: 24,
+              height: 24,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.brandPurple : null,
+                color: isSelected
+                    ? AppColors.brandPurple
+                    : const Color(0xFFE3E5EC),
                 shape: BoxShape.circle,
-                border: isSelected
-                    ? null
-                    : Border.all(color: AppColors.gray300),
               ),
               child: isSelected
                   ? const Icon(

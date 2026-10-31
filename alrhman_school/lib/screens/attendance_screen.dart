@@ -149,17 +149,19 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.emerald50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.emerald200),
+                    color: AppColors.chip,
+                    borderRadius: BorderRadius.circular(999),
                   ),
-                  child: Text(
-                    'نسبة الحضور ${stats.rate}٪',
-                    style: AppText.style(
-                      size: 10,
-                      weight: AppText.bold,
-                      color: AppColors.emerald700,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const _Dot(color: AppColors.present),
+                      const SizedBox(width: 6),
+                      Text(
+                        'نسبة الحضور ${stats.rate}٪',
+                        style: AppText.style(size: 10, weight: AppText.bold),
+                      ),
+                    ],
                   ),
                 ),
             ],
@@ -185,7 +187,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     child: _StatCard(
                       label: 'أيام الحضور',
                       value: '${stats.present} يوم',
-                      valueColor: AppColors.emerald600,
+                      dotColor: AppColors.present,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -193,7 +195,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     child: _StatCard(
                       label: 'الغياب',
                       value: '${stats.absent} يوم',
-                      valueColor: AppColors.absent,
+                      dotColor: AppColors.absent,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -201,7 +203,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     child: _StatCard(
                       label: 'الإجازات',
                       value: '${stats.excused} يوم',
-                      valueColor: AppColors.amber600,
+                      dotColor: AppColors.holiday,
                     ),
                   ),
                 ],
@@ -214,7 +216,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.gray100),
                   boxShadow: AppShadows.sm,
                 ),
                 child: Column(
@@ -248,13 +249,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         onSelect: (c) => setState(() => _selected = c),
                       ),
                       const SizedBox(height: 12),
-                      Container(
+                      Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            top: BorderSide(color: AppColors.gray100),
-                          ),
-                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -316,11 +312,10 @@ class _StudentSelector extends StatelessWidget {
     return Tap(
       onTap: canSwitch ? onTap : null,
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.purple200),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: AppShadows.sm,
         ),
         child: Row(
@@ -343,18 +338,10 @@ class _StudentSelector extends StatelessWidget {
               ),
             ),
             if (canSwitch)
-              Container(
-                width: 24,
-                height: 24,
-                decoration: const BoxDecoration(
-                  color: AppColors.purple50,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  LucideIcons.chevronDown,
-                  size: 14,
-                  color: AppColors.brandPurple,
-                ),
+              const Icon(
+                LucideIcons.chevronDown,
+                size: 18,
+                color: AppColors.brandPurple,
               ),
           ],
         ),
@@ -378,17 +365,13 @@ class _MonthHeader extends StatelessWidget {
       onTap: onTap,
       child: Tooltip(
         message: tip,
-        child: Container(
+        child: SizedBox(
           width: 28,
           height: 28,
-          decoration: BoxDecoration(
-            color: onTap == null ? AppColors.gray50 : AppColors.purple50,
-            borderRadius: BorderRadius.circular(10),
-          ),
           child: Icon(
             icon,
-            size: 14,
-            color: onTap == null ? AppColors.gray300 : AppColors.brandPurple,
+            size: 18,
+            color: onTap == null ? AppColors.faint : AppColors.brandPurple,
           ),
         ),
       ),
@@ -482,43 +465,44 @@ class _StatCard extends StatelessWidget {
   const _StatCard({
     required this.label,
     required this.value,
-    required this.valueColor,
+    required this.dotColor,
   });
 
   final String label;
   final String value;
-  final Color valueColor;
+  final Color dotColor;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.gray100),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: AppShadows.sm,
       ),
       child: Column(
         children: [
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: AppText.style(
-              size: 9,
-              weight: AppText.bold,
-              color: AppColors.textMuted,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _Dot(color: dotColor),
+              const SizedBox(width: 5),
+              Text(
+                label,
+                style: AppText.style(
+                  size: 10,
+                  weight: AppText.bold,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 2),
           Text(
             value,
             textAlign: TextAlign.center,
-            style: AppText.style(
-              size: 14,
-              weight: AppText.extrabold,
-              color: valueColor,
-            ),
+            style: AppText.style(size: 16, weight: AppText.extrabold),
           ),
         ],
       ),
@@ -597,59 +581,58 @@ class _CalendarCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final numberText = '${cell.date.day}';
 
-    Color bg;
+    // Days sit directly on the white card: state shows as a small dot only,
+    // the selected day is the single filled (purple) cell.
+    Color bg = Colors.transparent;
     Color fg;
     Color? dot;
     FontWeight weight = AppText.regular;
-    double radius = 12;
     List<BoxShadow>? shadow;
 
     if (isSelected) {
       bg = AppColors.brandPurple;
       fg = Colors.white;
       dot = cell.record == null ? null : Colors.white;
-      weight = AppText.bold;
-      shadow = AppShadows.sm;
+      weight = AppText.extrabold;
+      shadow = const [
+        BoxShadow(color: Color(0x33282C46), blurRadius: 14, offset: Offset(0, 6)),
+      ];
     } else {
       switch (cell.state) {
         case DayState.present:
-          bg = AppColors.presentBg;
-          fg = AppColors.presentDark;
+          fg = AppColors.textPrimary;
           dot = AppColors.present;
           weight = AppText.bold;
         case DayState.absent:
-          bg = AppColors.rose50;
-          fg = AppColors.rose700;
+          fg = AppColors.textPrimary;
           dot = AppColors.absent;
           weight = AppText.bold;
         case DayState.holiday:
         case DayState.excused:
-          bg = AppColors.holidayBg;
-          fg = AppColors.holidayDark;
+          fg = AppColors.textPrimary;
           dot = AppColors.holiday;
           weight = AppText.medium;
         case DayState.weekend:
-        case DayState.future:
         case DayState.noRecord:
-          bg = AppColors.gray50;
-          fg = cell.state == DayState.future
-              ? AppColors.gray300
-              : AppColors.gray400;
-          radius = 8;
+          fg = AppColors.gray300;
+        case DayState.future:
+          fg = AppColors.faint;
+      }
+      if (isToday) {
+        bg = AppColors.chip;
+        weight = AppText.extrabold;
+        fg = AppColors.brandPurple;
       }
     }
 
     return Tap(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
         decoration: BoxDecoration(
           color: bg,
-          borderRadius: BorderRadius.circular(radius),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: shadow,
-          border: isToday && !isSelected
-              ? Border.all(color: AppColors.brandPurple)
-              : null,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -666,10 +649,9 @@ class _CalendarCell extends StatelessWidget {
                 style: AppText.style(size: 8, color: fg),
               ),
             if (dot != null)
-              Container(
-                width: 4,
-                height: 4,
-                decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: _Dot(color: dot, size: 5),
               ),
           ],
         ),
@@ -689,14 +671,27 @@ class _LegendItem extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
+        _Dot(color: color),
         const SizedBox(width: 4),
         Text(label, style: AppText.style(size: 10)),
       ],
+    );
+  }
+}
+
+/// Small solid status dot (the only place status colors appear).
+class _Dot extends StatelessWidget {
+  const _Dot({required this.color, this.size = 7});
+
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }
@@ -708,31 +703,22 @@ class _SelectedDayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (statusText, statusColor, statusBorder) = switch (cell.state) {
-      DayState.present => ('حاضر', AppColors.present, AppColors.emerald100),
-      DayState.absent => ('غائب', AppColors.absent, AppColors.rose100),
-      DayState.excused => ('مجاز', AppColors.holiday, AppColors.amber100),
-      DayState.holiday => ('عطلة', AppColors.holiday, AppColors.amber100),
-      DayState.weekend => (
-        'عطلة نهاية الأسبوع',
-        AppColors.gray500,
-        AppColors.gray100,
-      ),
-      DayState.future => ('قادم', AppColors.gray500, AppColors.gray100),
-      DayState.noRecord => (
-        'لا يوجد سجل',
-        AppColors.gray500,
-        AppColors.gray100,
-      ),
+    final (statusText, statusColor) = switch (cell.state) {
+      DayState.present => ('حاضر', AppColors.present),
+      DayState.absent => ('غائب', AppColors.absent),
+      DayState.excused => ('مجاز', AppColors.holiday),
+      DayState.holiday => ('عطلة', AppColors.holiday),
+      DayState.weekend => ('عطلة نهاية الأسبوع', AppColors.faint),
+      DayState.future => ('قادم', AppColors.faint),
+      DayState.noRecord => ('لا يوجد سجل', AppColors.faint),
     };
     final record = cell.record;
 
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.purple100),
+        color: AppColors.inset,
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -747,19 +733,21 @@ class _SelectedDayCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: statusBorder),
+                  borderRadius: BorderRadius.circular(999),
                 ),
-                child: Text(
-                  statusText,
-                  style: AppText.style(
-                    size: 10,
-                    weight: AppText.bold,
-                    color: statusColor,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _Dot(color: statusColor),
+                    const SizedBox(width: 6),
+                    Text(
+                      statusText,
+                      style: AppText.style(size: 10, weight: AppText.bold),
+                    ),
+                  ],
                 ),
               ),
             ],

@@ -107,7 +107,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: AppColors.purple50),
                     boxShadow: AppShadows.sm,
                   ),
                   child: Column(
@@ -140,7 +139,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                         borderRadius: BorderRadius.circular(999),
                         child: Container(
                           height: 6,
-                          color: AppColors.gray100,
+                          color: AppColors.chip,
                           child: Align(
                             alignment: AlignmentDirectional.centerStart,
                             child: FractionallySizedBox(
@@ -149,15 +148,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(999),
-                                    // `bg-gradient-to-r` is physical left → right
-                                    gradient: const LinearGradient(
-                                      begin: Alignment.centerLeft,
-                                      end: Alignment.centerRight,
-                                      colors: [
-                                        AppColors.brandBlue,
-                                        AppColors.brandPurple,
-                                      ],
-                                    ),
+                                    color: AppColors.brandPurple,
                                   ),
                                 ),
                               ),
@@ -187,7 +178,7 @@ class _RingSpinnerPainter extends CustomPainter {
     final rect = Offset.zero & size;
     final arcRect = rect.deflate(stroke / 2);
     final track = Paint()
-      ..color = AppColors.purple100
+      ..color = AppColors.background
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke;
     final head = Paint()
@@ -219,7 +210,6 @@ class _ErrorCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.rose100),
         boxShadow: AppShadows.sm,
       ),
       child: Column(

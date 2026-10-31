@@ -103,16 +103,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.blue50,
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.chip,
+                    borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     '${periods.length} حصص',
-                    style: AppText.style(
-                      size: 10,
-                      weight: AppText.bold,
-                      color: AppColors.brandBlue,
-                    ),
+                    style: AppText.style(size: 10, weight: AppText.bold),
                   ),
                 ),
             ],
@@ -120,18 +116,20 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         ),
 
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
+            // room below the chips so their float shadow is not clipped
+            padding: const EdgeInsets.only(top: 2, bottom: 18),
             child: Row(
               children: [
                 for (final child in widget.data.students)
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
-                    child: ChoiceChip(
-                      label: Text(child.name),
-                      selected: child.id == student.id,
-                      onSelected: (_) {
+                    child: _Chip(
+                      label: child.name,
+                      isActive: child.id == student.id,
+                      onTap: () {
                         widget.data.selectStudent(child);
                         setState(() {});
                       },
@@ -143,17 +141,17 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         ),
         // ---------------- Day tabs ----------------
         Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: NoScrollbar(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(vertical: 4),
+              padding: const EdgeInsets.only(top: 2, bottom: 18),
               child: Row(
                 children: [
                   for (int i = 0; i < tabs.length; i++) ...[
                     if (i > 0) const SizedBox(width: 6),
-                    _DayTab(
-                      name: tabs[i].name,
+                    _Chip(
+                      label: tabs[i].name,
                       isActive: tabs[i].key == _selectedDayKey,
                       onTap: () =>
                           setState(() => _selectedDayKey = tabs[i].key),
@@ -193,14 +191,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 }
 
-class _DayTab extends StatelessWidget {
-  const _DayTab({
-    required this.name,
+/// Floating pill used for the student switch and the day tabs.
+class _Chip extends StatelessWidget {
+  const _Chip({
+    required this.label,
     required this.isActive,
     required this.onTap,
   });
 
-  final String name;
+  final String label;
   final bool isActive;
   final VoidCallback onTap;
 
@@ -209,15 +208,14 @@ class _DayTab extends StatelessWidget {
     return Tap(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isActive ? AppColors.brandPurple : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: isActive ? null : Border.all(color: AppColors.gray100),
-          boxShadow: isActive ? AppShadows.sm : null,
+          borderRadius: BorderRadius.circular(999),
+          boxShadow: AppShadows.sm,
         ),
         child: Text(
-          name,
+          label,
           maxLines: 1,
           softWrap: false,
           style: AppText.style(
@@ -241,11 +239,10 @@ class _PeriodCard extends StatelessWidget {
     final hasTeacher = period.teacher.trim().isNotEmpty;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.gray100),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: AppShadows.sm,
       ),
       child: Row(
@@ -255,26 +252,7 @@ class _PeriodCard extends StatelessWidget {
             color: AppColors.brandPurple,
             size: 26,
           ),
-          const SizedBox(width: 10),
-          Container(
-            width: 32,
-            height: 32,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.blue50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.blue100),
-            ),
-            child: Text(
-              '${period.periodNumber}',
-              style: AppText.style(
-                size: 12,
-                weight: AppText.bold,
-                color: AppColors.brandBlue,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,7 +267,7 @@ class _PeriodCard extends StatelessWidget {
                   hasTeacher ? period.teacher : 'لم يُحدَّد المعلم',
                   style: AppText.style(
                     size: 10,
-                    color: hasTeacher ? AppColors.textMuted : AppColors.gray300,
+                    color: hasTeacher ? AppColors.textMuted : AppColors.faint,
                   ),
                 ),
               ],
@@ -311,15 +289,15 @@ class _PeriodCard extends StatelessWidget {
 }
 
 IconData subjectIcon(String key) => switch (key) {
-  'arabic' => Icons.menu_book,
-  'islamic' => Icons.mosque,
-  'math' => Icons.calculate,
-  'science' => Icons.science,
-  'social' => Icons.public,
-  'english' => Icons.translate,
-  'art' => Icons.palette,
-  'pe' => Icons.sports_soccer,
-  'computer' => Icons.computer,
-  'music' => Icons.music_note,
-  _ => Icons.book_outlined,
+  'arabic' => LucideIcons.bookOpenText,
+  'islamic' => LucideIcons.landmark,
+  'math' => LucideIcons.calculator,
+  'science' => LucideIcons.flaskConical,
+  'social' => LucideIcons.globe,
+  'english' => LucideIcons.languages,
+  'art' => LucideIcons.palette,
+  'pe' => LucideIcons.trophy,
+  'computer' => LucideIcons.monitor,
+  'music' => LucideIcons.music,
+  _ => LucideIcons.book,
 };

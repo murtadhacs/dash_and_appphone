@@ -14,14 +14,12 @@ class EmptyStateCard extends StatelessWidget {
     required this.icon,
     required this.title,
     this.subtitle,
-    this.iconBackground = AppColors.purple50,
     this.iconColor = AppColors.brandPurple,
   });
 
   final IconData icon;
   final String title;
   final String? subtitle;
-  final Color iconBackground;
   final Color iconColor;
 
   @override
@@ -30,21 +28,12 @@ class EmptyStateCard extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.gray100),
+        borderRadius: BorderRadius.circular(26),
         boxShadow: AppShadows.sm,
       ),
       child: Column(
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: iconBackground,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(icon, size: 24, color: iconColor),
-          ),
+          Icon(icon, size: 32, color: iconColor),
           const SizedBox(height: 10),
           Text(
             title,

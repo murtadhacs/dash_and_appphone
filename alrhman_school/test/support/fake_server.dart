@@ -106,6 +106,40 @@ class FakeServer {
     final p1 = who == 'tok-1';
 
     switch ((req.method, path)) {
+      case ('GET', '/api/mobile/tuition'):
+        // الأول: متبقٍ؛ الثاني: لم يُحدَّد قسطه (remaining=null).
+        return _json({
+          'status': 'success',
+          'data': p1
+              ? [
+                  {
+                    'student_id': 1,
+                    'full_name': 'Test Student',
+                    'academic_year': '2026-2027',
+                    'remaining': 0,
+                    'fee_set': true,
+                    'last_updated': '2026-10-01T09:30:00+03:00',
+                  },
+                ]
+              : [
+                  {
+                    'student_id': 2,
+                    'full_name': 'Ali Test',
+                    'academic_year': '2026-2027',
+                    'remaining': 900000,
+                    'fee_set': true,
+                    'last_updated': '2026-10-01T09:30:00+03:00',
+                  },
+                  {
+                    'student_id': 3,
+                    'full_name': 'Sara Test',
+                    'academic_year': '2026-2027',
+                    'remaining': null,
+                    'fee_set': false,
+                    'last_updated': null,
+                  },
+                ],
+        });
       case ('GET', '/api/mobile/students'):
         return _json({
           'status': 'success',

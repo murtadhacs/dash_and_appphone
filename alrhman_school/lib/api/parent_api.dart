@@ -188,6 +188,15 @@ class ParentApi {
     ];
   }
 
+  /// المتبقي من القسط لكل ابن فعّال للسنة الحالية. دون تفاصيل الدفعات.
+  Future<List<ChildTuition>> tuition() async {
+    final json = await client.getJson('/api/mobile/tuition');
+    return [
+      for (final t in json['data'] as List<dynamic>)
+        ChildTuition.fromJson(t as Map<String, dynamic>),
+    ];
+  }
+
   /// حضور اليوم مفهرساً بمعرّف الطالب.
   Future<Map<int, TodayAttendance>> today() async =>
       (await todayResponse()).entries;

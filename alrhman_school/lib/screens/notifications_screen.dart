@@ -113,19 +113,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   onTap: () => _run(data.markAllRead),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
+                      horizontal: 4,
                       vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.purple50,
-                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(
                           LucideIcons.checkCheck,
-                          size: 12,
+                          size: 16,
                           color: AppColors.brandPurple,
                         ),
                         const SizedBox(width: 4),
@@ -154,7 +150,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               NoScrollbar(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  padding: const EdgeInsets.only(top: 2, bottom: 18),
                   child: Row(
                     children: [
                       for (final f in _TypeFilter.values) ...[
@@ -169,13 +165,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
 
               // ---------------- Date filters ----------------
               NoScrollbar(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  padding: const EdgeInsets.only(top: 2, bottom: 18),
                   child: Row(
                     children: [
                       for (final f in _Filter.values) ...[
@@ -190,7 +185,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
 
               // ---------------- Cards ----------------
               if (filtered.isEmpty)
@@ -219,8 +213,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.gray100),
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: AppShadows.sm,
                     ),
                     child: data.loadingMoreNotifications
                         ? const SizedBox(
@@ -266,12 +260,11 @@ class _FilterChip extends StatelessWidget {
     return Tap(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isActive ? AppColors.brandPurple : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: isActive ? null : Border.all(color: AppColors.gray100),
-          boxShadow: isActive ? AppShadows.sm : null,
+          borderRadius: BorderRadius.circular(999),
+          boxShadow: AppShadows.sm,
         ),
         child: Text(
           label,
@@ -301,24 +294,15 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.gray100),
+        borderRadius: BorderRadius.circular(26),
         boxShadow: AppShadows.sm,
       ),
       child: Column(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.purple50,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              hasAnyNotifications ? LucideIcons.bell : LucideIcons.bellOff,
-              size: 20,
-              color: AppColors.brandPurple,
-            ),
+          Icon(
+            hasAnyNotifications ? LucideIcons.bell : LucideIcons.bellOff,
+            size: 32,
+            color: AppColors.brandPurple,
           ),
           const SizedBox(height: 8),
           Text(
@@ -355,44 +339,22 @@ class _NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (iconBg, iconColor, icon, label) = switch (notif.category) {
-      NotificationCategory.checkIn => (
-        AppColors.presentBg,
-        AppColors.present,
-        LucideIcons.logIn,
-        'دخول',
-      ),
-      NotificationCategory.checkOut => (
-        AppColors.circularBg,
-        AppColors.brandBlue,
-        LucideIcons.logOut,
-        'انصراف',
-      ),
-      NotificationCategory.absence => (
-        AppColors.rose50,
-        AppColors.rose600,
-        LucideIcons.userX,
-        'غياب',
-      ),
-      NotificationCategory.general => (
-        AppColors.purple50,
-        AppColors.brandPurple,
-        LucideIcons.info,
-        'تنبيه',
-      ),
+    // One accent for every category: the label tells them apart, not the color.
+    final (icon, label) = switch (notif.category) {
+      NotificationCategory.checkIn => (LucideIcons.logIn, 'دخول'),
+      NotificationCategory.checkOut => (LucideIcons.logOut, 'انصراف'),
+      NotificationCategory.absence => (LucideIcons.userX, 'غياب'),
+      NotificationCategory.general => (LucideIcons.info, 'تنبيه'),
     };
     final unread = !notif.isRead;
 
     return Tap(
       onTap: unread ? onTap : null,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: unread ? AppColors.purple200 : AppColors.gray100,
-          ),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: AppShadows.sm,
         ),
         child: Row(
@@ -400,17 +362,13 @@ class _NotificationCard extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 2),
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: iconBg,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, size: 16, color: iconColor),
+              child: Icon(
+                icon,
+                size: 22,
+                color: unread ? AppColors.brandPurple : AppColors.textMuted,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -475,15 +433,15 @@ class _NotificationCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: iconBg,
-                          borderRadius: BorderRadius.circular(4),
+                          color: AppColors.chip,
+                          borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
                           label,
                           style: AppText.style(
-                            size: 8,
+                            size: 9,
                             weight: AppText.bold,
-                            color: iconColor,
+                            color: AppColors.textMuted,
                           ),
                         ),
                       ),

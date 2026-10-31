@@ -116,8 +116,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.gray100),
+                  borderRadius: BorderRadius.circular(999),
                   boxShadow: AppShadows.sm,
                 ),
                 child: Row(

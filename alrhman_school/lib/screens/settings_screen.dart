@@ -9,7 +9,9 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../widgets/common.dart';
 import '../widgets/account_controls.dart';
+import '../widgets/fade_route.dart';
 import '../widgets/settings_tile.dart';
+import 'tuition_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -81,20 +83,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.gray100),
+                  borderRadius: BorderRadius.circular(22),
                   boxShadow: AppShadows.sm,
                 ),
                 child: Row(
                   children: [
                     Container(
-                      width: 48,
-                      height: 48,
+                      width: 52,
+                      height: 52,
                       alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: AppColors.brandPurple.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.purple100),
+                      decoration: const BoxDecoration(
+                        color: AppColors.chip,
+                        shape: BoxShape.circle,
                       ),
                       child: Text(
                         parentName.isEmpty ? '؟' : parentName.substring(0, 1),
@@ -116,7 +116,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.purple50,
+                              color: AppColors.chip,
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Row(
@@ -167,6 +167,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 12),
 
+              // ---------------- Tuition ----------------
+              const SizedBox(height: 8),
+              const SettingsGroupLabel('القسط الدراسي'),
+              SettingsTile(
+                icon: LucideIcons.wallet,
+                title: 'المتبقي من القسط',
+                subtitle: 'ما تبقى من القسط الدراسي لكل ابن',
+                onTap: () => Navigator.of(context).push(
+                  FadeRoute(page: TuitionScreen(data: widget.data)),
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // ---------------- Notifications ----------------
               const SizedBox(height: 8),
               const SettingsGroupLabel('الإشعارات'),
@@ -177,9 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 16),
                 const SettingsGroupLabel('التواصل'),
                 SettingsTile(
-                  icon: LucideIcons.messageCircle,
-                  iconBackground: AppColors.emerald50,
-                  iconColor: AppColors.emerald600,
+                  icon: LucideIcons.messageCircleMore300,
                   title: 'تواصل مع إدارة المدرسة',
                   subtitle: schoolName == null || schoolName.isEmpty
                       ? 'محادثة واتساب مع الإدارة'
@@ -207,7 +218,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 8),
                 SettingsTile(
                   icon: LucideIcons.logOut,
-                  iconBackground: AppColors.rose50,
                   iconColor: AppColors.rose600,
                   title: 'تسجيل الخروج',
                   titleColor: AppColors.rose600,
@@ -238,25 +248,16 @@ class _LogoutDialog extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.95),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.rose100, width: 2),
             boxShadow: AppShadows.lg,
           ),
           child: Column(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.rose50,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(
-                  LucideIcons.logOut,
-                  size: 20,
-                  color: AppColors.rose600,
-                ),
+              const Icon(
+                LucideIcons.logOut,
+                size: 28,
+                color: AppColors.rose600,
               ),
               const SizedBox(height: 12),
               Text(
@@ -306,7 +307,7 @@ class _LogoutDialog extends StatelessWidget {
                         height: 32,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: AppColors.gray100,
+                          color: AppColors.chip,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(

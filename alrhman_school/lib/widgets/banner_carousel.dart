@@ -54,15 +54,21 @@ class _BannerCarouselState extends State<BannerCarousel> {
     final banners = widget.banners;
     return Column(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: AspectRatio(
-            aspectRatio: 16 / 7,
-            child: PageView.builder(
-              controller: _controller,
-              itemCount: banners.length,
-              onPageChanged: (i) => setState(() => _page = i),
-              itemBuilder: (context, i) => _BannerPage(banner: banners[i]),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: AppShadows.sm,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: AspectRatio(
+              aspectRatio: 16 / 7,
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: banners.length,
+                onPageChanged: (i) => setState(() => _page = i),
+                itemBuilder: (context, i) => _BannerPage(banner: banners[i]),
+              ),
             ),
           ),
         ),
@@ -80,7 +86,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                   decoration: BoxDecoration(
                     color: i == _page
                         ? AppColors.brandPurple
-                        : AppColors.gray200,
+                        : AppColors.faint,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -103,7 +109,7 @@ class _BannerPage extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        const ColoredBox(color: AppColors.purple50),
+        const ColoredBox(color: AppColors.chip),
         if (banner.imageUrl.isNotEmpty)
           Image.network(
             banner.imageUrl,
@@ -113,7 +119,7 @@ class _BannerPage extends StatelessWidget {
               child: Icon(
                 LucideIcons.imageOff,
                 size: 24,
-                color: AppColors.purple200,
+                color: AppColors.faint,
               ),
             ),
           ),

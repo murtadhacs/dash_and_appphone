@@ -11,18 +11,15 @@ class SettingsTile extends StatelessWidget {
   const SettingsTile({
     super.key,
     required this.icon,
-    required this.iconBackground,
-    required this.iconColor,
+    this.iconColor = AppColors.brandPurple,
     required this.title,
     this.subtitle,
     this.titleColor,
     this.trailing,
     this.onTap,
-    this.borderColor = AppColors.gray100,
   });
 
   final IconData icon;
-  final Color iconBackground;
   final Color iconColor;
   final String title;
   final String? subtitle;
@@ -31,7 +28,6 @@ class SettingsTile extends StatelessWidget {
   /// العنصر في نهاية البطاقة؛ سهم افتراضياً عند وجود [onTap].
   final Widget? trailing;
   final VoidCallback? onTap;
-  final Color borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -41,31 +37,22 @@ class SettingsTile extends StatelessWidget {
             ? null
             : const Icon(
                 LucideIcons.chevronLeft,
-                size: 16,
+                size: 18,
                 color: AppColors.textMuted,
               ));
     return Tap(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: borderColor),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: AppShadows.sm,
         ),
         child: Row(
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: iconBackground,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, size: 16, color: iconColor),
-            ),
-            const SizedBox(width: 10),
+            Icon(icon, size: 22, color: iconColor),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

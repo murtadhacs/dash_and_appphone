@@ -45,16 +45,13 @@ class _SpecialStatesScreenState extends State<SpecialStatesScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.blue50,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(999),
+                boxShadow: AppShadows.sm,
               ),
               child: Text(
                 'معاينة الحالات الاستثنائية والخطأ',
-                style: AppText.style(
-                  size: 10,
-                  weight: AppText.bold,
-                  color: AppColors.brandBlue,
-                ),
+                style: AppText.style(size: 10, weight: AppText.bold),
               ),
             ),
           ),
@@ -66,30 +63,21 @@ class _SpecialStatesScreenState extends State<SpecialStatesScreen> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.gray100),
+            borderRadius: BorderRadius.circular(26),
             boxShadow: AppShadows.sm,
           ),
           child: Column(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.brandPurple.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(
-                  LucideIcons.calendar,
-                  size: 24,
-                  color: AppColors.brandPurple,
-                ),
+              const Icon(
+                LucideIcons.calendar,
+                size: 32,
+                color: AppColors.brandPurple,
               ),
               const SizedBox(height: 10),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.amber50,
+                  color: AppColors.chip,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
@@ -97,7 +85,7 @@ class _SpecialStatesScreenState extends State<SpecialStatesScreen> {
                   style: AppText.style(
                     size: 9,
                     weight: AppText.bold,
-                    color: AppColors.orange,
+                    color: AppColors.textMuted,
                   ),
                 ),
               ),
@@ -127,24 +115,15 @@ class _SpecialStatesScreenState extends State<SpecialStatesScreen> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.amber100),
+            borderRadius: BorderRadius.circular(26),
             boxShadow: AppShadows.sm,
           ),
           child: Column(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.amber50,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(
-                  LucideIcons.triangleAlert,
-                  size: 24,
-                  color: AppColors.orange,
-                ),
+              const Icon(
+                LucideIcons.triangleAlert,
+                size: 32,
+                color: AppColors.brandPurple,
               ),
               const SizedBox(height: 10),
               Text(
@@ -170,7 +149,7 @@ class _SpecialStatesScreenState extends State<SpecialStatesScreen> {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: AppColors.brandPurple,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: AppShadows.sm,
                   ),
                   child: _retrying
@@ -216,24 +195,15 @@ class _SpecialStatesScreenState extends State<SpecialStatesScreen> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.gray100),
+            borderRadius: BorderRadius.circular(26),
             boxShadow: AppShadows.sm,
           ),
           child: Column(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.purple50,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  LucideIcons.bellOff,
-                  size: 20,
-                  color: AppColors.brandPurple,
-                ),
+              const Icon(
+                LucideIcons.bellOff,
+                size: 32,
+                color: AppColors.brandPurple,
               ),
               const SizedBox(height: 6),
               Text(

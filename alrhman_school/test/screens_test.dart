@@ -180,7 +180,7 @@ void main() {
 
     expect(find.text('الحاسوب'), findsOneWidget); // الخميس
     expect(find.text('يوم النشاط'), findsNothing);
-    expect(find.byType(ChoiceChip), findsOneWidget);
+    expect(find.text('Test Student'), findsOneWidget); // شريحة الابن الوحيد
     expect(find.text('لم يُحدَّد المعلم'), findsWidgets);
 
     await tapText(t, 'الأحد');
@@ -191,14 +191,15 @@ void main() {
   testWidgets('جدول الأبناء: التبديل المباشر والصف بلا جدول', (t) async {
     await pumpApp(t, session: parent2);
     await tapText(t, 'الجدول');
-    expect(find.byType(ChoiceChip), findsNWidgets(2));
+    expect(find.text('Ali Test'), findsOneWidget);
+    expect(find.text('Sara Test'), findsOneWidget);
     await tapText(t, 'الأحد');
     expect(find.text('العلوم'), findsOneWidget);
-    await t.tap(find.widgetWithText(ChoiceChip, 'Sara Test'));
+    await t.tap(find.text('Sara Test'));
     await settle(t);
     expect(find.text('لم يُضف الجدول بعد'), findsOneWidget);
     expect(find.text('العلوم'), findsNothing);
-    await t.tap(find.widgetWithText(ChoiceChip, 'Ali Test'));
+    await t.tap(find.text('Ali Test'));
     await settle(t);
     expect(find.text('العلوم'), findsOneWidget);
   });

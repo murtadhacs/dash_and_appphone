@@ -161,8 +161,6 @@ class _NotificationsSettingsState extends State<NotificationsSettings>
       children: [
         SettingsTile(
           icon: LucideIcons.bell,
-          iconBackground: AppColors.purple50,
-          iconColor: AppColors.brandPurple,
           title: 'إشعارات',
           subtitle:
               _loadError ??
@@ -186,9 +184,6 @@ class _NotificationsSettingsState extends State<NotificationsSettings>
           const SizedBox(height: 8),
           SettingsTile(
             icon: LucideIcons.bellOff,
-            iconBackground: AppColors.amber50,
-            iconColor: AppColors.amber600,
-            borderColor: AppColors.amber100,
             title: needsPermission
                 ? 'تفعيل إذن الإشعارات في الهاتف'
                 : 'إعادة تسجيل هذا الهاتف',
@@ -225,7 +220,6 @@ class DeleteAccountTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SettingsTile(
     icon: LucideIcons.trash2,
-    iconBackground: AppColors.rose50,
     iconColor: AppColors.rose600,
     title: 'حذف حساب ولي الأمر',
     titleColor: AppColors.rose600,
