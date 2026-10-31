@@ -26,6 +26,7 @@ const _navItems = [
     'الحضور والإجازات',
     LucideIcons.clipboardCheck,
   ),
+  _NavItem(NavigationTab.tuition, 'الحسابات', LucideIcons.wallet),
   _NavItem(NavigationTab.devices, 'الأجهزة', LucideIcons.cpu),
   _NavItem(NavigationTab.banners, 'التواصل والإعلانات', LucideIcons.megaphone),
   _NavItem(NavigationTab.schedule, 'الجداول الأسبوعية', LucideIcons.calendar),
@@ -87,9 +88,43 @@ class Sidebar extends StatelessWidget {
                       icon: item.icon,
                       active: item.tab == NavigationTab.banners
                           ? _commsActive
+                          : item.tab == NavigationTab.tuition
+                          ? currentTab.isAccounts
                           : item.tab == currentTab,
                       onTap: () => onSelectTab(item.tab),
                     ),
+                    if (item.tab == NavigationTab.tuition)
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: 24,
+                          top: 2,
+                          bottom: 6,
+                        ),
+                        child: Column(
+                          children: [
+                            _SubTile(
+                              label: 'الأقساط',
+                              dot: const Color(0xFF8FA7FE),
+                              current:
+                                  currentTab == NavigationTab.tuition ||
+                                  currentTab == NavigationTab.academicYear,
+                              onTap: () => onSelectTab(NavigationTab.tuition),
+                            ),
+                            _SubTile(
+                              label: 'المصروفات',
+                              dot: AppColors.green,
+                              current: currentTab == NavigationTab.expenses,
+                              onTap: () => onSelectTab(NavigationTab.expenses),
+                            ),
+                            _SubTile(
+                              label: 'المعلمون',
+                              dot: const Color(0xFF7DD3FC),
+                              current: currentTab == NavigationTab.teachers,
+                              onTap: () => onSelectTab(NavigationTab.teachers),
+                            ),
+                          ],
+                        ),
+                      ),
                     if (item.tab == NavigationTab.banners)
                       Padding(
                         padding: const EdgeInsetsDirectional.only(

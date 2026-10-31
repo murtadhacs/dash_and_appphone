@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import 'accounts_fake.dart';
+
 const fakeToken = 'fake-admin-token';
 
 /// خادم وهمي في الذاكرة يطبّق جزء الإدارة من عقد Future Kids API.
@@ -64,6 +66,9 @@ class FakeServer {
       'last_sync': '2026-10-08 07:31:02',
     },
   ];
+
+  /// المعلمون والأقساط والمصروفات.
+  late final AccountsFake accounts = AccountsFake(() => students);
 
   /// كل الطلبات الواردة، لفحصها في الاختبارات.
   final List<http.Request> requests = [];
@@ -140,6 +145,9 @@ class FakeServer {
     if (req.headers['Authorization'] != 'Bearer $fakeToken') {
       return _err(401, 'Unauthorized');
     }
+
+    final accountsResponse = accounts.handle(m, path, q, body);
+    if (accountsResponse != null) return accountsResponse;
 
     switch ((m, path)) {
       case ('GET', '/api/admin/holidays'):

@@ -59,7 +59,7 @@ void main() {
         last = input;
         throw const ApiException(message: 'test');
       });
-      final field = find.widgetWithText(TextFormField, 'مثال: 1001');
+      final field = find.widgetWithText(TextFormField, 'مثال: 100');
       await save(t);
       expect(calls, 0);
       expect(find.text('رقم المستخدم في جهاز البصمة مطلوب'), findsOneWidget);
@@ -74,6 +74,29 @@ void main() {
       expect(last!.rfidTag, '12345678901234');
     },
   );
+  testWidgets('student RFID must be 100 or more; 1 to 99 belong to teachers', (
+    t,
+  ) async {
+    var calls = 0;
+    StudentInput? last;
+    await pumpForm(t, (input) async {
+      calls++;
+      last = input;
+      throw const ApiException(message: 'test');
+    });
+    final field = find.widgetWithText(TextFormField, 'مثال: 100');
+    await t.enterText(field, '99');
+    await save(t);
+    expect(calls, 0);
+    expect(find.textContaining('من 100 فأكثر'), findsWidgets);
+    await t.enterText(field, '5');
+    await save(t);
+    expect(calls, 0);
+    await t.enterText(field, '100');
+    await save(t);
+    expect(calls, 1);
+    expect(last!.rfidTag, '100');
+  });
   testWidgets(
     '409 suggestions can be filled and retried; null hides the button',
     (t) async {
@@ -83,38 +106,38 @@ void main() {
         expect(
           input.rfidTag,
           calls == 1
-              ? '33'
+              ? '133'
               : calls == 2
-              ? '34'
-              : '35',
+              ? '134'
+              : '135',
         );
         throw ApiException(
           statusCode: 409,
           message: 'generic',
           suggestedRfidTag: calls == 1
-              ? '34'
+              ? '134'
               : calls == 2
-              ? '35'
+              ? '135'
               : null,
         );
       });
-      await t.enterText(find.widgetWithText(TextFormField, 'مثال: 1001'), '33');
+      await t.enterText(find.widgetWithText(TextFormField, 'مثال: 100'), '133');
       await save(t);
       expect(
-        find.text('الرقم 33 مسجل لطالب آخر، يمكنك استخدام 34'),
+        find.text('الرقم 133 مسجل لطالب آخر، يمكنك استخدام 134'),
         findsOneWidget,
       );
-      await t.tap(find.text('استخدام الرقم 34'));
+      await t.tap(find.text('استخدام الرقم 134'));
       await t.pumpAndSettle();
       await save(t);
       expect(
-        find.text('الرقم 34 مسجل لطالب آخر، يمكنك استخدام 35'),
+        find.text('الرقم 134 مسجل لطالب آخر، يمكنك استخدام 135'),
         findsOneWidget,
       );
-      await t.tap(find.text('استخدام الرقم 35'));
+      await t.tap(find.text('استخدام الرقم 135'));
       await t.pumpAndSettle();
       await save(t);
-      expect(find.text('الرقم 35 مسجل لطالب آخر'), findsOneWidget);
+      expect(find.text('الرقم 135 مسجل لطالب آخر'), findsOneWidget);
       expect(find.textContaining('استخدام الرقم'), findsNothing);
     },
   );
@@ -128,7 +151,7 @@ void main() {
         serverMessage: 'rfid_tag is required',
       );
     });
-    await t.enterText(find.widgetWithText(TextFormField, 'مثال: 1001'), '33');
+    await t.enterText(find.widgetWithText(TextFormField, 'مثال: 100'), '133');
     await save(t);
     expect(find.text('rfid_tag is required'), findsOneWidget);
     expect(find.text('generic'), findsNothing);

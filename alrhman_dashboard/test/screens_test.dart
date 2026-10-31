@@ -246,7 +246,7 @@ void main() {
     );
 
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'مثال: 1001'),
+      find.widgetWithText(TextFormField, 'مثال: 100'),
       '2001',
     );
     await _tapText(tester, 'حفظ الطالب');
@@ -299,7 +299,7 @@ void main() {
     expect(find.textContaining('سيُربط الطالب بحساب ولي الأمر المسجّل'), findsOneWidget);
 
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'مثال: 1001'),
+      find.widgetWithText(TextFormField, 'مثال: 100'),
       '2001',
     );
     await _tapText(tester, 'حفظ الطالب');

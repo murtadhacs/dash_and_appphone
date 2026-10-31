@@ -365,9 +365,11 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                     return null;
                   }
                   if (value.isEmpty) return 'رقم المستخدم في جهاز البصمة مطلوب';
-                  return RegExp(r'^[1-9][0-9]{0,13}$').hasMatch(value)
+                  // 1 إلى 99 محجوزة للمعلمين؛ الطلاب من 100 فأكثر (3 إلى 14 خانة).
+                  return RegExp(r'^[1-9][0-9]{2,13}$').hasMatch(value)
                       ? null
-                      : 'استخدم أرقاماً لاتينية فقط: 1 إلى 14 خانة، دون صفر في البداية';
+                      : 'استخدم أرقاماً لاتينية من 100 فأكثر (حتى 14 خانة)، '
+                            'فالأرقام من 1 إلى 99 للمعلمين';
                 },
                 onChanged: (_) => setState(() {
                   _rfidError = null;
@@ -375,10 +377,11 @@ class _StudentFormDialogState extends State<StudentFormDialog> {
                 }),
                 hint: _isEdit
                     ? 'رقم المستخدم المسجّل على الجهاز'
-                    : 'مثال: 1001',
+                    : 'مثال: 100',
               ),
               help:
-                  'يجب أن يطابق رقم المستخدم المسجّل للطالب في جهاز البصمة تماماً.',
+                  'يجب أن يطابق رقم المستخدم في جهاز البصمة تماماً. أرقام الطلاب من 100 فأكثر، '
+                  'والأرقام من 1 إلى 99 محجوزة للمعلمين.',
             ),
             if (_rfidError != null)
               Padding(

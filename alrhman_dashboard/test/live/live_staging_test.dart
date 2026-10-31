@@ -88,6 +88,48 @@ void main() {
     expect(file.bytes.length, greaterThan(100));
   }, skip: skip);
 
+  // قراءة فقط لشاشات الحسابات (المعلمون، الأقساط، المصروفات). لا كتابة هنا؛
+  // الإضافة والتعديل تُجرَّب يدوياً على staging ببيانات تجريبية فقط، لا على الإنتاج.
+  test('قراءة المعلمين والأقساط والمصروفات من staging (قراءة فقط)', () async {
+    final client = ApiClient(baseUrl: base);
+    final api = AdminApi(client, MemoryTokenStore());
+    await api.login(user!, pass!);
+
+    final teachers = await api.teachers();
+    // ignore: avoid_print
+    print('TEACHERS n=${teachers.length}');
+    final specs = await api.teacherSpecializations();
+    // ignore: avoid_print
+    print('SPECIALIZATIONS ${specs.length}');
+    final att = await api.teachersAttendance(BaghdadTime.today());
+    // ignore: avoid_print
+    print(
+      'TEACHER ATTENDANCE ${att.date} school=${att.schoolDay} n=${att.entries.length}',
+    );
+
+    final tuition = await api.tuition();
+    // ignore: avoid_print
+    print(
+      'TUITION ${tuition.academicYear} rows=${tuition.rows.length} '
+      'notSet=${tuition.summary.notSetCount}',
+    );
+    final fees = await api.tuitionFees();
+    // ignore: avoid_print
+    print('FEES ${fees.fees.map((f) => '${f.grade}=${f.fee}').join(' | ')}');
+
+    final expenses = await api.expenses();
+    // ignore: avoid_print
+    print('EXPENSES n=${expenses.expenses.length} total=${expenses.total}');
+    final cats = await api.expenseCategories();
+    // ignore: avoid_print
+    print('CATEGORIES ${cats.map((c) => c.name).join(', ')}');
+    final salary = cats.where((c) => c.isSalary);
+    expect(salary.length, 1);
+    final summary = await api.expenseSummary(categoryId: salary.first.id);
+    expect(summary.totals.collected, isNull);
+    expect(summary.totals.difference, isNull);
+  }, skip: skip);
+
   test('كلمة مرور خاطئة تعطي رسالة الخادم (مرة واحدة فقط)', () async {
     final client = ApiClient(baseUrl: base);
     final api = AdminApi(client, MemoryTokenStore());

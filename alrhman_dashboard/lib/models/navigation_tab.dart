@@ -8,5 +8,18 @@ enum NavigationTab {
   schedule,
   settings,
   activityLog,
-  login,
+
+  /// قسم «الحسابات»: الأقساط والمصروفات والمعلمون.
+  tuition,
+  academicYear,
+  expenses,
+  teachers,
+  login;
+
+  /// شاشات قسم «الحسابات» (تُظلَّل مجموعتها في الشريط الجانبي).
+  bool get isAccounts =>
+      this == tuition ||
+      this == academicYear ||
+      this == expenses ||
+      this == teachers;
 }

@@ -9,7 +9,10 @@ import '../models/school_banner.dart';
 import '../models/attendance_entry.dart';
 import '../models/dashboard_stats.dart';
 import '../models/device.dart';
+import '../models/expense.dart';
 import '../models/student.dart';
+import '../models/teacher.dart';
+import '../models/tuition.dart';
 import '../models/schedule_class.dart';
 import '../models/schedule_period.dart';
 import 'api_client.dart';
@@ -389,6 +392,218 @@ class AdminApi {
       'is_active': ?isActive,
     });
   }
+  // ---------------------------------------------------------------- المعلمون
+
+  Future<List<Teacher>> teachers({String? search, TeacherStatus? status}) async {
+    final json = await _client.getJson(
+      '/api/admin/teachers',
+      query: {
+        if (_nonEmpty(search?.trim()) != null) 'search': search!.trim(),
+        if (status != null) 'status': status.api,
+      },
+    );
+    return [
+      for (final t in json['data'] as List)
+        Teacher.fromJson(t as Map<String, dynamic>),
+    ];
+  }
+
+  /// `GET ?id` يرجع قائمة من عنصر واحد.
+  Future<Teacher> teacher(int id) async {
+    final json = await _client.getJson(
+      '/api/admin/teachers',
+      query: {'id': '$id'},
+    );
+    return Teacher.fromJson((json['data'] as List).first as Map<String, dynamic>);
+  }
+
+  Future<Teacher> createTeacher(TeacherInput input) async {
+    final json = await _client.postJson('/api/admin/teachers', input.toJson());
+    return Teacher.fromJson(json['data'] as Map<String, dynamic>);
+  }
+
+  /// PUT يستبدل السجل كله: كل الحقول تُرسل، والاختياري الفارغ يُمسح.
+  Future<Teacher> updateTeacher(int id, TeacherInput input) async {
+    final json = await _client.putJson(
+      '/api/admin/teachers',
+      input.toJson(id: id),
+    );
+    return Teacher.fromJson(json['data'] as Map<String, dynamic>);
+  }
+
+  Future<List<String>> teacherSpecializations() async {
+    final json = await _client.getJson('/api/admin/teachers/specializations');
+    return [for (final s in json['data'] as List) '$s'];
+  }
+
+  Future<TeacherAttendanceDay> teachersAttendance(DateTime date) async =>
+      TeacherAttendanceDay.fromJson(
+        await _client.getJson(
+          '/api/admin/teachers/attendance',
+          query: {'date': BaghdadTime.apiDate(date)},
+        ),
+      );
+
+  // ----------------------------------------------------------------- الأقساط
+
+  Future<TuitionList> tuition({
+    String? grade,
+    String? section,
+    String? search,
+    bool hasRemaining = false,
+  }) async => TuitionList.fromJson(
+    await _client.getJson(
+      '/api/admin/tuition',
+      query: {
+        if (_nonEmpty(grade) != null) 'grade': grade!,
+        if (_nonEmpty(section) != null) 'section': section!,
+        if (_nonEmpty(search?.trim()) != null) 'search': search!.trim(),
+        if (hasRemaining) 'has_remaining': 'true',
+      },
+    ),
+  );
+
+  Future<TuitionDetail> studentTuition(int studentId) async {
+    final json = await _client.getJson(
+      '/api/admin/tuition/student',
+      query: {'student_id': '$studentId'},
+    );
+    return TuitionDetail.fromJson(
+      json['data'] as Map<String, dynamic>,
+      academicYear: json['academic_year'] as String? ?? '',
+    );
+  }
+
+  Future<GradeFees> tuitionFees() async =>
+      GradeFees.fromJson(await _client.getJson('/api/admin/tuition/fees'));
+
+  /// يرجع عدد الحسابات التي أُعيد تسعيرها (0 دون `apply_to_existing`).
+  Future<int> setTuitionFee({
+    required String grade,
+    required int fee,
+    bool applyToExisting = false,
+  }) async {
+    final json = await _client.putJson('/api/admin/tuition/fees', {
+      'grade': grade,
+      'fee': fee,
+      'apply_to_existing': applyToExisting,
+    });
+    return ((json['data'] as Map<String, dynamic>)['updated_accounts'] as num?)
+            ?.toInt() ??
+        0;
+  }
+
+  Future<TuitionDetail> setTuitionDiscount({
+    required int studentId,
+    required int discount,
+    String? note,
+  }) async => _detail(
+    await _client.putJson('/api/admin/tuition/discount', {
+      'student_id': studentId,
+      'discount': discount,
+      'note': _nonEmpty(note?.trim()),
+    }),
+  );
+
+  Future<TuitionDetail> recordPayment({
+    required int studentId,
+    required int amount,
+    required DateTime paidAt,
+    String? note,
+  }) async => _detail(
+    await _client.postJson('/api/admin/tuition/payments', {
+      'student_id': studentId,
+      'amount': amount,
+      'paid_at': BaghdadTime.apiDate(paidAt),
+      'note': _nonEmpty(note?.trim()),
+    }),
+  );
+
+  Future<TuitionDetail> voidPayment({
+    required int id,
+    required String reason,
+  }) async => _detail(
+    await _client.postJson('/api/admin/tuition/payments/void', {
+      'id': id,
+      'reason': reason.trim(),
+    }),
+  );
+
+  TuitionDetail _detail(Map<String, dynamic> json) => TuitionDetail.fromJson(
+    json['data'] as Map<String, dynamic>,
+    academicYear: json['academic_year'] as String? ?? '',
+  );
+
+  /// السنة الدراسية الحالية. تغييرها يجمّد أرصدة كل الطلاب، فلها شاشة منفصلة
+  /// بتأكيد صريح ولا تظهر كحقل عادي في الإعدادات.
+  Future<void> changeAcademicYear(String year) async {
+    await _client.putJson('/api/admin/settings', {
+      'key': 'academic_year',
+      'value': year,
+    });
+  }
+
+  // --------------------------------------------------------------- المصروفات
+
+  Future<ExpenseList> expenses({
+    int? categoryId,
+    String? month,
+    int? teacherId,
+  }) async => ExpenseList.fromJson(
+    await _client.getJson(
+      '/api/admin/expenses',
+      query: {
+        if (categoryId != null) 'category_id': '$categoryId',
+        'month': ?month,
+        if (teacherId != null) 'teacher_id': '$teacherId',
+      },
+    ),
+  );
+
+  Future<void> createExpense({
+    required int categoryId,
+    required int amount,
+    required DateTime date,
+    String? note,
+    int? teacherId,
+  }) async {
+    await _client.postJson('/api/admin/expenses', {
+      'category_id': categoryId,
+      'amount': amount,
+      'expense_date': BaghdadTime.apiDate(date),
+      'note': _nonEmpty(note?.trim()),
+      'teacher_id': teacherId,
+    });
+  }
+
+  Future<void> voidExpense({required int id, required String reason}) async {
+    await _client.postJson('/api/admin/expenses/void', {
+      'id': id,
+      'reason': reason.trim(),
+    });
+  }
+
+  Future<List<ExpenseCategory>> expenseCategories() async {
+    final json = await _client.getJson('/api/admin/expenses/categories');
+    return [
+      for (final c in json['data'] as List)
+        ExpenseCategory.fromJson(c as Map<String, dynamic>),
+    ];
+  }
+
+  Future<void> createExpenseCategory(String name) async {
+    await _client.postJson('/api/admin/expenses/categories', {
+      'name': name.trim(),
+    });
+  }
+
+  Future<ExpenseSummary> expenseSummary({int? categoryId}) async =>
+      ExpenseSummary.fromJson(
+        await _client.getJson(
+          '/api/admin/expenses/summary',
+          query: {if (categoryId != null) 'category_id': '$categoryId'},
+        ),
+      );
 }
 
 /// أخطاء خاصة بسياق العملية، لرسائل أوضح من الرسالة العامة.

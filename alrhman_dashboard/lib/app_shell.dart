@@ -7,8 +7,12 @@ import 'core/app_colors.dart';
 import 'core/responsive.dart';
 import 'core/school_day_info.dart';
 import 'models/navigation_tab.dart';
+import 'screens/academic_year_screen.dart';
 import 'screens/attendance_screen.dart';
 import 'screens/activity_log_screen.dart';
+import 'screens/expenses_screen.dart';
+import 'screens/teachers_screen.dart';
+import 'screens/tuition_screen.dart';
 import 'screens/communications_screen.dart';
 import 'screens/schedule_screen.dart';
 import 'screens/dashboard_screen.dart';
@@ -156,6 +160,19 @@ class _AppShellState extends State<AppShell> {
           openAddOnStart: _openSchedule,
           onStartHandled: () => _openSchedule = false,
         );
+      case NavigationTab.tuition:
+        return TuitionScreen(
+          onOpenAcademicYear: () =>
+              setState(() => _tab = NavigationTab.academicYear),
+        );
+      case NavigationTab.academicYear:
+        return AcademicYearScreen(
+          onBack: () => setState(() => _tab = NavigationTab.tuition),
+        );
+      case NavigationTab.expenses:
+        return const ExpensesScreen();
+      case NavigationTab.teachers:
+        return const TeachersScreen();
       case NavigationTab.login:
         return const SizedBox.shrink();
     }

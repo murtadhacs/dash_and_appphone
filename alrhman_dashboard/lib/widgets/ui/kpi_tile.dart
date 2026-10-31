@@ -49,13 +49,21 @@ class KpiTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Text(
-                      value,
-                      style: const TextStyle(
-                        fontSize: 26,
-                        height: 1.3,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.text,
+                    // المبالغ الطويلة (مليارات الدنانير) تصغر بدل أن تتجاوز البطاقة.
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          value,
+                          maxLines: 1,
+                          style: const TextStyle(
+                            fontSize: 26,
+                            height: 1.3,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.text,
+                          ),
+                        ),
                       ),
                     ),
                     if (extra != null) ...[
