@@ -6,9 +6,13 @@ import 'package:alrhman_school/app_scope.dart';
 import 'package:alrhman_school/core/baghdad_time.dart';
 import 'package:alrhman_school/main.dart';
 import 'package:alrhman_school/models/models.dart';
+import 'package:alrhman_school/widgets/privacy_link.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 import 'support/fake_server.dart';
 
@@ -258,4 +262,66 @@ void main() {
     expect(find.text('رقم الهاتف'), findsOneWidget);
     expect(await h.store.read(), isNull);
   });
+
+  group('سياسة الخصوصية', () {
+    late FakeUrlLauncher launcher;
+    late UrlLauncherPlatform original;
+
+    setUp(() {
+      original = UrlLauncherPlatform.instance;
+      launcher = FakeUrlLauncher();
+      UrlLauncherPlatform.instance = launcher;
+    });
+    tearDown(() => UrlLauncherPlatform.instance = original);
+
+    final notice = find.textContaining('سياسة الخصوصية', findRichText: true);
+
+    testWidgets('تُفتح من شاشة الدخول دون تسجيل دخول', (t) async {
+      final h = await pumpApp(t);
+      await t.tap(notice);
+      await settle(t);
+
+      expect(launcher.opened, [privacyPolicyUrl]);
+      expect(
+        h.server.requests.where((r) => r.url.path == '/api/mobile/login'),
+        isEmpty,
+      );
+    });
+
+    testWidgets('تُفتح من الإعدادات', (t) async {
+      await pumpApp(t, session: parent1);
+      await tapText(t, 'الإعدادات');
+      await tapText(t, 'سياسة الخصوصية');
+
+      expect(launcher.opened, [privacyPolicyUrl]);
+    });
+
+    testWidgets('تعذر الفتح يظهر رسالة', (t) async {
+      launcher.result = false;
+      await pumpApp(t);
+      await t.tap(notice);
+      await settle(t);
+
+      expect(
+        find.text('تعذر فتح سياسة الخصوصية على هذا الجهاز'),
+        findsOneWidget,
+      );
+    });
+  });
+}
+
+class FakeUrlLauncher extends Fake
+    with MockPlatformInterfaceMixin
+    implements UrlLauncherPlatform {
+  final opened = <String>[];
+  bool result = true;
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    opened.add(url);
+    return result;
+  }
 }

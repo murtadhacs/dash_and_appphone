@@ -10,6 +10,7 @@ import '../theme/app_text.dart';
 import '../widgets/common.dart';
 import '../widgets/account_controls.dart';
 import '../widgets/fade_route.dart';
+import '../widgets/privacy_link.dart';
 import '../widgets/settings_tile.dart';
 import 'tuition_screen.dart';
 
@@ -202,6 +203,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               // ---------------- Account ----------------
               const SizedBox(height: 16),
               const SettingsGroupLabel('الحساب'),
+              SettingsTile(
+                icon: LucideIcons.shieldCheck,
+                title: 'سياسة الخصوصية',
+                subtitle: 'كيف نستخدم بياناتك ونحميها',
+                onTap: () => openPrivacyPolicy(context),
+              ),
+              const SizedBox(height: 8),
               DeleteAccountTile(data: widget.data),
 
               // ---------------- Logout confirmation dialog ----------------

@@ -9,6 +9,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../widgets/common.dart';
 import '../widgets/fade_route.dart';
+import '../widgets/privacy_link.dart';
 import '../widgets/school_logo.dart';
 import 'loading_screen.dart';
 
@@ -257,8 +258,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
+            const PrivacyNotice(),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.only(bottom: 16),
               child: Text(
                 'مدرسة الرحمن الأهلية © جميع الحقوق محفوظة',
                 textAlign: TextAlign.center,
