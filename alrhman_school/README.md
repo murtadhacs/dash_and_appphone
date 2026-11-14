@@ -6,7 +6,8 @@
 
 ```bash
 flutter pub get
-flutter run                                   # على staging افتراضياً
+flutter run                                   # على Production افتراضياً
+flutter run --dart-define=API_BASE_URL=https://futurekids-staging.up.railway.app   # على staging للتجربة
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080   # خادم محلي من محاكي أندرويد
 ```
 

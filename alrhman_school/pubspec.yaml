@@ -1,7 +1,7 @@
 name: alrhman_school
 description: "مدرسة الرحمن الابتدائية — تطبيق ولي الأمر"
 publish_to: 'none'
-version: 1.0.6+7
+version: 1.0.8+9
 
 environment:
   sdk: ^3.12.2

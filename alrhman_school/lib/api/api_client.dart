@@ -9,7 +9,7 @@ import 'api_exception.dart';
 /// `flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080`
 const apiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
-  defaultValue: 'https://futurekids-staging.up.railway.app',
+  defaultValue: 'https://alrahmanschool.up.railway.app',
 );
 
 /// عميل HTTP رفيع: يضيف `Authorization: Bearer`، يفك JSON، ويحوّل الأخطاء إلى [ApiException].
