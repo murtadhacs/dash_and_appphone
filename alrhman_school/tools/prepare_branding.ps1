@@ -3,12 +3,18 @@ $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 $appRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $source = [System.Drawing.Image]::FromFile((Resolve-Path -LiteralPath $SourceImage))
-function Save-Icon([string]$relativePath, [int]$size) {
+function Save-Icon([string]$relativePath, [int]$size, [switch]$Opaque) {
     $target = Join-Path $appRoot $relativePath
     New-Item -ItemType Directory -Path (Split-Path $target) -Force | Out-Null
-    $bitmap = [System.Drawing.Bitmap]::new($size, $size)
+    if ($Opaque) {
+        # App Store rejects app icons that contain an alpha channel.
+        $bitmap = [System.Drawing.Bitmap]::new($size, $size, [System.Drawing.Imaging.PixelFormat]::Format24bppRgb)
+    } else {
+        $bitmap = [System.Drawing.Bitmap]::new($size, $size)
+    }
     $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
     try {
+        if ($Opaque) { $graphics.Clear(([System.Drawing.Bitmap]$source).GetPixel(0, 0)) }
         $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
         $graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
         $graphics.DrawImage($source, 0, 0, $size, $size)
@@ -28,7 +34,7 @@ try {
     foreach ($icon in $iosIcons.images) {
         $points = [double]($icon.size -split 'x')[0]
         $scale = [double]($icon.scale -replace 'x', '')
-        Save-Icon "ios/Runner/Assets.xcassets/AppIcon.appiconset/$($icon.filename)" ([int]($points * $scale))
+        Save-Icon "ios/Runner/Assets.xcassets/AppIcon.appiconset/$($icon.filename)" ([int]($points * $scale)) -Opaque
     }
     Save-Icon 'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png' 112
     Save-Icon 'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png' 224

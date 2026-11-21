@@ -20,8 +20,15 @@ import 'widgets/fade_route.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-    await Firebase.initializeApp();
+  if (!kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS)) {
+    try {
+      await Firebase.initializeApp();
+    } catch (e) {
+      // Missing google-services.json / GoogleService-Info.plist: run without push.
+      debugPrint('Firebase unavailable: $e');
+    }
   }
   final services = AppServices.create();
   await (services.api.pushDevice as FirebasePushDevice).initialize();

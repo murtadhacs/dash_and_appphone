@@ -69,7 +69,8 @@ class PhonePushDevice extends UnavailablePushDevice {
   }
 }
 
-/// FCM registration plus local presentation of foreground Android messages.
+/// FCM registration plus local presentation of foreground messages
+/// (Android and iOS). Background messages are shown by the OS itself.
 class FirebasePushDevice extends PhonePushDevice {
   static const channel = AndroidNotificationChannel(
     'attendance_alerts',
@@ -82,9 +83,11 @@ class FirebasePushDevice extends PhonePushDevice {
   StreamSubscription<RemoteMessage>? _foregroundSubscription;
   bool Function()? shouldShowNotification;
 
+  bool get _isIOS => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+
   bool get _ready =>
       !kIsWeb &&
-      defaultTargetPlatform == TargetPlatform.android &&
+      (defaultTargetPlatform == TargetPlatform.android || _isIOS) &&
       Firebase.apps.isNotEmpty;
 
   Future<void> initialize() async {
@@ -92,6 +95,12 @@ class FirebasePushDevice extends PhonePushDevice {
     await _notifications.initialize(
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('ic_notification'),
+        // Permission is asked through our own channel (see AppDelegate).
+        iOS: DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        ),
       ),
     );
     await _notifications
@@ -124,6 +133,12 @@ class FirebasePushDevice extends PhonePushDevice {
               importance: Importance.high,
               priority: Priority.high,
             ),
+            iOS: const DarwinNotificationDetails(
+              presentAlert: true,
+              presentBanner: true,
+              presentList: true,
+              presentSound: true,
+            ),
           ),
         );
       } catch (_) {
@@ -133,8 +148,20 @@ class FirebasePushDevice extends PhonePushDevice {
   }
 
   @override
-  Future<String?> token() async =>
-      _ready ? FirebaseMessaging.instance.getToken() : null;
+  Future<String?> token() async {
+    if (!_ready) return null;
+    // On iOS getToken() throws until Apple has issued the APNs token.
+    if (_isIOS && !await _apnsTokenReady()) return null;
+    return FirebaseMessaging.instance.getToken();
+  }
+
+  Future<bool> _apnsTokenReady() async {
+    for (var attempt = 0; attempt < 10; attempt++) {
+      if (await FirebaseMessaging.instance.getAPNSToken() != null) return true;
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    }
+    return false;
+  }
 
   @override
   Stream<String> get tokenRefresh =>
